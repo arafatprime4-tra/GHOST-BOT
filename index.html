@@ -19,7 +19,7 @@
 <body>
   <div id="root"></div>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDKs & Configuration -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -41,6 +41,7 @@
     window.dispatchEvent(new Event('firebase-ready'));
   </script>
 
+  <!-- React Application -->
   <script type="text/babel">
     function GeogramApp() {
       const [chats, setChats] = React.useState([
