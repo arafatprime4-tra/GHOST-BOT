@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Geogram - Secure Messenger</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Geogram</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React & Babel CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- FontAwesome for Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { background-color: #0e1621; color: #f5f5f5; font-family: sans-serif; margin: 0; padding: 0; overflow: hidden; }
@@ -19,10 +16,9 @@
 <body>
   <div id="root"></div>
 
-  <!-- Firebase SDKs & Configuration -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot, serverTimestamp, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA4Mr6c0uFkN7JRuK_xu_wOtM1INBB82SM",
@@ -37,119 +33,244 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     window.db = db;
-    window.firebaseModules = { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp };
+    window.firebaseModules = { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot, serverTimestamp, setDoc, getDoc };
     window.dispatchEvent(new Event('firebase-ready'));
   </script>
 
-  <!-- React Application -->
   <script type="text/babel">
     function GeogramApp() {
+      const [user, setUser] = React.useState(null);
+      const [view, setView] = React.useState('auth');
+      const [usernameInput, setUsernameInput] = React.useState('');
+      const [passInput, setPassInput] = React.useState('');
+      
       const [chats, setChats] = React.useState([
-        { id: "chat_bot", name: "Geogram Official Bot", lastMsg: "স্বাগতম Geogram-এ! হাই সিকিউরিটি সক্রিয়।", time: "09:00 AM", unread: 0, online: true, avatar: "GG" },
-        { id: "chat_friends", name: "Friends Testing Group", lastMsg: "দোস্তরা কে কোথায় আছিস?", time: "08:30 AM", unread: 0, online: true, avatar: "FG" }
+        { id: "friends_group", name: "Friends Testing Group", lastMsg: "Live Chat...", time: "Live", unread: 0, online: true, avatar: "FG" }
       ]);
-
       const [activeChat, setActiveChat] = React.useState(chats[0]);
       const [messages, setMessages] = React.useState([]);
       const [inputText, setInputText] = React.useState("");
+      const [pendingUsers, setPendingUsers] = React.useState([]);
       const [mobileShowChat, setMobileShowChat] = React.useState(false);
-      const [isFirebaseConnected, setIsFirebaseConnected] = React.useState(false);
+      const [isRecording, setIsRecording] = React.useState(false);
+      const mediaRecorderRef = React.useRef(null);
+      const audioChunksRef = React.useRef([]);
 
-      // Listen to Firebase Realtime Messages for Active Chat
-      React.useEffect(() => {
-        const checkFirebase = () => {
-          if (window.db && window.firebaseModules) {
-            setIsFirebaseConnected(true);
-            const { collection, query, orderBy, onSnapshot } = window.firebaseModules;
-            const q = query(collection(window.db, "chats", activeChat.id, "messages"), orderBy("createdAt", "asc"));
-            
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-              const msgs = [];
-              snapshot.forEach((doc) => {
-                msgs.push({ id: doc.id, ...doc.data() });
-              });
-              setMessages(msgs);
-            });
-
-            return () => unsubscribe();
-          }
-        };
-
-        window.addEventListener('firebase-ready', checkFirebase);
-        const timer = setTimeout(checkFirebase, 1000);
-        return () => clearTimeout(timer);
-      }, [activeChat]);
-
-      const sendMessage = async (e) => {
+      const handleAuth = async (e) => {
         e.preventDefault();
-        if (!inputText.trim()) return;
+        if (!usernameInput.trim()) return;
+        const cleanName = usernameInput.trim().toLowerCase();
 
-        const textToSend = inputText;
-        setInputText("");
+        if (cleanName === "admin" && passInput === "1234") {
+          const adminUser = { username: "Admin", role: "admin" };
+          setUser(adminUser);
+          setView('chat');
+          return;
+        }
 
-        if (window.db && window.firebaseModules) {
-          const { collection, addDoc, serverTimestamp } = window.firebaseModules;
-          try {
-            await addDoc(collection(window.db, "chats", activeChat.id, "messages"), {
-              text: textToSend,
-              sender: "user",
-              createdAt: serverTimestamp(),
-              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            });
+        if (!window.db) return;
+        const { doc, getDoc, setDoc } = window.firebaseModules;
+        const userRef = doc(window.db, "users", cleanName);
+        const userSnap = await getDoc(userRef);
 
-            // If chatting with Bot, send auto response
-            if (activeChat.id === "chat_bot") {
-              setTimeout(async () => {
-                await addDoc(collection(window.db, "chats", activeChat.id, "messages"), {
-                  text: `Geogram Bot (Secure E2EE): আপনার মেসেজটি সুরক্ষিতভাবে প্রসেস হয়েছে। 👍`,
-                  sender: "bot",
-                  createdAt: serverTimestamp(),
-                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                });
-              }, 1000);
-            }
-          } catch (error) {
-            console.error("Error sending message: ", error);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          if (userData.status === "approved") {
+            setUser(userData);
+            setView('chat');
+          } else {
+            setView('pending');
           }
+        } else {
+          const newUser = { username: usernameInput.trim(), status: "pending", createdAt: new Date().toISOString() };
+          await setDoc(userRef, newUser);
+          setView('pending');
         }
       };
 
+      React.useEffect(() => {
+        if (!window.db) return;
+        const { collection, query, orderBy, onSnapshot } = window.firebaseModules;
+
+        if (view === 'chat' && activeChat) {
+          const q = query(collection(window.db, "chats", activeChat.id, "messages"), orderBy("createdAt", "asc"));
+          const unsubscribe = onSnapshot(q, (snapshot) => {
+            const msgs = [];
+            snapshot.forEach((doc) => msgs.push({ id: doc.id, ...doc.data() }));
+            setMessages(msgs);
+          });
+          return () => unsubscribe();
+        }
+
+        if (user?.role === 'admin') {
+          const unsubUsers = onSnapshot(collection(window.db, "users"), (snapshot) => {
+            const pend = [];
+            snapshot.forEach((doc) => {
+              if (doc.data().status === 'pending') {
+                pend.push({ id: doc.id, ...doc.data() });
+              }
+            });
+            setPendingUsers(pend);
+          });
+          return () => unsubUsers();
+        }
+      }, [view, activeChat, user]);
+
+      const approveUser = async (userId) => {
+        const { doc, updateDoc } = window.firebaseModules;
+        await updateDoc(doc(window.db, "users", userId), { status: "approved" });
+      };
+
+      const sendMessage = async (textPayload, type = 'text', mediaUrl = null) => {
+        if (!user) return;
+        const { collection, addDoc, serverTimestamp } = window.firebaseModules;
+        await addDoc(collection(window.db, "chats", activeChat.id, "messages"), {
+          text: textPayload || "",
+          type: type, // 'text', 'image', 'audio'
+          mediaUrl: mediaUrl || "",
+          sender: user.username,
+          role: user.role,
+          createdAt: serverTimestamp(),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+      };
+
+      const handleTextSubmit = (e) => {
+        e.preventDefault();
+        if (!inputText.trim()) return;
+        const txt = inputText;
+        setInputText("");
+        sendMessage(txt, 'text');
+      };
+
+      // Handle Image Upload (Media)
+      const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          sendMessage("📷 Photo", 'image', reader.result);
+        };
+        reader.readAsDataURL(file);
+      };
+
+      // Handle Voice Recording
+      const startVoiceRecording = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorderRef.current = new MediaRecorder(stream);
+          audioChunksRef.current = [];
+
+          mediaRecorderRef.current.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              audioChunksRef.current.push(event.data);
+            }
+          };
+
+          mediaRecorderRef.current.onstop = async () => {
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onload = () => {
+              sendMessage("🎤 Voice Message", 'audio', reader.result);
+            };
+            reader.readAsDataURL(audioBlob);
+          };
+
+          mediaRecorderRef.current.start();
+          setIsRecording(true);
+        } catch (err) {
+          alert("Microphone permission denied or not supported.");
+        }
+      };
+
+      const stopVoiceRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+          mediaRecorderRef.current.stop();
+          setIsRecording(false);
+        }
+      };
+
+      if (view === 'auth') {
+        return (
+          <div className="flex items-center justify-center h-[100dvh] bg-[#0e1621] px-4">
+            <form onSubmit={handleAuth} className="bg-[#17212b] p-6 rounded-2xl w-full max-w-sm border border-[#242f3d] shadow-xl">
+              <h1 className="text-white text-xl font-bold text-center mb-6">Geogram Login</h1>
+              <input 
+                type="text" 
+                placeholder="Telegram Username" 
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                className="w-full bg-[#242f3d] text-white px-4 py-3 rounded-xl mb-4 outline-none text-[15px]"
+                required
+              />
+              <input 
+                type="password" 
+                placeholder="Password (Admin only)" 
+                value={passInput}
+                onChange={(e) => setPassInput(e.target.value)}
+                className="w-full bg-[#242f3d] text-white px-4 py-3 rounded-xl mb-6 outline-none text-[15px]"
+              />
+              <button type="submit" className="w-full bg-[#5288c1] text-white py-3 rounded-xl font-bold">Start Messaging</button>
+            </form>
+          </div>
+        );
+      }
+
+      if (view === 'pending') {
+        return (
+          <div className="flex flex-col items-center justify-center h-[100dvh] bg-[#0e1621] px-4 text-center">
+            <div className="bg-[#17212b] p-8 rounded-2xl max-w-sm border border-[#242f3d]">
+              <i className="fa-solid fa-clock-rotate-left text-yellow-400 text-4xl mb-4"></i>
+              <h2 className="text-white font-bold text-lg mb-2">Pending Approval</h2>
+              <p className="text-[#8796a5] text-sm mb-6">Admin aprot korle apnake entry dewa hobe.</p>
+              <button onClick={() => setView('auth')} className="text-[#5288c1] text-sm font-semibold">Back to Login</button>
+            </div>
+          </div>
+        );
+      }
+
+      if (view === 'admin') {
+        return (
+          <div className="flex flex-col h-[100dvh] bg-[#0e1621] w-full">
+            <div className="bg-[#17212b] px-4 py-3 flex items-center justify-between border-b border-[#242f3d]">
+              <h1 className="font-bold text-white text-lg">Admin Panel - Requests</h1>
+              <button onClick={() => setView('chat')} className="bg-[#242f3d] text-white px-4 py-1.5 rounded-lg text-sm">Back</button>
+            </div>
+            <div className="p-4 flex-1 overflow-y-auto">
+              {pendingUsers.length === 0 ? (
+                <p className="text-[#8796a5] text-center mt-10">Kono pending user nei.</p>
+              ) : (
+                pendingUsers.map(u => (
+                  <div key={u.id} className="bg-[#17212b] p-3 rounded-xl mb-3 flex items-center justify-between border border-[#242f3d]">
+                    <span className="text-white font-semibold">@{u.username}</span>
+                    <button onClick={() => approveUser(u.id)} className="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold">Approve</button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="flex h-[100dvh] w-full bg-[#0e1621] overflow-hidden">
-          
-          {/* Left Sidebar: Chat List */}
           <div className={`${mobileShowChat ? 'hidden md:flex' : 'flex'} w-full md:w-[380px] flex-col bg-[#17212b] border-r border-[#242f3d] shrink-0`}>
-            
-            {/* Sidebar Header */}
             <div className="px-4 py-3 flex items-center justify-between border-b border-[#242f3d]">
               <div className="flex items-center gap-3">
-                <button className="text-[#8796a5] hover:text-white text-lg"><i className="fa-solid fa-bars"></i></button>
-                <h1 className="font-bold text-white text-[17px]">Geogram</h1>
+                <h1 className="font-bold text-white text-[17px]">Geogram (@{user.username})</h1>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isFirebaseConnected ? 'bg-green-500/20 text-[#78e378]' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                {isFirebaseConnected ? '● Live DB' : 'Connecting...'}
-              </span>
+              {user.role === 'admin' && (
+                <button onClick={() => setView('admin')} className="bg-[#2b5278] text-white text-xs px-2.5 py-1.5 rounded-lg font-bold">
+                  Admin ({pendingUsers.length})
+                </button>
+              )}
             </div>
-
-            {/* Chat List Items */}
-            <div className="flex-1 overflow-y-auto divide-y divide-[#242f3d]/30">
+            <div className="flex-1 overflow-y-auto">
               {chats.map(chat => (
-                <div 
-                  key={chat.id} 
-                  onClick={() => { setActiveChat(chat); setMobileShowChat(true); }}
-                  className={`flex items-center gap-3 px-3 py-3 cursor-pointer transition-colors ${activeChat.id === chat.id ? 'bg-[#2b5278]/40' : 'hover:bg-[#202e3a]'}`}
-                >
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center font-bold text-white text-lg shadow-sm">
-                      {chat.avatar}
-                    </div>
-                    {chat.online && <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-[#17212b]"></div>}
-                  </div>
+                <div key={chat.id} className="flex items-center gap-3 px-3 py-3 bg-[#2b5278]/40 cursor-pointer">
+                  <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-lg">{chat.avatar}</div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-baseline mb-1">
-                      <h2 className="font-semibold text-[15px] text-white truncate">{chat.name}</h2>
-                      <span className="text-[11px] text-[#8796a5]">{chat.time}</span>
-                    </div>
+                    <h2 className="font-semibold text-[15px] text-white truncate">{chat.name}</h2>
                     <p className="text-[13px] text-[#8796a5] truncate">{chat.lastMsg}</p>
                   </div>
                 </div>
@@ -157,86 +278,71 @@
             </div>
           </div>
 
-          {/* Right Main Chat Area */}
           <div className={`${!mobileShowChat ? 'hidden md:flex' : 'flex'} flex-1 flex-col bg-[#0e1621] h-full relative`}>
-            
-            {/* Chat Header */}
             <div className="bg-[#17212b] px-4 py-3 flex items-center justify-between border-b border-[#242f3d] z-10">
               <div className="flex items-center gap-3">
-                <button onClick={() => setMobileShowChat(false)} className="md:hidden text-[#8796a5] hover:text-white mr-1 text-lg">
-                  <i className="fa-solid fa-arrow-left"></i>
-                </button>
-                <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white text-md shadow-md">
-                    {activeChat.avatar}
-                  </div>
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#17212b]"></div>
-                </div>
+                <button onClick={() => setMobileShowChat(false)} className="md:hidden text-[#8796a5] text-lg mr-1"><i className="fa-solid fa-arrow-left"></i></button>
+                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center font-bold text-white">FG</div>
                 <div>
-                  <h1 className="font-bold text-[15px] text-white tracking-wide">{activeChat.name}</h1>
-                  <p className="text-[12px] text-[#78e378] font-medium">online (High Security E2EE)</p>
+                  <h1 className="font-bold text-[15px] text-white">Friends Testing Group</h1>
+                  <p className="text-[12px] text-green-400">online</p>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-5 text-[#8796a5] text-lg">
-                <button title="Audio Call" className="hover:text-white transition-colors"><i className="fa-solid fa-phone"></i></button>
-                <button title="Video Call" className="hover:text-white transition-colors"><i className="fa-solid fa-video"></i></button>
-                <button title="Anti-Spam Active" className="text-[#78e378] transition-colors"><i className="fa-solid fa-shield-halved"></i></button>
               </div>
             </div>
 
-            {/* Messages Scroll Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0e1621]">
-              <div className="text-center my-2">
-                <span className="bg-[#17212b] text-[#8796a5] text-[11px] px-3 py-1 rounded-full border border-[#242f3d]">
-                  🔒 End-to-End Encrypted & Anti-Spam Protected
-                </span>
-              </div>
-
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((msg, index) => (
-                <div key={msg.id || index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[75%] rounded-[12px] px-3 py-2 text-[14px] shadow-sm relative ${
-                    msg.sender === 'user' 
-                      ? 'bg-[#2b5278] text-white rounded-br-[4px]' 
-                      : 'bg-[#182533] text-[#f5f5f5] rounded-bl-[4px] border border-[#242f3d]/30'
-                  }`}>
-                    <p className="leading-[18px] break-words">{msg.text}</p>
-                    <div className="text-[10px] text-right mt-1 opacity-70 flex items-center justify-end gap-1">
-                      <span>{msg.time || "Just now"}</span>
-                      {msg.sender === 'user' && <i className="fa-solid fa-check-double text-[#5288c1]"></i>}
-                    </div>
+                <div key={msg.id || index} className={`flex ${msg.sender === user.username ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[75%] rounded-[12px] px-3 py-2 text-[14px] ${msg.sender === user.username ? 'bg-[#2b5278] text-white' : 'bg-[#182533] text-white border border-[#242f3d]'}`}>
+                    <div className="text-[11px] text-blue-300 font-bold mb-0.5">@{msg.sender}</div>
+                    
+                    {msg.type === 'image' && (
+                      <img src={msg.mediaUrl} alt="media" className="rounded-lg max-h-48 object-cover mb-1" />
+                    )}
+                    {msg.type === 'audio' && (
+                      <audio controls src={msg.mediaUrl} className="max-w-full h-10 my-1"></audio>
+                    )}
+                    {msg.type === 'text' && (
+                      <p className="break-words">{msg.text}</p>
+                    )}
+
+                    <div className="text-[10px] text-right mt-1 opacity-70">{msg.time}</div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Message Input Footer */}
-            <form onSubmit={sendMessage} className="bg-[#17212b] px-3 py-2.5 flex items-center gap-2 border-t border-[#242f3d]">
-              <button type="button" className="text-[#8796a5] hover:text-white p-2 text-xl transition-colors">
+            <form onSubmit={handleTextSubmit} className="bg-[#17212b] px-3 py-2.5 flex items-center gap-2 border-t border-[#242f3d]">
+              <label className="text-[#8796a5] hover:text-white p-2 text-xl cursor-pointer">
                 <i className="fa-solid fa-paperclip"></i>
-              </button>
-              
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+
               <input 
                 type="text" 
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Write a secure message..." 
-                className="flex-1 bg-[#242f3d] text-white px-4 py-2 rounded-full text-[14px] outline-none placeholder-[#6d7f8f] focus:ring-1 focus:ring-[#5288c1]"
+                placeholder="Message..." 
+                className="flex-1 bg-[#242f3d] text-white px-4 py-2 rounded-full text-[14px] outline-none"
               />
 
-              {inputText.trim() ? (
-                <button type="submit" className="bg-[#5288c1] text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#366391] transition-colors shadow-md">
-                  <i className="fa-solid fa-paper-plane text-sm"></i>
+              {isRecording ? (
+                <button type="button" onClick={stopVoiceRecording} className="bg-red-500 text-white w-10 h-10 rounded-full flex items-center animate-pulse justify-center">
+                  <i className="fa-solid fa-stop text-sm"></i>
                 </button>
               ) : (
-                <button type="button" className="text-[#8796a5] hover:text-white p-2 text-xl transition-colors">
+                <button type="button" onClick={startVoiceRecording} className="text-[#8796a5] hover:text-white p-2 text-xl">
                   <i className="fa-solid fa-microphone"></i>
                 </button>
               )}
+
+              {inputText.trim() && (
+                <button type="submit" className="bg-[#5288c1] text-white w-10 h-10 rounded-full flex items-center justify-center">
+                  <i className="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+              )}
             </form>
-
           </div>
-
         </div>
       );
     }
