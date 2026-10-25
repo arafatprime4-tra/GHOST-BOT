@@ -126,7 +126,7 @@
         const { collection, addDoc, serverTimestamp } = window.firebaseModules;
         await addDoc(collection(window.db, "chats", activeChat.id, "messages"), {
           text: textPayload || "",
-          type: type, // 'text', 'image', 'audio'
+          type: type,
           mediaUrl: mediaUrl || "",
           sender: user.username,
           role: user.role,
@@ -143,7 +143,6 @@
         sendMessage(txt, 'text');
       };
 
-      // Handle Image Upload (Media)
       const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -154,19 +153,14 @@
         reader.readAsDataURL(file);
       };
 
-      // Handle Voice Recording
       const startVoiceRecording = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           mediaRecorderRef.current = new MediaRecorder(stream);
           audioChunksRef.current = [];
-
           mediaRecorderRef.current.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-              audioChunksRef.current.push(event.data);
-            }
+            if (event.data.size > 0) audioChunksRef.current.push(event.data);
           };
-
           mediaRecorderRef.current.onstop = async () => {
             const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
             const reader = new FileReader();
@@ -175,11 +169,10 @@
             };
             reader.readAsDataURL(audioBlob);
           };
-
           mediaRecorderRef.current.start();
           setIsRecording(true);
         } catch (err) {
-          alert("Microphone permission denied or not supported.");
+          alert("Microphone permission denied.");
         }
       };
 
@@ -194,10 +187,12 @@
         return (
           <div className="flex items-center justify-center h-[100dvh] bg-[#0e1621] px-4">
             <form onSubmit={handleAuth} className="bg-[#17212b] p-6 rounded-2xl w-full max-w-sm border border-[#242f3d] shadow-xl">
-              <h1 className="text-white text-xl font-bold text-center mb-6">Geogram Login</h1>
+              <h1 className="text-white text-xl font-bold text-center mb-2">Geogram</h1>
+              <p className="text-[#8796a5] text-xs text-center mb-6">আপনার পছন্দমতো ইউজারনেম দিয়ে রেজিস্ট্রেশন করুন</p>
+              
               <input 
                 type="text" 
-                placeholder="Telegram Username" 
+                placeholder="Enter your username (e.g. rahim)" 
                 value={usernameInput}
                 onChange={(e) => setUsernameInput(e.target.value)}
                 className="w-full bg-[#242f3d] text-white px-4 py-3 rounded-xl mb-4 outline-none text-[15px]"
@@ -205,12 +200,12 @@
               />
               <input 
                 type="password" 
-                placeholder="Password (Admin only)" 
+                placeholder="Password (Only for Admin)" 
                 value={passInput}
                 onChange={(e) => setPassInput(e.target.value)}
                 className="w-full bg-[#242f3d] text-white px-4 py-3 rounded-xl mb-6 outline-none text-[15px]"
               />
-              <button type="submit" className="w-full bg-[#5288c1] text-white py-3 rounded-xl font-bold">Start Messaging</button>
+              <button type="submit" className="w-full bg-[#5288c1] text-white py-3 rounded-xl font-bold">Register / Login</button>
             </form>
           </div>
         );
@@ -221,8 +216,8 @@
           <div className="flex flex-col items-center justify-center h-[100dvh] bg-[#0e1621] px-4 text-center">
             <div className="bg-[#17212b] p-8 rounded-2xl max-w-sm border border-[#242f3d]">
               <i className="fa-solid fa-clock-rotate-left text-yellow-400 text-4xl mb-4"></i>
-              <h2 className="text-white font-bold text-lg mb-2">Pending Approval</h2>
-              <p className="text-[#8796a5] text-sm mb-6">Admin aprot korle apnake entry dewa hobe.</p>
+              <h2 className="text-white font-bold text-lg mb-2">Approval Pending</h2>
+              <p className="text-[#8796a5] text-sm mb-6">আপনার অ্যাকাউন্টটি তৈরি হয়েছে! এডমিন এপ্রুভ করলেই আপনি গ্রুপে প্রবেশ করতে পারবেন।</p>
               <button onClick={() => setView('auth')} className="text-[#5288c1] text-sm font-semibold">Back to Login</button>
             </div>
           </div>
@@ -233,12 +228,12 @@
         return (
           <div className="flex flex-col h-[100dvh] bg-[#0e1621] w-full">
             <div className="bg-[#17212b] px-4 py-3 flex items-center justify-between border-b border-[#242f3d]">
-              <h1 className="font-bold text-white text-lg">Admin Panel - Requests</h1>
-              <button onClick={() => setView('chat')} className="bg-[#242f3d] text-white px-4 py-1.5 rounded-lg text-sm">Back</button>
+              <h1 className="font-bold text-white text-lg">Admin Panel - Pending Users</h1>
+              <button onClick={() => setView('chat')} className="bg-[#242f3d] text-white px-4 py-1.5 rounded-lg text-sm">Back to Chat</button>
             </div>
             <div className="p-4 flex-1 overflow-y-auto">
               {pendingUsers.length === 0 ? (
-                <p className="text-[#8796a5] text-center mt-10">Kono pending user nei.</p>
+                <p className="text-[#8796a5] text-center mt-10">কোনো নতুন ইউজারের রিকুয়েস্ট নেই।</p>
               ) : (
                 pendingUsers.map(u => (
                   <div key={u.id} className="bg-[#17212b] p-3 rounded-xl mb-3 flex items-center justify-between border border-[#242f3d]">
@@ -312,7 +307,7 @@
               ))}
             </div>
 
-            <form onSubmit={handleTextSubmit} className="bg-[#17212b] px-3 py-2.5 flex items-center gap-2 border-t border-[#242f3d]">
+            <form onSubmit={handleTextSubmit} className="bg-[#17212b] px-3 py-2.5 flex items-center gap-2 border-tertiary border-t border-[#242f3d]">
               <label className="text-[#8796a5] hover:text-white p-2 text-xl cursor-pointer">
                 <i className="fa-solid fa-paperclip"></i>
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
