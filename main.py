@@ -22,7 +22,7 @@ def save_approved(data):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
-        "👻 *GHOST TRADER - PREMIUM FREE* 👻\n\n"
+        "👻 *GHOST - PREMIUM BOT* 👻\n\n"
         "We Don't Sell, We Share Free For Members!\n\n"
         "*Access kivabe paba?*\n"
         "1️⃣ Niche link theke account khulo\n"
