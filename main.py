@@ -6,7 +6,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID")) if os.getenv("ADMIN_ID") else 0
 AFFILIATE_LINK = os.getenv("AFFILIATE_LINK", "")
-CHANNEL_LINK = "-1004329207274"  # tomar channel link bosao
+CHANNEL_LINK = "https://t.me/premierghos"  # tomar channel link bosao
 
 APPROVED_FILE = "approved_ids.json"
 
