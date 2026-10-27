@@ -5,7 +5,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID")) if os.getenv("ADMIN_ID") else 0
-AFFILIATE_LINK = os.getenv("AFFILIATE_LINK")
+AFFILIATE_LINK = os.getenv("AFFILIATE_LINK", "https://google.com")
 
 APPROVED_FILE = "approved_ids.json"
 
@@ -20,7 +20,7 @@ def save_approved(data):
     with open(APPROVED_FILE, 'w') as f: json.dump(data, f)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"👻 GHOST FREE\nLink: {AFFILIATE_LINK}\n\nTrader ID pathao")
+    await update.message.reply_text(f"👻 GHOST TRADER FREE\n\nLink: {AFFILIATE_LINK}\n\nTrader ID pathao")
 
 async def handle_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tid = update.message.text.strip()
@@ -41,13 +41,14 @@ async def approve_btn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=uid, text=f"✅ {tid} Approved! Signal bot ready hole paba.")
     await q.edit_message_text(f"Approved {tid}")
 
-# Flask web server (Render free te alive thakar jonno)
+# Flask
 flask_app = Flask(__name__)
 @flask_app.route('/')
 def home():
-    return "GHOST TRADER Bot Running - Free"
+    return "GHOST TRADER Bot Running"
 
 def run_bot():
+    # Eita main thread e cholbe, tai event loop error hobe na
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_id))
@@ -56,6 +57,7 @@ def run_bot():
     app.run_polling()
 
 if __name__ == "__main__":
-    threading.Thread(target=run_bot).start()
+    # Flask ke thread e dao, bot ke main e rakho
     port = int(os.environ.get("PORT", 10000))
-    flask_app.run(host="0.0.0.0", port=port)
+    threading.Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port)).start()
+    run_bot()
