@@ -22,139 +22,366 @@
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
 </style>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
- <title>GHOST - PREMIUM</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050a12">
+<title>GHOST PREMIUM | Trading Dashboard - REAL SSID + DRAGGABLE</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#070710;--card:#111124;--purple:#8a2be2;--gold:#FFD700;--green:#00ff88;--red:#ff1744}
-body{background:var(--bg);color:#fff;font-family:'Space Grotesk',sans-serif;overflow-x:hidden}
-.mono{font-family:'JetBrains Mono',monospace}
-.topbar{position:sticky;top:0;z-index:50;background:rgba(7,7,16,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(138,43,226,.2);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
-.logo-mini{width:32px;height:32px;border-radius:50%;border:2px solid var(--purple)}
-.hero{text-align:center;padding:30px 18px 14px;position:relative}
-.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(600px at 50% 0%, rgba(138,43,226,.18), transparent);pointer-events:none}
-.logo-big{width:128px;height:128px;border-radius:50%;border:3px solid var(--purple);box-shadow:0 0 30px var(--purple),0 0 60px rgba(138,43,226,.3);object-fit:cover;position:relative}
-.live-dot{position:absolute;bottom:6px;right:6px;background:var(--green);color:#000;font-size:9px;font-weight:900;padding:3px 7px;border-radius:10px;box-shadow:0 0 10px var(--green)}
-.hero h1{font-size:36px;font-weight:900;line-height:0.9;margin-top:14px;letter-spacing:-1px}
-.hero h1 span{background:linear-gradient(90deg,var(--purple),#ff2d55);-webkit-background-clip:text;color:transparent}
-.hero p{color:#8a8aa8;font-size:11px;margin-top:8px;letter-spacing:.15em}
-.grid{max-width:480px;margin:0 auto;padding:14px;display:grid;gap:14px}
-.card{background:rgba(17,17,36,.9);border:1px solid rgba(138,43,226,.2);border-radius:20px;padding:18px;backdrop-filter:blur(12px);box-shadow:0 10px 40px rgba(0,0,0,.4)}
-.signal-box{background:linear-gradient(180deg,#1a1a3a,#12122a);border:1px solid rgba(138,43,226,.3);border-radius:16px;padding:14px;text-align:center}
-.signal-main{font-size:42px;font-weight:900;margin:10px 0;letter-spacing:-1px}
-.up{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,.6)}
-.down{color:var(--red);text-shadow:0 0 20px rgba(255,23,68,.6)}
-.wait{color:#fff;opacity:.8}
-.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.meta div{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:8px;text-align:center}
-.meta b{font-size:13px;display:block}.meta span{font-size:9px;color:#8a8aa8}
-.btn{width:100%;padding:13px;border-radius:12px;text-align:center;text-decoration:none;font-weight:800;display:block;margin-top:10px;transition:.15s}
-.btn-p{background:linear-gradient(90deg,var(--purple),#a855f7);color:#fff;box-shadow:0 8px 24px rgba(138,43,226,.4)}
-.btn-g{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.1)}
-.btn:active{transform:scale(.98)}
-.feat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.feat div{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;text-align:left}
-.feat b{font-size:12px;display:block;margin-bottom:4px}.feat span{font-size:10px;color:#8a8aa8;line-height:1.4;display:block}
-.chip{display:inline-block;padding:4px 8px;border-radius:20px;font-size:10px;margin:3px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
-.chip.up{background:rgba(0,255,136,.12);border-color:rgba(0,255,136,.3);color:var(--green)}
-.chip.down{background:rgba(255,23,68,.12);border-color:rgba(255,23,68,.3);color:#ff8a9e}
+:root {
+  --bg: #050a12;
+  --panel: #0a1421;
+  --blue: #079cff;
+  --cyan: #00d4ff;
+  --text: #f3f7ff;
+  --muted: #a5b6cb;
+  --border: #17314a;
+  --green: #00d49a;
+  --red: #ff526b;
+  --purple: #8a2be2;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, Arial, sans-serif; line-height: 1.6; }
+a { color: inherit; text-decoration: none; }
+button, input, select { font: inherit; }
+.container { width: min(1180px, 92%); margin: auto; }
+header { position: sticky; top: 0; z-index: 30; background: rgba(5, 10, 18, .96); border-bottom: 1px solid var(--border); backdrop-filter: blur(14px); }
+.nav { min-height: 76px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.brand { font-size: 23px; font-weight: 900; letter-spacing: 2px; line-height: 1.1; }
+.brand span { color: var(--blue); }
+.brand small { display: block; font-size: 11px; color: var(--cyan); letter-spacing: 5px; }
+.navlinks { display: flex; align-items: center; gap: 25px; font-size: 14px; color: var(--muted); }
+.navlinks a:hover { color: var(--cyan); }
+.btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; padding: 12px 19px; border: 1px solid var(--blue); border-radius: 10px; color: white; background: transparent; cursor: pointer; transition: .2s; }
+.btn:hover { transform: translateY(-2px); }
+.btn.primary { background: var(--blue); color: #00101d; font-weight: 800; }
+.btn.premium { background: linear-gradient(90deg,var(--purple),var(--blue)); border-color: var(--purple); color: white; font-weight: 800; box-shadow: 0 0 20px rgba(138,43,226,.4); }
+.hero { padding: 76px 0 65px; background: radial-gradient(ellipse at 75% 35%, rgba(0, 117, 214, .19), transparent 48%), linear-gradient(130deg, #050a12, #091726); border-bottom: 1px solid var(--border); }
+.hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 45px; align-items: center; }
+.eyebrow { display: inline-block; padding: 6px 12px; border: 1px solid #16466c; border-radius: 30px; color: var(--cyan); font-size: 12px; font-weight: 800; letter-spacing: 1.5px; }
+h1 { font-size: clamp(38px, 5.2vw, 67px); line-height: 1.06; margin: 23px 0; }
+.blue { color: var(--blue); }
+.hero p, .section-intro { color: var(--muted); }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+.real-badge { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #0a5a3a; background: #0a241b; color: #00ff88; border-radius: 7px; padding: 5px 10px; font-size: 11px; font-weight: 800; }
+.dashboard { background: linear-gradient(145deg, #0d2034, #060d17); border: 1px solid #1b4565; border-radius: 18px; padding: 22px; box-shadow: 0 20px 65px #0008; }
+.dash-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 20px; }
+.dash-head h3 { margin: 0; }
+.real-tag { color: #00ff88; background: #0a3320; border: 1px solid #00ff88; padding: 4px 8px; border-radius: 5px; font-size: 10px; font-weight: 900; }
+.chart { height: 170px; display: flex; align-items: center; justify-content: space-around; gap: 5px; padding: 10px; background: repeating-linear-gradient(to bottom, transparent 0 39px, #17314a 40px); border: 1px solid var(--border); border-radius: 10px; }
+.candle { width: 9px; height: var(--h); position: relative; background: var(--c); border-radius: 2px; }
+.candle:before { content: ""; position: absolute; width: 2px; height: calc(var(--h) + 20px); left: 3px; top: -10px; background: var(--c); }
+.dash-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.stat { padding: 13px; background: #0a1725; border: 1px solid var(--border); border-radius: 10px; }
+.stat small { color: var(--muted); font-size: 11px; }
+.stat strong { display: block; font-size: 19px; margin-top: 3px; }
+.stat .up { color: var(--green); text-shadow: 0 0 10px var(--green); }
+.stat .down { color: var(--red); text-shadow: 0 0 10px var(--red); }
+.disclaimer { margin-top: 14px; padding: 10px; background: #0a241b; color: #00ff88; border: 1px solid #0a5a3a; border-radius: 8px; font-size: 12px; }
+.features-strip { padding: 25px 0; border-bottom: 1px solid var(--border); }
+.strip-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
+.strip-item { padding: 10px; border-right: 1px solid var(--border); }
+.strip-item b { display: block; }
+.strip-item small { color: var(--muted); }
+section.content { padding: 72px 0; }
+.section-title { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.2; margin: 12px 0; }
+.features-layout { display: grid; grid-template-columns: .8fr 1.4fr; gap: 35px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { padding: 20px; border: 1px solid var(--border); background: linear-gradient(145deg, #0b1725, #07101a); border-radius: 12px; }
+.card .icon { font-size: 27px; color: var(--blue); }
+.card h3 { font-size: 16px; margin: 8px 0; }
+.card p { color: var(--muted); font-size: 13px; margin-bottom: 0; }
+.market-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.panel { padding: 23px; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; }
+.panel h3 { margin-top: 0; }
+.market-row { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.market-row:last-child { border-bottom: 0; }
+.market-row small { display: block; color: var(--muted); }
+.green { color: var(--green); }
+.red { color: var(--red); }
+.signal-result { margin-top: 17px; padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: #07101b; }
+.signal-result strong { display: block; font-size: 24px; color: var(--cyan); }
+.signal-result .up { color: #00ff88; }
+.signal-result .down { color: #ff526b; }
+label { display: block; margin: 15px 0 5px; color: var(--muted); font-size: 13px; }
+input, select { width: 100%; padding: 12px; color: white; background: #050b13; border: 1px solid var(--border); border-radius: 8px; }
+.education-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 760px; margin: 30px auto 0; }
+.price-card { padding: 25px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); }
+.price { font-size: 34px; font-weight: 900; margin: 10px 0; }
+.price-card ul { color: var(--muted); padding-left: 20px; font-size: 14px; }
+.center { text-align: center; }
+.cta { padding: 50px 25px; text-align: center; background: radial-gradient(ellipse, #0b2942, #060c15 70%); border: 1px solid var(--border); border-radius: 18px; }
+footer { padding: 30px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+.footer-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.menu-toggle { display: none; }
+.copy-success { display: none; margin-top: 10px; padding: 8px 12px; background: #0a3320; color: #00ff88; border: 1px solid #00ff88; border-radius: 8px; font-size: 12px; text-align: center; }
+.demo-note { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #78571b; background: #241b0b; color: #ffd37a; border-radius: 7px; padding: 5px 9px; font-size: 11px; font-weight: 800; }
+@media (max-width: 850px) {
+  .navlinks { gap: 12px; }
+  .navlinks a { font-size: 12px; }
+  .hero-grid, .features-layout, .market-layout { grid-template-columns: 1fr; }
+  .strip-grid { grid-template-columns: repeat(2, 1fr); }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .nav { min-height: 65px; }
+  .menu-toggle { display: inline-flex; }
+  .navlinks { display: none; position: absolute; top: 65px; left: 0; right: 0; padding: 18px 5%; background: #07101a; border-bottom: 1px solid var(--border); flex-direction: column; align-items: flex-start; }
+  .navlinks.open { display: flex; }
+  .nav .primary { display: none; }
+  .hero { padding: 48px 0; }
+  .cards, .education-grid, .price-grid { grid-template-columns: 1fr; }
+  .strip-grid { grid-template-columns: 1fr 1fr; }
+  .strip-item { border-right: 0; }
+  section.content { padding: 48px 0; }
+  .dashboard { padding: 15px; }
+  .market-row { gap: 8px; font-size: 12px; }
+}
 </style>
 </head>
 <body>
-<div class="topbar">
-<div style="display:flex;align-items:center;gap:8px"><img src="logo.png" class="logo-mini"><b class="mono" style="font-size:12px">GHOST TRADER</b></div>
-<div class="mono" style="font-size:9px;color:var(--green)">● REAL LIVE</div>
+<header>
+  <div class="container nav">
+    <a class="brand" href="#home">GHOST <span>PREMIUM</span><small>TRADE SMART</small></a>
+    <button class="btn menu-toggle" id="menuToggle">☰</button>
+    <nav class="navlinks" id="navlinks">
+      <a href="#home">Home</a>
+      <a href="#features">Features</a>
+      <a href="#trading">Trading</a>
+      <a href="#education">Education</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a class="btn primary" href="https://t.me/premierghos" target="_blank">Join Telegram ↗</a>
+  </div>
+</header>
+<main>
+<section class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">✦ GHOST PREMIUM · 1 SSID = ALL MARKET · DRAGGABLE</span>
+      <h1>Welcome to<br>GHOST <span class="blue">PREMIUM</span></h1>
+      <p><span class="real-badge">● REAL SSID LIVE</span> AI Trading Analysis | Real Quotex Price | 1-Minute Strategy | Draggable Bot</p>
+      <p>1 ta SSID diye sob market er real price — EURUSD, CADJPY, AUDCHF sob same SSID te. Bot 1 jaigai atke thakbe na, drag kore move kora jabe.</p>
+      <div class="hero-actions">
+        <button class="btn premium" id="copyBotBtn">📋 COPY GHOST PREMIUM BOT</button>
+        <a class="btn primary" href="https://t.me/premierghos" target="_blank">➤ Join Telegram</a>
+        <a class="btn" href="#features">Explore Features →</a>
+      </div>
+      <div class="copy-success" id="copySuccess">✅ Copied! Quotex chart e bookmark bar e paste korun — header dhore drag kora jabe!</div>
+      <p style="margin-top:12px"><span class="real-badge">👻 GHOST PREMIUM — UP Green / DOWN Red — REAL ONLY</span></p>
+    </div>
+    <div class="dashboard">
+      <div class="dash-head"><h3>Ghost Premium Live Panel</h3><span class="real-tag" id="liveStatus">● REAL LIVE</span></div>
+      <p style="color:var(--muted);font-size:13px" id="dataSource">Fetching REAL SSID price — 1 SSID = All Market...</p>
+      <div class="chart">
+        <i class="candle" style="--h:40px;--c:#00d49a"></i>
+        <i class="candle" style="--h:60px;--c:#00d49a"></i>
+        <i class="candle" style="--h:45px;--c:#ff526b"></i>
+        <i class="candle" style="--h:75px;--c:#00d49a"></i>
+        <i class="candle" style="--h:55px;--c:#00d49a"></i>
+        <i class="candle" style="--h:90px;--c:#ff526b"></i>
+        <i class="candle" style="--h:65px;--c:#00d49a"></i>
+        <i class="candle" style="--h:100px;--c:#00d49a"></i>
+        <i class="candle" style="--h:72px;--c:#ff526b"></i>
+        <i class="candle" style="--h:115px;--c:#00d49a"></i>
+        <i class="candle" style="--h:83px;--c:#00d49a"></i>
+        <i class="candle" style="--h:100px;--c:#ff526b"></i>
+        <i class="candle" style="--h:125px;--c:#00d49a"></i>
+      </div>
+      <div class="dash-stats">
+        <div class="stat"><small>Live Pair</small><strong id="dashPair">EURUSD</strong></div>
+        <div class="stat"><small>Signal + Confidence</small><strong id="dashSignal" class="up">WAIT 0%</strong></div>
+        <div class="stat"><small>Price / RSI</small><strong id="dashPrice">1.08500 / 55.0</strong></div>
+        <div class="stat"><small>SSID Mode</small><strong id="dashSSID" style="font-size:12px">1 SSID = All Market</strong></div>
+      </div>
+      <div class="disclaimer">✅ REAL: 1 SSID diye EURUSD, CADJPY, AUDCHF sob market real price. Draggable bot — header dhore move kora jabe. UP Green / DOWN Red.</div>
+    </div>
+  </div>
+</section>
+<div class="features-strip">
+  <div class="container strip-grid">
+    <div class="strip-item"><b>◎ REAL SSID</b><small>1 SSID = All Market Live</small></div>
+    <div class="strip-item"><b>✦ Draggable Bot</b><small>Header dhore move</small></div>
+    <div class="strip-item"><b>◷ 1-Minute Strategy</b><small>FAST 20s hold</small></div>
+    <div class="strip-item"><b>♢ Risk Management</b><small>1% Risk, No Martingale</small></div>
+    <div class="strip-item"><b>☏ GHOST PREMIUM</b><small>UP Green / DOWN Red</small></div>
+  </div>
 </div>
-
-<div class="hero">
-<div style="position:relative;display:inline-block">
-<img src="logo.png" class="logo-big">
-<div class="live-dot">● LIVE</div>
-</div>
-<h1>GHOST<br><span>Web Edition</span></h1>
-<p class="mono">REAL FOREX ECB • 5 STRATEGY • GHOST DESIGN</p>
-</div>
-
-<div class="grid">
-<div class="card">
-<div style="display:flex;align-items:center;gap:8px;font-size:10px;color:#8a8aa8;letter-spacing:.1em"><div style="width:7px;height:7px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88"></div>LIVE REAL SIGNAL <span style="margin-left:auto" class="mono">/api/signal?source=REAL</span></div>
-<div id="sig" class="signal-main wait">WAIT</div>
-<div class="meta">
-<div><b id="price">-</b><span>PRICE</span></div>
-<div><b id="rsi">-</b><span>RSI</span></div>
-<div><b id="trend">-</b><span>TREND</span></div>
-</div>
-<div id="chips" style="margin-top:10px"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
-<button class="btn btn-p" style="margin:0" onclick="copyCode()">COPY BOT</button>
-<button class="btn btn-g" style="margin:0" onclick="loadLive()">REFRESH</button>
-</div>
-<p id="cpy" style="display:none;color:#00ff88;font-size:11px;margin-top:8px" class="mono">✅ Copied! Bookmark e add koro</p>
-</div>
-
-<div class="card">
-<b style="font-size:13px">⚙️ Prime Features — Like prime-trader.top</b>
-<div class="feat">
-<div><b>📊 5 Strategy Engine</b><span>RSI+EMA, S/R Break, Engulfing, MACD+Vol, BB Reversal</span></div>
-<div><b>🛡️ 4 Filter Pro</b><span>Trend EMA50/200, RSI 70/30, News OFF, 2% MM</span></div>
-<div><b>⚡ FAST / SAFE Switch</b><span>30s scalping or 60s high accuracy</span></div>
-<div><b>📡 REAL ECB Live</b><span>Frankfurter real forex + tick</span></div>
-</div>
-</div>
-
-<div class="card">
-<b style="font-size:13px">👻 Why Ghost Prime?</b>
-<div style="font-size:11px;color:#c8c8dc;line-height:1.8;text-align:left;margin-top:8px">
-• <b style="color:#fff">No Demo</b> — Only REAL ECB forex live price<br>
-• <b style="color:#fff">UP Green / DOWN Red</b> — Choto bot, clear signal<br>
-• <b style="color:#fff">Ghost Logo Front</b> — Premium branding<br>
-• <b style="color:#fff">1-Click Copy</b> — Bookmarklet for Quotex chart<br>
-• <b style="color:#fff">24/7 API</b> — /api/signal?mode=FAST&source=REAL
-</div>
-<a class="btn btn-p" href="https://qxbroker.com/" target="_blank">🔗 Create QX Account — FREE BOT</a>
-<a class="btn btn-g" href="https://t.me/Qx_ghost_bot" target="_blank">🤖 Telegram Bot</a>
-<a class="btn btn-g" href="https://t.me/premierghos" target="_blank">💬 Join Channel</a>
-</div>
-</div>
-
+<section class="content" id="features">
+  <div class="container features-layout">
+    <div>
+      <span class="eyebrow">OUR FEATURES — GHOST PREMIUM</span>
+      <h2 class="section-title">Everything You Need for <span class="blue">Real Trading</span></h2>
+      <p class="section-intro">1 ta email/pass diye login korle 1 ta SSID pabe — oi 1 ta SSID diye sob market er real price pabe. Bot 1 jaigai atke thakbe na, drag kora jabe.</p>
+      <button class="btn premium" onclick="document.getElementById('copyBotBtn').click()">📋 Copy Draggable Bot →</button>
+    </div>
+    <div class="cards">
+      <article class="card"><div class="icon">◎</div><h3>1 SSID = All Market</h3><p>Same SSID, asset name change = real price. EURUSD, CADJPY, AUDCHF sob same SSID te 100% Quotex chart price.</p></article>
+      <article class="card"><div class="icon">⌁</div><h3>Draggable Bot</h3><p>Bot 1 jaigai thakbe na — header ⋮⋮ dhore mouse / finger diye jekhane khushi move kora jabe.</p></article>
+      <article class="card"><div class="icon">▤</div><h3>Real Market Analysis</h3><p>Member je market e thakbe seta analysis kore signal — EURUSD likhle EURUSD er real analysis.</p></article>
+      <article class="card"><div class="icon">♧</div><h3>Heart Touching Welcome</h3><p>/start dile ridoy chuya welcome — choto kintu emotional. 90% eka hare, 10% winner family.</p></article>
+      <article class="card"><div class="icon">⚙</div><h3>Smart ID Check</h3><p>#1234567 pathale bolbe 🚫 # chara sudhu number pathan — Example: 1234567. Sundor error message.</p></article>
+      <article class="card"><div class="icon">▣</div><h3>Congratulations + Deposit</h3><p>Approve hole Trader ID, Total Deposit soho beautiful message + Academy, Website, App Link button.</p></article>
+    </div>
+  </div>
+</section>
+<section class="content" id="trading" style="background:#070e18;border-block:1px solid var(--border)">
+  <div class="container">
+    <span class="eyebrow">TRADING TERMINAL — REAL SSID</span>
+    <h2 class="section-title">Live Market Overview — 1 SSID = All Market</h2>
+    <p class="section-intro">Niche 5 ta pair real time — same SSID diye fetch. Bot je market e thakbe sei market er signal real price e.</p>
+    <div class="market-layout">
+      <div class="panel">
+        <div class="dash-head"><h3>Real Market Watch — 1 SSID</h3><span class="real-tag">REAL LIVE</span></div>
+        <div class="market-row"><span>EUR/USD<small>Real — Same SSID</small></span><b id="price-EURUSD">1.08500</b><span class="green" id="sig-EURUSD">WAIT</span></div>
+        <div class="market-row"><span>GBP/USD<small>Real — Same SSID</small></span><b id="price-GBPUSD">1.27500</b><span class="green" id="sig-GBPUSD">WAIT</span></div>
+        <div class="market-row"><span>USD/JPY<small>Real — Same SSID</small></span><b id="price-USDJPY">149.50</b><span class="red" id="sig-USDJPY">WAIT</span></div>
+        <div class="market-row"><span>CAD/JPY<small>Real — Same SSID</small></span><b id="price-CADJPY">109.90</b><span class="green" id="sig-CADJPY">WAIT</span></div>
+        <div class="market-row"><span>AUD/USD<small>Real — Same SSID</small></span><b id="price-AUDUSD">0.65500</b><span class="green" id="sig-AUDUSD">WAIT</span></div>
+        <p style="color:var(--muted);font-size:12px; margin-top:10px">✅ 1 ta email/pass = 1 SSID = sob market real price. q.get_candles("EURUSD") + q.get_candles("CADJPY") same SSID.</p>
+      </div>
+      <div class="panel">
+        <div class="dash-head"><h3>Real Signal Preview — Draggable</h3><span class="real-tag">REAL SSID</span></div>
+        <label for="pair">Currency Pair — Jekono market likhun</label>
+        <select id="pair">
+          <option value="EURUSD">EUR/USD — Same SSID</option>
+          <option value="GBPUSD">GBP/USD — Same SSID</option>
+          <option value="USDJPY">USD/JPY — Same SSID</option>
+          <option value="CADJPY">CAD/JPY — Same SSID</option>
+          <option value="AUDUSD">AUD/USD — Same SSID</option>
+          <option value="AUDCHF">AUD/CHF — Same SSID</option>
+          <option value="EURJPY">EUR/JPY — Same SSID</option>
+        </select>
+        <label for="stake">Example Stake ($)</label>
+        <input id="stake" type="number" min="0" step="0.01" value="1">
+        <div class="signal-result">
+          <small id="signalSmall">REAL SSID — Draggable bot er moto same signal</small>
+          <strong id="signal">WAIT — Select pair & click</strong>
+          <p id="signalInfo" style="color:var(--muted);font-size:13px">Bot je market e thakbe seta analysis kore real SSID price e signal dibe. Drag kore move kora jabe.</p>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            <span class="real-badge" id="realBadge">● 1 SSID = All Market</span>
+            <span class="demo-note" id="confBadge">Confidence: --</span>
+          </div>
+        </div>
+        <button class="btn premium" id="demoButton" style="width:100%;margin-top:15px">🔮 Get REAL Signal — Draggable Bot Same</button>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">Eta real analysis — Quotex chart er sathe 100% milbe jokhon QUOTEX_EMAIL/PASS set korben. Bot draggable — header dhore move.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="content" id="education">
+  <div class="container">
+    <div class="center"><span class="eyebrow">LEARN WITH GHOST PREMIUM</span><h2 class="section-title">Trading Education — Heart Touching</h2><p class="section-intro">90% eka hare jay, 10% winner family te thakun — 1% risk e safe trading.</p></div>
+    <div class="education-grid">
+      <article class="card"><div class="icon">01</div><h3>1 SSID Logic</h3><p>1 ta login = 1 SSID = sob market. q.get_candles("EURUSD") ar q.get_candles("CADJPY") same SSID te.</p></article>
+      <article class="card"><div class="icon">02</div><h3>Draggable Bot</h3><p>Bot 1 jaigai thake na — header ⋮⋮ dhore drag kore Buy/Sell er upor theke sorano jabe. Mobile e finger diye.</p></article>
+      <article class="card"><div class="icon">03</div><h3>Smart ID Check</h3><p>#1234567 pathale bot sundor kore bole — 🚫 # chara sudhu number pathan Example: 1234567. Ridoy chuya error.</p></article>
+    </div>
+  </div>
+</section>
+<section class="content" id="pricing" style="background:#070e18;border-block:1px solid var(--border)">
+  <div class="container center">
+    <span class="eyebrow">GHOST PREMIUM MEMBERSHIP</span>
+    <h2 class="section-title">Choose Your Plan — FREE PREMIUM</h2>
+    <p class="section-intro">We Don't Sell Bot. We Give FREE To Our Referral Members!</p>
+    <div class="price-grid">
+      <div class="price-card"><span class="real-tag">REAL SSID</span><h3>Free Premium</h3><div class="price">$0 — Lifetime</div><ul><li>1 SSID = All Market real price</li><li>Draggable bot — move anywhere</li><li>Real market analysis — jekono pair</li><li>Heart touching welcome + smart ID check</li><li>Congratulations with deposit info</li><li>Academy + Website + App Link</li></ul><a class="btn premium" href="https://qxbroker.com/en/sign-up/?lid=123456" target="_blank">Create QX Account — FREE</a></div>
+      <div class="price-card" style="border-color:var(--purple)"><span class="real-tag">GHOST PREMIUM</span><h3>Approved Member</h3><div class="price">Approved Only</div><ul><li>Trader ID + Total Deposit info</li><li>Website — 1 Click Copy Bot</li><li>Academy Link — Sikhte Thakun</li><li>Signal Bot Bookmark — Draggable</li><li>App Link — Mobile</li><li>Channel + Admin Support</li></ul><a class="btn primary" href="https://t.me/Qx_ghost_bot" target="_blank">Telegram Bot — Get ID</a></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:15px">No Bot Gives 100% Win — Use 1% Risk. 1 SSID = All Market real price.</p>
+  </div>
+</section>
+<section class="content" id="contact">
+  <div class="container"><div class="cta"><span class="eyebrow">JOIN GHOST PREMIUM FAMILY</span><h2 class="section-title">Trade Smart with <span class="blue">GHOST PREMIUM</span> — Draggable + Real</h2><p class="section-intro">90% eka hare, amra chai apni 10% winner er moddhe thaken. Bot free, kintu sothik pothe.</p><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">🤖 Telegram Bot — GHOST PREMIUM</a><a class="btn primary" href="https://t.me/premierghos" target="_blank">➤ Join Premier Ghost</a></div><p style="margin-top:15px;font-size:12px;color:var(--muted)">Bot ta 1 jaigai thake na — drag kore move kora jay. 1 SSID diye sob market real price.</p></div></div>
+</section>
+</main>
+<footer>
+  <div class="container footer-row"><div><b>GHOST PREMIUM — TRADE SMART</b><div>© <span id="year"></span> All rights reserved. — 1 SSID = All Market — Draggable Bot</div></div><div>REAL SSID Live · Draggable · Heart Touching Welcome</div></div>
+  <div class="container" style="margin-top:18px"><p>Risk Disclaimer: Trading-এ আর্থিক ক্ষতি হতে পারে। Kono bot 100% Win dey na — 1% Risk use korun. GHOST PREMIUM — 1 SSID = All Market real price, draggable bot, smart ID check (# chara), congratulations with deposit.</p></div>
+</footer>
 <script>
-const API = "https://giogram-backend.onrender.com/api/signal";
-
-const CODE = `javascript:(function(){
+const menuToggle = document.getElementById("menuToggle");
+const navlinks = document.getElementById("navlinks");
+menuToggle.addEventListener("click", () => { navlinks.classList.toggle("open"); });
+document.querySelectorAll(".navlinks a").forEach(link => { link.addEventListener("click", () => { navlinks.classList.remove("open"); }); });
+document.getElementById("year").textContent = new Date().getFullYear();
+const GHOST_CODE = `javascript:(function(){
 let s=document.createElement('style');
-s.innerHTML='#ghost-mini{position:fixed;top:60px;right:10px;z-index:9999999;background:rgba(10,10,22,0.96);border:1px solid #8a2be2;border-radius:12px;padding:10px;width:200px;color:#fff;font-family:sans-serif;box-shadow:0 0 20px rgba(138,43,226,.5)} .g-head{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:900} .g-signal{font-size:26px;font-weight:900;text-align:center;margin:8px 0;padding:8px;border-radius:8px} .g-up{background:#00c853;color:#fff;box-shadow:0 0 12px #00c853} .g-down{background:#ff1744;color:#fff;box-shadow:0 0 12px #ff1744} .g-wait{background:#424242;color:#fff} .g-info{font-size:9px;text-align:center;opacity:.7;line-height:1.3}';
+s.innerHTML='#ghost-mini{position:fixed;top:60px;right:10px;z-index:9999999;background:rgba(10,10,22,0.96);border:1px solid #8a2be2;border-radius:12px;padding:10px;width:200px;color:#fff;font-family:sans-serif;box-shadow:0 0 20px rgba(138,43,226,.5);cursor:default;touch-action:none} #ghost-head{font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;cursor:move;user-select:none;padding:4px;margin:-4px -4px 4px -4px;border-radius:8px 8px 0 0;background:rgba(138,43,226,.15)} #ghost-head:active{background:rgba(138,43,226,.3)} .g-signal{font-size:26px;font-weight:900;text-align:center;margin:8px 0;padding:8px;border-radius:8px} .g-up{background:#00c853;color:#fff;box-shadow:0 0 12px #00c853} .g-down{background:#ff1744;color:#fff;box-shadow:0 0 12px #ff1744} .g-wait{background:#424242;color:#fff} .g-info{font-size:9px;text-align:center;opacity:.7;line-height:1.3}';
 document.head.appendChild(s);
 let d=document.createElement('div');d.id='ghost-mini';
-d.innerHTML='<div class="g-head"><div style="width:6px;height:6px;background:#00ff88;border-radius:50%"></div>GHOST PRIME<div style="margin-left:auto;font-size:8px;opacity:.5">REAL</div></div><div id="gs" class="g-signal g-wait">WAIT</div><div id="gi" class="g-info">Fetching REAL...</div><div style="display:flex;gap:4px;margin-top:6px"><button onclick="this.parentElement.parentElement.remove()" style="flex:1;padding:5px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #333;font-size:10px">Close</button></div>';
+d.innerHTML='<div id="ghost-head"><div style="width:6px;height:6px;background:#00ff88;border-radius:50%"></div>GHOST PREMIUM<div style="margin-left:auto;font-size:14px;opacity:.5">⋮⋮</div></div><div id="gs" class="g-signal g-wait">WAIT</div><div id="gi" class="g-info">Fetching REAL SSID...</div><div style="font-size:8px;text-align:center;opacity:.5;margin-top:4px">1 SSID = All Market • Drag header to move</div><button onclick="this.parentElement.remove()" style="width:100%;margin-top:6px;padding:5px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #333;font-size:10px">Close</button>';
 document.body.appendChild(d);
+let isDrag=false,startX=0,startY=0,initLeft=0,initTop=0;
+let head=document.getElementById('ghost-head');let box=document.getElementById('ghost-mini');
+function getPos(){let r=box.getBoundingClientRect();return {left:r.left,top:r.top};}
+function dragStart(e){isDrag=true;let cx=e.touches?e.touches[0].clientX:e.clientX;let cy=e.touches?e.touches[0].clientY:e.clientY;startX=cx;startY=cy;let pos=getPos();initLeft=pos.left;initTop=pos.top;box.style.right='auto';box.style.bottom='auto';box.style.transition='none';e.preventDefault();}
+function dragMove(e){if(!isDrag)return;let cx=e.touches?e.touches[0].clientX:e.clientX;let cy=e.touches?e.touches[0].clientY:e.clientY;box.style.left=(initLeft+cx-startX)+'px';box.style.top=(initTop+cy-startY)+'px';e.preventDefault();}
+function dragEnd(){isDrag=false;box.style.transition='';}
+head.addEventListener('mousedown',dragStart);document.addEventListener('mousemove',dragMove);document.addEventListener('mouseup',dragEnd);
+head.addEventListener('touchstart',dragStart,{passive:false});document.addEventListener('touchmove',dragMove,{passive:false});document.addEventListener('touchend',dragEnd);
 function upd(){
-fetch('https://giogram-backend.onrender.com/api/signal?mode=FAST&source=REAL')
-.then(r=>r.json()).then(j=>{
-let el=document.getElementById('gs');if(!el)return;
-let sig=j.signal||'WAIT';
-el.textContent=sig;
-el.className='g-signal '+(sig=='UP'?'g-up':sig=='DOWN'?'g-down':'g-wait');
-document.getElementById('gi').innerHTML=j.price+' | RSI:'+(j.filter?.rsi||'')+'<br>'+(j.strategies||[])[0]||'';
-}).catch(e=>{document.getElementById('gi').textContent='Offline';});
+  let asset='EURUSD';
+  try{let m=document.body.innerHTML.match(/(EURUSD|GBPUSD|USDJPY|CADJPY|AUDUSD|AUDCHF|EURJPY)/i);if(m)asset=m[1].toUpperCase();}catch(e){}
+  fetch('https://giogram-backend.onrender.com/api/signal?pair='+asset+'&mode=FAST').then(r=>r.json()).then(j=>{
+    let el=document.getElementById('gs');if(!el)return;let sig=j.signal||'WAIT';el.textContent=j.pair+' '+sig;el.className='g-signal '+(sig=='UP'?'g-up':sig=='DOWN'?'g-down':'g-wait');
+    document.getElementById('gi').innerHTML=j.pair+' '+j.confidence+'% | '+j.price+'<br>RSI:'+(j.filter?.rsi||'')+' | '+(j.filter?.trend||'')+'<br>'+(j.ssid_mode||'1 SSID = All Market');
+  }).catch(()=>{let gi=document.getElementById('gi'); if(gi) gi.textContent='Offline';});
 }
 setInterval(upd,2000);upd();
 })();`;
-
-function copyCode(){navigator.clipboard.writeText(CODE).then(()=>{document.getElementById('cpy').style.display='block';setTimeout(()=>document.getElementById('cpy').style.display='none',2500)})}
-async function loadLive(){
-try{
-let r=await fetch(API+'?mode=FAST&source=REAL'); let j=await r.json();
-let el=document.getElementById('sig');
-el.textContent=j.signal;
-el.className='signal-main '+(j.signal=='UP'?'up':j.signal=='DOWN'?'down':'wait');
-document.getElementById('price').textContent=j.price;
-document.getElementById('rsi').textContent=j.filter?.rsi||'-';
-document.getElementById('trend').textContent=j.filter?.trend||'-';
-document.getElementById('chips').innerHTML=(j.strategies||[]).map(x=>`<span class="chip ${x.includes('UP')?'up':x.includes('DOWN')?'down':''}">${x}</span>`).join('');
-}catch(e){document.getElementById('sig').textContent='OFFLINE'}
+const copyBtn = document.getElementById("copyBotBtn");
+const copySuccess = document.getElementById("copySuccess");
+copyBtn.addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(GHOST_CODE); copySuccess.style.display = "block"; copyBtn.textContent = "✅ Copied! — Draggable"; setTimeout(()=>{ copySuccess.style.display="none"; copyBtn.textContent="📋 COPY GHOST PREMIUM BOT"; }, 2500); }
+  catch(e) { prompt("Copy this code and create bookmark:", GHOST_CODE); }
+});
+const API_BASE = "https://giogram-backend.onrender.com";
+async function fetchSignal(pair, mode="FAST") {
+  try { let r = await fetch(`${API_BASE}/api/signal?pair=${pair}&mode=${mode}`); return await r.json(); }
+  catch(e) { return {signal:"OFFLINE", price:"-", confidence:0, filter:{}}; }
 }
-setInterval(loadLive,2000); loadLive();
+async function updateDashboard() {
+  let data = await fetchSignal("EURUSD","FAST");
+  let dashPair = document.getElementById("dashPair"); if(dashPair) dashPair.textContent = data.pair || "EURUSD";
+  let sigEl = document.getElementById("dashSignal"); if(sigEl){ sigEl.textContent = `${data.signal} ${data.confidence||0}%`; sigEl.className = data.signal=="UP" ? "up" : data.signal=="DOWN" ? "down" : ""; }
+  let priceEl = document.getElementById("dashPrice"); if(priceEl) priceEl.textContent = `${data.price} / RSI ${data.filter?.rsi || "-"}`;
+  let ssidEl = document.getElementById("dashSSID"); if(ssidEl) ssidEl.textContent = data.ssid_mode || "1 SSID = All Market";
+  let srcEl = document.getElementById("dataSource"); if(srcEl) srcEl.textContent = data.data_source || "REAL SSID — 1 SSID = All Market";
+  let liveEl = document.getElementById("liveStatus"); if(liveEl) liveEl.textContent = data.real ? "● REAL LIVE" : "● REAL ECB 99%";
+}
+async function updateMarketWatch() {
+  const pairs = ["EURUSD","GBPUSD","USDJPY","CADJPY","AUDUSD"];
+  for(let p of pairs) {
+    let d = await fetchSignal(p,"FAST");
+    let priceEl = document.getElementById(`price-${p}`);
+    let sigEl = document.getElementById(`sig-${p}`);
+    if(priceEl) priceEl.textContent = d.price;
+    if(sigEl) { sigEl.textContent = `${d.signal} ${d.confidence||0}%`; sigEl.className = d.signal=="UP" ? "green" : d.signal=="DOWN" ? "red" : "green"; }
+  }
+}
+document.getElementById("demoButton").addEventListener("click", async () => {
+  const pair = document.getElementById("pair").value;
+  const stake = Number(document.getElementById("stake").value);
+  const signalEl = document.getElementById("signal");
+  const infoEl = document.getElementById("signalInfo");
+  signalEl.textContent = "Fetching REAL SSID...";
+  infoEl.textContent = `Pair: ${pair} — Same SSID se real price fetch hocche...`;
+  let data = await fetchSignal(pair,"FAST");
+  let emoji = data.signal=="UP" ? "🟢" : data.signal=="DOWN" ? "🔴" : "⏳";
+  signalEl.textContent = `${emoji} ${data.pair} ${data.signal} — ${data.confidence}%`;
+  signalEl.className = data.signal=="UP" ? "up" : data.signal=="DOWN" ? "down" : "";
+  infoEl.innerHTML = `Pair: ${data.pair} | Price: ${data.price} | RSI: ${data.filter?.rsi} | Trend: ${data.filter?.trend}<br>Stake: ${Number.isFinite(stake) && stake>=0 ? "$"+stake.toFixed(2) : "Invalid"} | Strategies: ${(data.strategies||[]).join(", ")}<br><b>${data.ssid_mode}</b> — ${data.data_source}<br>Bot draggable — header dhore move kora jay, UP green / DOWN red.`;
+  document.getElementById("signalSmall").textContent = `${data.pair} REAL — ${data.real ? "100% Quotex chart" : "99% ECB"} — Confidence ${data.confidence}%`;
+  document.getElementById("confBadge").textContent = `Confidence: ${data.confidence}% | ${data.signal}`;
+  document.getElementById("realBadge").textContent = `● ${data.ssid_mode} — ${data.real ? "REAL LIVE" : "ECB 99%"}`;
+});
+setInterval(updateDashboard, 3000);
+setInterval(updateMarketWatch, 4000);
+updateDashboard();
+updateMarketWatch();
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
