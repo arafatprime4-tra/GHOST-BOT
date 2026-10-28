@@ -41,7 +41,7 @@ def api_signal():
 def health(): return "GHOST PREMIUM LIVE - DRAGGABLE + REAL SSID"
 
 # Ridoy chuya welcome - choto but emotional
-WELCOME = """👻 *GHOST PREMIUM* 👻
+WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 
 *ভাই, ট্রেডিংয়ে ৯০% মানুষ একা হেরে যায়...*
 *আমরা চাই আপনি ১০% উইনারের মধ্যে থাকেন।* ❤️
@@ -57,10 +57,10 @@ WELCOME = """👻 *GHOST PREMIUM* 👻
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     kb=[
-        [InlineKeyboardButton("🔗 Quotex Account - FREE PREMIUM", url=AFFILIATE_LINK)],
+        [InlineKeyboardButton("🔗 Account Create Link", url=AFFILIATE_LINK)],
         [InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
-    await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb))
+    await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
