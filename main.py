@@ -15,7 +15,13 @@ except:
 
 logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN","").strip()
-ADMIN_ID = int(os.getenv("ADMIN_ID","0") or 0)
+import re
+_raw_admin = os.getenv("ADMIN_ID","0").strip()
+try:
+    ADMIN_ID = int(_raw_admin) if _raw_admin else 0
+except:
+    ADMIN_ID = int(re.sub(r'[^0-9]', '', _raw_admin) or 0)
+print(f"🔥 ADMIN_ID CHECK: raw='{_raw_admin}' -> parsed={ADMIN_ID}")
 AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
 WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
@@ -43,16 +49,16 @@ def health(): return "GHOST PREMIUM LIVE - DRAGGABLE + REAL SSID"
 # Ridoy chuya welcome - choto but emotional
 WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 
-*ভাই, ট্রেডিংয়ে ৯০% মানুষ একা হেরে যায়...*
-*আমরা চাই আপনি ১০% উইনারের মধ্যে থাকেন।* ❤️
+<b>ভাই, ট্রেডিংয়ে ৯০% মানুষ একা হেরে যায়...</b>
+<b>আমরা চাই আপনি ১০% উইনারের মধ্যে থাকেন।</b> ❤️
 
-*বটটা ফ্রি, কিন্তু সঠিক পথে। কোনো সেল না।*
+<b>বটটা ফ্রি, কিন্তু সঠিক পথে। কোনো সেল না।</b>
 
-✨ *কিভাবে শুরু?*
-1️⃣ *লিংক থেকে অ্যাকাউন্ট করে যেকোনো অ্যামাউন্ট ডিপোজিট করুন*
-2️⃣ *প্রোফাইল থেকে Trader ID কপি করুন*
+✨ <b>কিভাবে শুরু?</b>
+1️⃣ <b>লিংক থেকে অ্যাকাউন্ট করে যেকোনো অ্যামাউন্ট ডিপোজিট করুন</b>
+2️⃣ <b>প্রোফাইল থেকে Trader ID কপি করে এখানে পাঠান</b>
 
-⚠️ *কোনো বট ১০০% উইন দেয় না - আমরা ১% রিস্কে সেফ থাকতে শেখাই*
+⚠️ <b>কোনো বট ১০০% উইন দেয় না - আমরা ১% রিস্কে সেফ থাকতে শেখাই</b>
 """
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
