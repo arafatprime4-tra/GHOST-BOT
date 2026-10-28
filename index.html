@@ -309,10 +309,10 @@ document.querySelectorAll(".navlinks a").forEach(link => { link.addEventListener
 document.getElementById("year").textContent = new Date().getFullYear();
 const GHOST_CODE = `javascript:(function(){
 let s=document.createElement('style');
-s.innerHTML='#ghost-mini{position:fixed;top:60px;right:10px;z-index:9999999;background:rgba(10,10,22,0.96);border:1px solid #8a2be2;border-radius:12px;padding:10px;width:200px;color:#fff;font-family:sans-serif;box-shadow:0 0 20px rgba(138,43,226,.5);cursor:default;touch-action:none} #ghost-head{font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;cursor:move;user-select:none;padding:4px;margin:-4px -4px 4px -4px;border-radius:8px 8px 0 0;background:rgba(138,43,226,.15)} #ghost-head:active{background:rgba(138,43,226,.3)} .g-signal{font-size:26px;font-weight:900;text-align:center;margin:8px 0;padding:8px;border-radius:8px} .g-up{background:#00c853;color:#fff;box-shadow:0 0 12px #00c853} .g-down{background:#ff1744;color:#fff;box-shadow:0 0 12px #ff1744} .g-wait{background:#424242;color:#fff} .g-info{font-size:9px;text-align:center;opacity:.7;line-height:1.3}';
+s.innerHTML='#ghost-mini{position:fixed;top:60px;right:10px;z-index:9999999;background:rgba(10,10,22,0.96);border:1px solid #00d49a;border-radius:12px;padding:10px;width:205px;color:#fff;font-family:sans-serif;box-shadow:0 0 20px rgba(0,212,154,.5);cursor:default;touch-action:none} #ghost-head{font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;cursor:move;user-select:none;padding:4px;margin:-4px -4px 4px -4px;border-radius:8px 8px 0 0;background:rgba(0,212,154,.15)} #ghost-head:active{background:rgba(0,212,154,.3)} .g-signal{font-size:24px;font-weight:900;text-align:center;margin:8px 0;padding:10px;border-radius:8px} .g-up{background:#00c853;color:#fff;box-shadow:0 0 12px #00c853} .g-down{background:#ff1744;color:#fff;box-shadow:0 0 12px #ff1744} .g-wait{background:#424242;color:#fff} .g-info{font-size:10px;text-align:center;opacity:.8;line-height:1.3} .g-pair{font-size:11px;text-align:center;color:#00d4ff;font-weight:800;margin-bottom:4px}';
 document.head.appendChild(s);
 let d=document.createElement('div');d.id='ghost-mini';
-d.innerHTML='<div id="ghost-head"><div style="width:6px;height:6px;background:#00ff88;border-radius:50%"></div>GHOST PREMIUM<div style="margin-left:auto;font-size:14px;opacity:.5">⋮⋮</div></div><div id="gs" class="g-signal g-wait">WAIT</div><div id="gi" class="g-info">Fetching REAL SSID...</div><div style="font-size:8px;text-align:center;opacity:.5;margin-top:4px">1 SSID = All Market • Drag header to move</div><button onclick="this.parentElement.remove()" style="width:100%;margin-top:6px;padding:5px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #333;font-size:10px">Close</button>';
+d.innerHTML='<div id="ghost-head"><div style="width:6px;height:6px;background:#00ff88;border-radius:50%"></div>GHOST SAFE 1M<div style="margin-left:auto;font-size:14px;opacity:.5">⋮⋮</div></div><div id="gpair" class="g-pair">DETECTING...</div><div id="gs" class="g-signal g-wait">WAIT</div><div id="gi" class="g-info">Fetching SAFE 1M...</div><div style="font-size:8px;text-align:center;opacity:.5;margin-top:4px">SAFE 1M • Auto Market Detect • 1% Risk</div><button onclick="this.parentElement.remove()" style="width:100%;margin-top:6px;padding:5px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #333;font-size:10px">Close</button>';
 document.body.appendChild(d);
 let isDrag=false,startX=0,startY=0,initLeft=0,initTop=0;
 let head=document.getElementById('ghost-head');let box=document.getElementById('ghost-mini');
@@ -322,15 +322,45 @@ function dragMove(e){if(!isDrag)return;let cx=e.touches?e.touches[0].clientX:e.c
 function dragEnd(){isDrag=false;box.style.transition='';}
 head.addEventListener('mousedown',dragStart);document.addEventListener('mousemove',dragMove);document.addEventListener('mouseup',dragEnd);
 head.addEventListener('touchstart',dragStart,{passive:false});document.addEventListener('touchmove',dragMove,{passive:false});document.addEventListener('touchend',dragEnd);
-function upd(){
-  let asset='EURUSD';
-  try{let m=document.body.innerHTML.match(/(EURUSD|GBPUSD|USDJPY|CADJPY|AUDUSD|AUDCHF|EURJPY)/i);if(m)asset=m[1].toUpperCase();}catch(e){}
-  fetch('https://giogram-backend.onrender.com/api/signal?pair='+asset+'&mode=FAST').then(r=>r.json()).then(j=>{
-    let el=document.getElementById('gs');if(!el)return;let sig=j.signal||'WAIT';el.textContent=j.pair+' '+sig;el.className='g-signal '+(sig=='UP'?'g-up':sig=='DOWN'?'g-down':'g-wait');
-    document.getElementById('gi').innerHTML=j.pair+' '+j.confidence+'% | '+j.price+'<br>RSI:'+(j.filter?.rsi||'')+' | '+(j.filter?.trend||'')+'<br>'+(j.ssid_mode||'1 SSID = All Market');
-  }).catch(()=>{let gi=document.getElementById('gi'); if(gi) gi.textContent='Offline';});
+function getPair(){
+  try{
+    // Method 1: Quotex active pair selectors (real DOM)
+    let sels=['.current-symbol','.pair-name','.asset-name','[data-pair]','.usermenu__info-name','.header__pair','.chart__pair'];
+    for(let sel of sels){
+      let el=document.querySelector(sel);
+      if(el){
+        let txt=el.textContent.replace(/[^A-Z\/]/gi,'').replace('/','').toUpperCase();
+        if(/^[A-Z]{6,7}$/.test(txt) && /USD|JPY|EUR|GBP|AUD|CAD|CHF|NZD/.test(txt)) return txt;
+      }
+    }
+    // Method 2: Look for EUR/USD pattern in visible text (top bar)
+    let topBar=document.body.innerText.substring(0,2000);
+    let m1=topBar.match(/([A-Z]{3})\/([A-Z]{3})/);
+    if(m1) return (m1[1]+m1[2]).toUpperCase();
+    // Method 3: Search innerHTML for known pairs (fallback)
+    let m=document.body.innerHTML.match(/(EURUSD|GBPUSD|USDJPY|CADJPY|AUDUSD|AUDCHF|EURJPY|GBPJPY|USDCHF|EURGBP|EURAUD|EURCAD|AUDJPY|CHFJPY)/i);
+    if(m) return m[1].toUpperCase();
+  }catch(e){}
+  return 'EURUSD';
 }
-setInterval(upd,2000);upd();
+let lastPair='';
+function upd(){
+  let asset=getPair();
+  if(asset!==lastPair){
+    lastPair=asset;
+    let gp=document.getElementById('gpair');
+    if(gp) gp.textContent='📊 '+asset+' • Auto Detected';
+  }
+  fetch('https://giogram-backend.onrender.com/api/signal?pair='+asset+'&mode=SAFE').then(r=>r.json()).then(j=>{
+    let el=document.getElementById('gs');if(!el)return;
+    let sig=j.signal||'WAIT';
+    el.textContent=j.pair+' '+sig;
+    el.className='g-signal '+(sig=='UP'?'g-up':sig=='DOWN'?'g-down':'g-wait');
+    let gi=document.getElementById('gi');
+    if(gi) gi.innerHTML=j.pair+' SAFE 1M '+j.confidence+'% | '+j.price+'<br>RSI:'+(j.filter?.rsi||'')+' | '+(j.filter?.trend||'')+'<br>'+(j.filter?.time_left||55)+'s hold • 1% Risk';
+  }).catch(()=>{let gi=document.getElementById('gi'); if(gi) gi.textContent='Offline - SAFE retry...';});
+}
+setInterval(upd,1500);upd();
 })();`;
 const copyBtn = document.getElementById("copyBotBtn");
 const copySuccess = document.getElementById("copySuccess");
@@ -339,12 +369,12 @@ copyBtn.addEventListener("click", async () => {
   catch(e) { prompt("Copy this code and create bookmark:", GHOST_CODE); }
 });
 const API_BASE = "https://giogram-backend.onrender.com";
-async function fetchSignal(pair, mode="FAST") {
+async function fetchSignal(pair, mode="SAFE") {
   try { let r = await fetch(`${API_BASE}/api/signal?pair=${pair}&mode=${mode}`); return await r.json(); }
   catch(e) { return {signal:"OFFLINE", price:"-", confidence:0, filter:{}}; }
 }
 async function updateDashboard() {
-  let data = await fetchSignal("EURUSD","FAST");
+  let data = await fetchSignal("EURUSD","SAFE");
   let dashPair = document.getElementById("dashPair"); if(dashPair) dashPair.textContent = data.pair || "EURUSD";
   let sigEl = document.getElementById("dashSignal"); if(sigEl){ sigEl.textContent = `${data.signal} ${data.confidence||0}%`; sigEl.className = data.signal=="UP" ? "up" : data.signal=="DOWN" ? "down" : ""; }
   let priceEl = document.getElementById("dashPrice"); if(priceEl) priceEl.textContent = `${data.price} / RSI ${data.filter?.rsi || "-"}`;
@@ -355,7 +385,7 @@ async function updateDashboard() {
 async function updateMarketWatch() {
   const pairs = ["EURUSD","GBPUSD","USDJPY","CADJPY","AUDUSD"];
   for(let p of pairs) {
-    let d = await fetchSignal(p,"FAST");
+    let d = await fetchSignal(p,"SAFE");
     let priceEl = document.getElementById(`price-${p}`);
     let sigEl = document.getElementById(`sig-${p}`);
     if(priceEl) priceEl.textContent = d.price;
@@ -369,7 +399,7 @@ document.getElementById("demoButton").addEventListener("click", async () => {
   const infoEl = document.getElementById("signalInfo");
   signalEl.textContent = "Fetching REAL SSID...";
   infoEl.textContent = `Pair: ${pair} — Same SSID se real price fetch hocche...`;
-  let data = await fetchSignal(pair,"FAST");
+  let data = await fetchSignal(pair,"SAFE");
   let emoji = data.signal=="UP" ? "🟢" : data.signal=="DOWN" ? "🔴" : "⏳";
   signalEl.textContent = `${emoji} ${data.pair} ${data.signal} — ${data.confidence}%`;
   signalEl.className = data.signal=="UP" ? "up" : data.signal=="DOWN" ? "down" : "";
