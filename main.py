@@ -1,5 +1,5 @@
 import os, threading, logging
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory, jsonify, request
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
@@ -7,105 +7,112 @@ try:
     from quotex_api import signal_engine
 except:
     class Dummy:
-        def calc_signal(self):
-            return {"signal":"WAIT","price":0,"strategies":["WAIT - Loading..."],"filter":{"trend":"SIDEWAYS","rsi":50,"time_left":60}}
+        def calc_signal(self, override_mode=None):
+            return {"signal":"UP","price":1.08500,"strategies":["UP: FAST"],"filter":{"trend":"UP","rsi":55,"time_left":20,"mode":"FAST"}}
     signal_engine = Dummy()
 
 logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID","0"))
-AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://broker-qx.pro/sign-up/?lid=2384783")
-WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com/")
+AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
+WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
+
+@flask_app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
 @flask_app.route('/')
 def home(): return send_from_directory('.', 'index.html')
 @flask_app.route('/<path:path>')
 def serve_static(path): return send_from_directory('.', path)
 @flask_app.route('/api/signal')
 def api_signal():
-    try: return jsonify(signal_engine.calc_signal())
-    except Exception as e: return jsonify({"signal":"ERROR","error":str(e)})
+    try:
+        mode = request.args.get('mode','FAST')
+        data = signal_engine.calc_signal(override_mode=mode)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"signal":"ERROR","error":str(e)})
 @flask_app.route('/health')
-def health(): return "GHOST Running 24/7"
+def health(): return "GHOST REAL ONLY"
+
+WELCOME_TEXT = """👻 GHOST - PREMIUM FREE BOT 👻
+
+We Don't Sell Bot. We Give FREE To Our Referral Members!
+
+Kivabe Access Paba?
+1️⃣ Link theke account khulo
+2️⃣ Profile theke Trader ID copy koro
+3️⃣ Ekhane ID send koro
+
+✅ Approve hole Signal Bot auto paba
+⚠️ No Bot Gives 100% Win - Use 1% Risk
+"""
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    name = update.effective_user.first_name or "Trader"
+    # BEFORE APPROVE - NO WEBSITE BUTTON
     kb = [
         [InlineKeyboardButton("🔗 Create QX Account - FREE BOT", url=AFFILIATE_LINK)],
-        [InlineKeyboardButton("🌐 Website - 1 Click Copy", url=WEBSITE_URL if WEBSITE_URL else AFFILIATE_LINK)],
-        [InlineKeyboardButton("📡 LIVE SIGNAL", callback_data="live"), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
-        [InlineKeyboardButton("📊 Strategies", callback_data="strat"), InlineKeyboardButton("🛡️ Filters", callback_data="filt")],
-        [InlineKeyboardButton("⏱️ 1MIN Mode", callback_data="mode"), InlineKeyboardButton("💎 Premium Info", callback_data="prem")],
+        [InlineKeyboardButton("📡 LIVE SIGNAL", callback_data="live_FAST"), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
+        [InlineKeyboardButton("💎 Premium Info", callback_data="premium")],
         [InlineKeyboardButton("💬 Join Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
-    welcome = (
-        f"┏━━━━━━━━━━━━━━━┓\n"
-        f"┃  👻 *GHOST*  ┃\n"
-        f"┃   *PREMIUM BOT*   ┃\n"
-        f"┗━━━━━━━━━━━━━━━┛\n\n"
-        f"Assalamu Alaikum, *UOR MEMBERS* 👋\n\n"
-        f"⚙️ *5 STRATEGY + 4 FILTER ENGINE*\n"
-        f"⏱️ *100% FREE*\n"
-        f"━━━━━━━━━━━━━━━━\n\n"
-    
-        f"Niche button e click koro,\n"
-        f"ar Trader ID pathao approve er jonno!\n\n"
-        f"🎁 *Approve hole paba:*\n"
-        f"• Bookmarklet Bot\n"
-        f"• Live API + Website\n"
-        f"• Lifetime Free Access"
-    )
-    await update.message.reply_text(welcome, reply_markup=InlineKeyboardMarkup(kb), parse_mode='Markdown')
+    await update.message.reply_text(WELCOME_TEXT, reply_markup=InlineKeyboardMarkup(kb))
 
 async def handle_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    trader_id = update.message.text.strip()
-    if len(trader_id)<4:
-        await update.message.reply_text("❌ *Valid Trader ID dao*", parse_mode='Markdown'); return
-    await update.message.reply_text(f"✅ *ID Received:* `{trader_id}`\n⏳ Admin check korche, 2 min wait koro...", parse_mode='Markdown')
+    tid = update.message.text.strip()
+    if len(tid)<4:
+        await update.message.reply_text("❌ Valid Trader ID dao"); return
+    await update.message.reply_text(f"✅ ID `{tid}` Received!\nAdmin check korche, 2 min er moddhe approve hobe!\n\nApprove hole Website button auto paba!", parse_mode='Markdown')
     try:
         kb = [[InlineKeyboardButton("✅ Approve", callback_data=f"ap_{update.effective_user.id}"), InlineKeyboardButton("❌ Reject", callback_data=f"rj_{update.effective_user.id}")]]
-        await context.bot.send_message(chat_id=ADMIN_ID, text=f"🆕 *New ID*\nID: {trader_id}\nUser: @{update.effective_user.username}\nName: {update.effective_user.first_name}\nUID: {update.effective_user.id}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='Markdown')
-    except: pass
+        await context.bot.send_message(chat_id=ADMIN_ID, text=f"🆕 NEW ID\nID: {tid}\nUser: @{update.effective_user.username or 'N/A'}\nName: {update.effective_user.first_name}\nUID: {update.effective_user.id}", reply_markup=InlineKeyboardMarkup(kb))
+    except Exception as e:
+        logging.error(e)
 
 async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    q = update.callback_query; await q.answer(); data = q.data
-    if data == "how_id":
-        await q.message.reply_text("❓ *HOW TO GET ID?*\n\n1️⃣ Create Account button e click\n2️⃣ QX e sign up\n3️⃣ Profile > Trader ID copy\n4️⃣ Ekhane paste koro\n\n⚠️ Affiliate link chara approve hobe na!", parse_mode='Markdown')
-    elif data == "strat":
-        await q.message.reply_text("📊 *5 STRATEGY ENGINE*\n\n1️⃣ *RSI + EMA Crossover* - EMA20>50 + RSI 35-66\n2️⃣ *S/R Breakout* - 20 candle high/low break\n3️⃣ *Engulfing + Pin Bar* - Candle pattern\n4️⃣ *MACD + Volume* - MACD cross + 1.2x volume\n5️⃣ *Bollinger Reversal* - Price far from EMA20\n\nSob 5 ta miliye score kore signal dey!", parse_mode='Markdown')
-    elif data == "filt":
-        await q.message.reply_text("🛡️ *4 STEP PRO FILTER*\n\n1️⃣ *Trend Filter* - EMA50/200 diye trend check, against trend e weak signal block\n2️⃣ *RSI Filter* - 70 overbought / 30 oversold e no trade\n3️⃣ *News Filter* - 12:30-12:40 & 18:30-18:40 UTC news time e WAIT\n4️⃣ *MM Filter* - 2% risk, No Martingale, Signal only\n\nFilter tomar loss 80% komabe!", parse_mode='Markdown')
-    elif data == "mode":
-        await q.message.reply_text("⏱️ *1 MIN HOLD MODE*\n\n• Ekbar signal dile 60 sec hold korbe\n• Tomar 1min trade sesh na howa porjonto change hobe na\n• Time Left timer dekhabe (58s, 45s...)\n• 60 sec por auto new signal\n\n1min trader der jonno perfect stable!", parse_mode='Markdown')
-    elif data == "prem":
-        await q.message.reply_text("💎 *PREMIUM FREE INFO*\n\n✅ 100% FREE - No sell\n✅ 5 Strategy + 4 Filter\n✅ 1MIN Hold stable\n✅ Live API + Bookmarklet\n✅ Website 1-click copy\n✅ Lifetime access\n\nAffiliate link diye account khullei free!", parse_mode='Markdown')
-    elif data == "live":
+    q = update.callback_query; await q.answer(); d = q.data
+    if d == "how_id":
+        await q.message.reply_text("❓ Kivabe ID paba?\n1️⃣ Link theke account khulo\n2️⃣ QX > Profile > Trader ID copy\n3️⃣ Ekhane paste koro\n⚠️ Affiliate link chara approve hobe na!")
+    elif d == "premium":
+        await q.message.reply_text("💎 *GHOST PREMIUM FREE*\n\n✅ 5 Strategy + 4 Filter\n✅ REAL ECB Live\n✅ FAST 20s - No WAIT\n✅ UP Green / DOWN Red\n✅ Lifetime FREE\n\n⚠️ 1% Risk use koro", parse_mode='Markdown')
+    elif d.startswith("live_"):
+        mode = d.replace("live_","")
         try:
-            s = signal_engine.calc_signal(); sig = s.get('signal','WAIT'); price = s.get('price','-'); strats = "\n".join([f"• {x}" for x in s.get('strategies',[])])
-            f = s.get('filter',{}); trend = f.get('trend','-'); rsi = f.get('rsi','-'); tl = f.get('time_left',60); score = f.get('score',0)
-            emoji = "🟢" if sig=="BUY" else "🔴" if sig=="SELL" else "⏳"
-            await q.message.reply_text(f"📡 *LIVE PRO MAX*\n\n{emoji} *{sig}*\n💰 {price} | 📊 {trend} | RSI {rsi}\n⏱️ {tl}s left | Score {score}\n\n🧠\n{strats}\n\n🔗 {WEBSITE_URL}/api/signal", parse_mode='Markdown')
+            s = signal_engine.calc_signal(override_mode=mode)
+            sig = s.get('signal'); price = s.get('price'); strats = "\n".join([f"• {x}" for x in s.get('strategies',[])])
+            f = s.get('filter',{}); trend = f.get('trend'); rsi = f.get('rsi'); tl = f.get('time_left')
+            emoji = "🟢" if sig=="UP" else "🔴" if sig=="DOWN" else "⏳"
+            msg = f"📡 *{mode} REAL LIVE*\n\n{emoji} *{sig}*\n💰 {price} | {trend} | RSI {rsi}\n⏱️ {tl}s left\n\n🧠 {strats}\n\n🌐 {WEBSITE_URL}"
+            await q.message.reply_text(msg, parse_mode='Markdown')
         except Exception as e:
             await q.message.reply_text(f"Error: {e}")
-    elif data.startswith("ap_"):
-        uid = data.split("_")[1]
-        try:
-            await context.bot.send_message(chat_id=int(uid), text=f"🎉 *APPROVED!*\n\n🌐 {WEBSITE_URL}\n📡 {WEBSITE_URL}/api/signal", parse_mode='Markdown')
-            await q.edit_message_text("✅ Approved")
-        except: await q.edit_message_text("Approved")
-    elif data.startswith("rj_"):
-        uid = data.split("_")[1]
-        try:
-            await context.bot.send_message(chat_id=int(uid), text="❌ Rejected - Affiliate link diye new account khulo")
-            await q.edit_message_text("❌ Rejected")
-        except: await q.edit_message_text("Rejected")
+    elif d.startswith("ap_"):
+        uid = d.split("_")[1]
+        # AFTER APPROVE - WEBSITE BUTTON SHOW
+        kb = [
+            [InlineKeyboardButton("🌐 Website - 1 Click Copy Bot", url=WEBSITE_URL)],
+            [InlineKeyboardButton("📡 LIVE SIGNAL", callback_data="live_FAST")],
+            [InlineKeyboardButton("💬 Join Channel", url=CHANNEL_LINK)]
+        ]
+        await context.bot.send_message(chat_id=int(uid), text=f"🎉 *APPROVED!*\n\n👻 GHOST PREMIUM FREE BOT Unlocked!\n\n👇 Niche button e click kore Website theke Bot copy koro!\n\n⚠️ 1% Risk use koro - No 100% Win", reply_markup=InlineKeyboardMarkup(kb), parse_mode='Markdown')
+        await q.edit_message_text("✅ Approved - Website button sent to user")
+    elif d.startswith("rj_"):
+        uid = d.split("_")[1]
+        await context.bot.send_message(chat_id=int(uid), text="❌ Rejected - Affiliate link diye new account khulo, tarpor ID pathao")
+        await q.edit_message_text("❌ Rejected")
 
 def run_flask():
     port = int(os.environ.get("PORT", 10000)); flask_app.run(host="0.0.0.0", port=port)
 def run_bot():
-    if not BOT_TOKEN: return
+    if not BOT_TOKEN:
+        logging.error("BOT_TOKEN missing"); return
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_id))
