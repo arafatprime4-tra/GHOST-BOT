@@ -41,16 +41,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("💬 Join Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
     welcome = (
-        f"┏━━━━━━━━━━━━━━━━━━━━━┓\n"
+        f"┏━━━━━━━━━━━━━━━┓\n"
         f"┃  👻 *GHOST*  ┃\n"
         f"┃   *PREMIUM BOT*   ┃\n"
-        f"┗━━━━━━━━━━━━━━━━━━━━━┛\n\n"
-        f"Assalamu Alaikum, *{name}* 👋\n\n"
+        f"┗━━━━━━━━━━━━━━━┛\n\n"
+        f"Assalamu Alaikum, *{UOR MEMBERS}* 👋\n\n"
         f"⚙️ *5 STRATEGY + 4 FILTER ENGINE*\n"
         f"⏱️ *100% FREE*\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"👇 *SOB BUTTON AKARE DEWA ACHE* 👇\n"
-        f"Niche button e click kore details dekho,\n"
+        f"━━━━━━━━━━━━━━━━\n\n"
+    
+        f"Niche button e click koro,\n"
         f"ar Trader ID pathao approve er jonno!\n\n"
         f"🎁 *Approve hole paba:*\n"
         f"• Bookmarklet Bot\n"
