@@ -53,7 +53,7 @@ def serve_static(path):
 @flask_app.route('/api/signal')
 def api_signal():
     try:
-        mode=request.args.get('mode','FAST')
+        mode=request.args.get('mode','SAFE')
         pair=request.args.get('pair','EURUSD').upper()
         return jsonify(signal_engine.get_signal(pair,mode))
     except Exception as e: 
@@ -118,7 +118,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         num_only = re.sub(r'[^0-9]', '', text)
         await update.message.reply_text(
             f"🚫 <code>{text}</code> পাওয়া যায় নাই!\n\n"
-            f"অনুগ্রহ করে # ছাড়া শুধু ID পাঠান\n"
+            f"অনুগ্রহ করে শুধু ID পাঠান\n"
             f"Example: 1234567\n\n"
             f"💡 Tip: Profile > Trader ID copy করে শুধু নাম্বারটা পেস্ট করুন, # দিবেন না।\n\n"
             f"আপনি পাঠিয়েছেন: {text} → সঠিক: {num_only if num_only else '1234567'}",
@@ -140,7 +140,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(
                 "👻 <b>GHOST PREMIUM</b>\n\n"
                 "ID পাঠান: শুধু নাম্বার, যেমন <code>1234567</code>\n"
-                "Market analysis: যেমন <code>REAL MARKET</code> লিখুন\n"
+                "Market analysis: যেমন <code>EURUSD</code> লিখুন\n"
                 "Help: /start\n"
                 "ID check: /myid",
                 parse_mode='HTML'
@@ -150,13 +150,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Valid ID
     tid = text
     if len(tid) < 4 or len(tid) > 12:
-        await update.message.reply_text("❌ ID 7-8 digit er hobe, Example: 1234567")
+        await update.message.reply_text("❌ ID 4-12 digit er hobe, Example: 1234567")
         return
 
     await update.message.reply_text(
         f"✅ ID <code>{tid}</code> Received! ❤️\n\n"
         f"Admin check korche, 2 min er moddhe approve hobe!\n"
-        f"Approve hole GHOST PREMIUM BOT Free Access!",
+        f"Approve hole GHOST PREMIUM BOT Access.",
         parse_mode='HTML'
     )
     
@@ -199,41 +199,50 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='HTML'
         )
     elif d.startswith("ap_"):
+        # Step 1: Admin clicked Approve -> Show deposit selection $10-$100 + extra common deposits
         parts=d.split("_")
         uid=parts[1]
         trader_id=parts[2] if len(parts)>2 else "N/A"
         kb=[
-            [InlineKeyboardButton("🌐 GHOST PREMIUM Website", url=WEBSITE_URL)],
-            [InlineKeyboardButton("📚 Academy - Sikhte Thakun", url=ACADEMY_LINK)],
-            [InlineKeyboardButton("📱 App Link", url=APP_LINK), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)],
-            [InlineKeyboardButton("📊 EURUSD Real Signal", callback_data="live_EURUSD"), InlineKeyboardButton("🔮 All Market Scan", callback_data="scan")]
+            [InlineKeyboardButton("💵 $10", callback_data=f"dep_{uid}_{trader_id}_10"), InlineKeyboardButton("💵 $20", callback_data=f"dep_{uid}_{trader_id}_20"), InlineKeyboardButton("💵 $30", callback_data=f"dep_{uid}_{trader_id}_30"), InlineKeyboardButton("💵 $40", callback_data=f"dep_{uid}_{trader_id}_40")],
+            [InlineKeyboardButton("💵 $50", callback_data=f"dep_{uid}_{trader_id}_50"), InlineKeyboardButton("💵 $60", callback_data=f"dep_{uid}_{trader_id}_60"), InlineKeyboardButton("💵 $70", callback_data=f"dep_{uid}_{trader_id}_70"), InlineKeyboardButton("💵 $80", callback_data=f"dep_{uid}_{trader_id}_80")],
+            [InlineKeyboardButton("💵 $90", callback_data=f"dep_{uid}_{trader_id}_90"), InlineKeyboardButton("💵 $100", callback_data=f"dep_{uid}_{trader_id}_100"), InlineKeyboardButton("💵 $150", callback_data=f"dep_{uid}_{trader_id}_150"), InlineKeyboardButton("💵 $200", callback_data=f"dep_{uid}_{trader_id}_200")],
+            [InlineKeyboardButton("💵 $250", callback_data=f"dep_{uid}_{trader_id}_250"), InlineKeyboardButton("💵 $300", callback_data=f"dep_{uid}_{trader_id}_300"), InlineKeyboardButton("💵 $500", callback_data=f"dep_{uid}_{trader_id}_500"), InlineKeyboardButton("💵 $1000", callback_data=f"dep_{uid}_{trader_id}_1000")],
+            [InlineKeyboardButton("💵 $5", callback_data=f"dep_{uid}_{trader_id}_5"), InlineKeyboardButton("💵 $15", callback_data=f"dep_{uid}_{trader_id}_15"), InlineKeyboardButton("💵 $25", callback_data=f"dep_{uid}_{trader_id}_25"), InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}")]
         ]
-        msg = f"""🎉 <b>CONGRATULATIONS! GHOST PREMIUM APPROVED!</b> 🎉
+        await q.edit_message_text(f"💰 <b>Deposit Select for {trader_id}</b>\n\nUser ID: {uid}\nTrader ID: {trader_id}\n\nKoto deposit korse select korun:\n$10-$100 main + extra common deposits:", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+        logging.info(f"Admin selecting deposit for {trader_id} uid {uid}")
 
-❤️ Bhai, apnake welcome - apni ekhon amader 10K+ winner family er part!
+    elif d.startswith("dep_"):
+        # Step 2: Admin selected deposit amount -> Send SHORT congrats to user
+        parts=d.split("_")
+        uid=parts[1]
+        trader_id=parts[2]
+        amount=parts[3]
+        kb=[
+            [InlineKeyboardButton("🌐 GHOST PREMIUM Website", url=WEBSITE_URL)],
+            [InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)],
+            [InlineKeyboardButton("📱 App Link", url=APP_LINK)]
+        ]
+        # Short congrats - no "Apnar jonno sob kichu ready" part
+        msg = f"""🎉 <b>CONGRATULATIONS! PREMIUM APPROVED!</b> 🎉
+
+❤️ <b>Bhai, apnake welcome - 10K+ winner family er part!</b>
 
 🆔 <b>Trader ID:</b> <code>{trader_id}</code>
-💰 <b>Total Deposit:</b> Admin verify korche (24h er moddhe update paben)
-📊 <b>Status:</b> ✅ PREMIUM ACTIVE - Lifetime FREE
+💰 <b>Total Deposit:</b> <b>${amount}</b>
+📊 <b>Status:</b> ✅ PREMIUM ACTIVE
 
-👇 <b>Apnar jonno sob kichu ready:</b>
+⚠️ <b>Kono bot 100% win dey na - 1% risk e safe trading!</b>
 
-🌐 <b>Website:</b> 1 Click e draggable bot copy
-📚 <b>Academy:</b> Trading shikhte thakun - free course
-📱 <b>App:</b> Mobile app diye jekono market e signal
-📊 <b>Real SSID:</b> Jekono pair likhun - EURUSD, GBPJPY - real analysis dibo
-
-⚠️ <b>Mone rakhben:</b>
-Kono bot 100% win dey na. Amra 1% risk e safe trading shikhai. Apni eka na, amra achi!
-
-🚀 Ekhon website theke bot copy kore Quotex chart e drag kore use korun!
+🚀 <b>Website theke draggable bot copy korun!</b>
 
 - GHOST PREMIUM Team 👻
 """
         try:
             await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-            await q.edit_message_text(f"✅ GHOST PREMIUM Approved - ID {trader_id} - Deposit check")
-            logging.info(f"Approved {trader_id} for {uid}")
+            await q.edit_message_text(f"✅ Approved ID {trader_id} - Deposit ${amount} - Sent to {uid}")
+            logging.info(f"✅ Approved {trader_id} for {uid} with ${amount}")
         except Exception as e:
             logging.error(f"Approve send fail {e}")
             await q.edit_message_text(f"Approved but send fail {e}")
