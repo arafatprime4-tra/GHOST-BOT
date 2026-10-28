@@ -1,22 +1,21 @@
 import os, threading, logging
 from flask import Flask, send_from_directory, jsonify
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
-# Pro engine import
 try:
     from quotex_api import signal_engine
-except:
-    # fallback if file not found
+except Exception as e:
+    print(f"quotex_api import failed: {e}, using dummy")
     class Dummy:
         def calc_signal(self):
-            return {"signal":"WAIT","price":0,"strategies":[],"filter":{}}
+            return {"signal":"WAIT","price":0,"strategies":["Demo Mode"],"filter":{"trend":"WAIT","rsi":50}}
     signal_engine = Dummy()
 
 logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = int(os.getenv("ADMIN_ID","0"))
-AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
+ADMIN_ID = int(os.getenv("ADMIN_ID","0") or "0")
+AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","")
 WEBSITE_URL = os.getenv("WEBSITE_URL","")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
 
@@ -42,7 +41,6 @@ def api_signal():
 def health():
     return "GHOST Running 24/7"
 
-# --- Telegram Bot ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     kb = [
         [InlineKeyboardButton("🔗 Create QX Account", url=AFFILIATE_LINK)],
