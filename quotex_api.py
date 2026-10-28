@@ -184,6 +184,100 @@ class QuantumEngine:
             self.prices[pair].append(tick)
             if len(self.prices[pair])>300: self.prices[pair].pop(0)
 
+
+    def _price_action(self,pair):
+        """Price Action: Wick rejection, Pin Bar, Support/Resistance, Engulfing - for wick profit"""
+        data=self.prices[pair]
+        if len(data)<25:
+            return 0, "No PA"
+        # Last 20 candles high/low for support/resistance
+        recent = data[-20:]
+        recent_high = max(recent)
+        recent_low = min(recent)
+        curr = data[-1]
+        prev = data[-2]
+        prev2 = data[-3]
+        
+        # Wick analysis - simulate OHLC from last few ticks
+        # Long lower wick = bullish rejection, Long upper wick = bearish rejection
+        last_5 = data[-5:]
+        high_5 = max(last_5)
+        low_5 = min(last_5)
+        body_size = abs(curr - prev)
+        upper_wick = high_5 - max(curr, prev)
+        lower_wick = min(curr, prev) - low_5
+        
+        score = 0
+        reasons = []
+        
+        # 1. Pin Bar Bullish (long lower wick)
+        if lower_wick > body_size*1.8 and lower_wick > 0.0002:
+            # Check if near support
+            dist_to_low = (curr - recent_low) / (recent_high - recent_low + 0.00001)
+            if dist_to_low < 0.25:  # Near support
+                score += 2.0
+                reasons.append(f"PA PinBar Bullish WICK {lower_wick:.5f} at Support")
+            else:
+                score += 1.0
+                reasons.append(f"PA Long Lower Wick Rejection")
+        
+        # 2. Pin Bar Bearish (long upper wick)
+        if upper_wick > body_size*1.8 and upper_wick > 0.0002:
+            dist_to_high = (recent_high - curr) / (recent_high - recent_low + 0.00001)
+            if dist_to_high < 0.25:  # Near resistance
+                score -= 2.0
+                reasons.append(f"PA PinBar Bearish WICK {upper_wick:.5f} at Resistance")
+            else:
+                score -= 1.0
+                reasons.append(f"PA Long Upper Wick Rejection")
+        
+        # 3. Bullish Engulfing (current > previous high, prev was down)
+        if curr > prev and prev < prev2 and body_size > abs(prev - prev2)*1.2:
+            if curr > recent_low + (recent_high - recent_low)*0.1:  # Not at very bottom trap
+                score += 1.5
+                reasons.append("PA Bullish Engulfing")
+        
+        # 4. Bearish Engulfing
+        if curr < prev and prev > prev2 and body_size > abs(prev - prev2)*1.2:
+            if curr < recent_high - (recent_high - recent_low)*0.1:
+                score -= 1.5
+                reasons.append("PA Bearish Engulfing")
+        
+        # 5. Support/Resistance Wick Profit - price bouncing from support/resistance with wick
+        # If price touches support and shows rejection wick, strong UP
+        if abs(curr - recent_low) < (recent_high - recent_low)*0.08:
+            # At support
+            if lower_wick > upper_wick:
+                score += 1.2
+                reasons.append("PA Support Wick Bounce UP")
+        
+        if abs(curr - recent_high) < (recent_high - recent_low)*0.08:
+            # At resistance
+            if upper_wick > lower_wick:
+                score -= 1.2
+                reasons.append("PA Resistance Wick Bounce DOWN")
+        
+        # 6. Consecutive wick profit - 2 same direction wicks
+        if len(data)>=10:
+            last_wicks = []
+            for i in range(-5, 0):
+                h = max(data[i-2:i+1]) if len(data)>=abs(i)+2 else data[i]
+                l = min(data[i-2:i+1]) if len(data)>=abs(i)+2 else data[i]
+                # Simplified wick direction
+                if data[i] > data[i-1]:
+                    last_wicks.append(1)
+                else:
+                    last_wicks.append(-1)
+            if last_wicks[-2:] == [1,1] and score>0:
+                score += 0.5
+                reasons.append("PA Trend Wick Continuation UP")
+            if last_wicks[-2:] == [-1,-1] and score<0:
+                score -= 0.5
+                reasons.append("PA Trend Wick Continuation DOWN")
+        
+        reason_str = " | ".join(reasons[:2]) if reasons else "No PA"
+        return score, reason_str
+
     def _trap(self,pair):
         data=self.prices[pair]
         bw=self._bb_width(data,20)
@@ -251,6 +345,11 @@ class QuantumEngine:
         rsi=self._rsi(data,14)
 
         score=0; reasons=[]
+        # PRICE ACTION - Wick profit strategy (must for wick trading)
+        pa_score, pa_reason = self._price_action(pair)
+        score += pa_score
+        if pa_score != 0:
+            reasons.append(pa_reason)
         if e20 and e50:
             if price>e20 and e20>e50 and 20<rsi<80: score+=1.5; reasons.append(f"UP EMA {pair}")
             elif price<e20 and e20<e50 and 20<rsi<80: score-=1.5; reasons.append(f"DOWN EMA {pair}")
@@ -264,7 +363,8 @@ class QuantumEngine:
             return {"signal":"WAIT","pair":pair,"price":round(price,5 if "JPY" not in pair else 3),"strategies":[f"TRAP {tinfo}"],"filter":{"trap":True,"rsi":round(rsi,1)},"engine":"QUANTUM X ANTI-TRAP","confidence":0,"real":quotex_client.use_real,"ssid":quotex_client.ssid[:15]+"..." if quotex_client.ssid else "ECB"}
 
         mtf_sig,mtf_conf=self._mtf(pair)
-        if mtf_sig=="MIXED" and mode=="SAFE":
+        # If strong price action wick, allow even MIXED in SAFE (wick profit)
+        if mtf_sig=="MIXED" and mode=="SAFE" and abs(pa_score) < 1.5:
             return {"signal":"WAIT","pair":pair,"price":round(price,5 if "JPY" not in pair else 3),"strategies":["MTF MIXED"],"filter":{"mtf":"MIXED"},"engine":"QUANTUM MTF","confidence":0,"real":quotex_client.use_real}
         score+=mtf_conf/20; reasons.append(f"MTF {mtf_sig}")
 
@@ -277,7 +377,11 @@ class QuantumEngine:
         mem_b,mem_i=self._mem(pair)
         score+=mem_b/20; reasons.append(mem_i)
 
-        final="UP" if score>=0.4 else "DOWN" if score<=-0.4 else "UP" if mode=="FAST" and e7 and e20 and e7>e20 else "DOWN" if mode=="FAST" else "WAIT"
+        # Price Action boost for wick profit - if PA strong, override small score
+        if abs(pa_score) >= 1.5:
+            final = "UP" if pa_score > 0 else "DOWN"
+        else:
+            final="UP" if score>=0.4 else "DOWN" if score<=-0.4 else "UP" if mode=="FAST" and e7 and e20 and e7>e20 else "DOWN" if mode=="FAST" else "WAIT"
         conf=min(95,50+abs(score)*20+(corr_conf if corr_conf>0 else 0)+(mem_b if mem_b>0 else 0))
 
         self.last_signals[pair]={"signal":final,"price":price,"time":time.time()}
