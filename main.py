@@ -45,7 +45,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"┃  👻 *GHOST*  ┃\n"
         f"┃   *PREMIUM BOT*   ┃\n"
         f"┗━━━━━━━━━━━━━━━┛\n\n"
-        f"Assalamu Alaikum, *{UOR MEMBERS}* 👋\n\n"
+        f"Assalamu Alaikum, *UOR MEMBERS* 👋\n\n"
         f"⚙️ *5 STRATEGY + 4 FILTER ENGINE*\n"
         f"⏱️ *100% FREE*\n"
         f"━━━━━━━━━━━━━━━━\n\n"
