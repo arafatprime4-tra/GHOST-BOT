@@ -8,7 +8,7 @@ PAIRS = [
  "CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"
 ]
 
-SIGNAL_MODE = os.getenv("SIGNAL_MODE","FAST").upper()
+SIGNAL_MODE = os.getenv("SIGNAL_MODE","SAFE").upper()
 QUOTEX_EMAIL = os.getenv("QUOTEX_EMAIL","").strip()
 QUOTEX_PASSWORD = os.getenv("QUOTEX_PASSWORD","").strip()
 QUOTEX_SSID = os.getenv("QUOTEX_SSID","").strip()
@@ -285,7 +285,7 @@ class QuantumEngine:
         return {
             "signal":final,"pair":pair,"price":round(price,5 if "JPY" not in pair else 3),
             "strategies":reasons[:4],
-            "filter":{"trend":"UP" if score>0 else "DOWN","rsi":round(rsi,1),"mtf":mtf_sig,"corr_conf":corr_conf,"mem":mem_i,"time_left":20 if mode=="FAST" else 40,"mode":mode,"score":round(score,2)},
+            "filter":{"trend":"UP" if score>0 else "DOWN","rsi":round(rsi,1),"mtf":mtf_sig,"corr_conf":corr_conf,"mem":mem_i,"time_left":20 if mode=="FAST" else 55,"mode":mode,"score":round(score,2)},
             "engine":f"GHOST QUANTUM X | {mode} | REAL={quotex_client.use_real} | 1 SSID={pair}",
             "confidence":int(conf),"real":quotex_client.use_real,"ssid_mode":"1 SSID = All Market",
             "data_source":"REAL Quotex 100% (same SSID)" if quotex_client.use_real and quotex_client.token and "ECB" not in quotex_client.token else "REAL ECB 99% (set QUOTEX_EMAIL/PASS for 100% Quotex chart)",
