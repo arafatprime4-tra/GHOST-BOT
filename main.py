@@ -118,7 +118,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         num_only = re.sub(r'[^0-9]', '', text)
         await update.message.reply_text(
             f"🚫 <code>{text}</code> পাওয়া যায় নাই!\n\n"
-            f"অনুগ্রহ করে শুধু ID পাঠান\n"
+            f"অনুগ্রহ করে # ছাড়া শুধু ID পাঠান\n"
             f"Example: 1234567\n\n"
             f"💡 Tip: Profile > Trader ID copy করে শুধু নাম্বারটা পেস্ট করুন, # দিবেন না।\n\n"
             f"আপনি পাঠিয়েছেন: {text} → সঠিক: {num_only if num_only else '1234567'}",
@@ -156,7 +156,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"✅ ID <code>{tid}</code> Received! ❤️\n\n"
         f"Admin check korche, 2 min er moddhe approve hobe!\n"
-        f"Approve hole GHOST PREMIUM BOT Access.",
+        f"Approve hole GHOST PREMIUM BOT Free Access Paben!",
         parse_mode='HTML'
     )
     
@@ -214,28 +214,31 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logging.info(f"Admin selecting deposit for {trader_id} uid {uid}")
 
     elif d.startswith("dep_"):
-        # Step 2: Admin selected deposit amount -> Send SHORT congrats to user
+        # Step 2: Admin selected deposit amount -> Send SHORT congrats to user with Universal Bookmarklet guide
         parts=d.split("_")
         uid=parts[1]
         trader_id=parts[2]
         amount=parts[3]
         kb=[
-            [InlineKeyboardButton("🌐 GHOST PREMIUM Website", url=WEBSITE_URL)],
-            [InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)],
-            [InlineKeyboardButton("📱 App Link", url=APP_LINK)]
+            [InlineKeyboardButton("🌐 Website + Bookmarklet", url=WEBSITE_URL)],
+            [InlineKeyboardButton("🔖 Universal Bookmarklet Guide", callback_data="bookmark_guide"), InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK)],
+            [InlineKeyboardButton("📱 App Link", url=APP_LINK), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)]
         ]
-        # Short congrats - no "Apnar jonno sob kichu ready" part
+        # Short congrats with bookmarklet info
         msg = f"""🎉 <b>CONGRATULATIONS! PREMIUM APPROVED!</b> 🎉
 
 ❤️ <b>Bhai, apnake welcome - 10K+ winner family er part!</b>
 
 🆔 <b>Trader ID:</b> <code>{trader_id}</code>
 💰 <b>Total Deposit:</b> <b>${amount}</b>
-📊 <b>Status:</b> ✅ PREMIUM ACTIVE
+📊 <b>Status:</b> ✅ PREMIUM ACTIVE - Price Action WICK PROFIT
 
 ⚠️ <b>Kono bot 100% win dey na - 1% risk e safe trading!</b>
 
-🚀 <b>Website theke draggable bot copy korun!</b>
+🔖 <b>Universal Bookmarklet:</b>
+Website e giye <b>COPY UNIVERSAL BOOKMARKLET</b> button e click korun - 1 ta bookmarklet e PC/Mobile/Laptop sob cholbe!
+
+🚀 <b>PA Strategy: Pin Bar, Support/Resistance Wick e o profit!</b>
 
 - GHOST PREMIUM Team 👻
 """
@@ -250,6 +253,29 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid=d.split("_")[1]
         await context.bot.send_message(chat_id=int(uid), text="❌ Rejected - Affiliate link diye new account khulun, tarpor sudhu number ID pathan (Example: 1234567, # chara)")
         await q.edit_message_text("❌ Rejected")
+    elif d=="bookmark_guide":
+        guide = """🔖 <b>UNIVERSAL BOOKMARKLET - ALL DEVICES</b> 🔖
+
+<b>1 ta bookmarklet e PC/Laptop/Mobile/Desktop/Tablet sob cholbe!</b>
+
+<b>🌐 Website Method (Best):</b>
+1️⃣ <b>Website e jao:</b> """ + WEBSITE_URL + """
+2️⃣ <b>COPY UNIVERSAL BOOKMARKLET</b> button e click koro
+3️⃣ Bookmark bar e paste kore save koro
+
+<b>📱 Mobile Method:</b>
+1️⃣ Chrome > 3 dot > Bookmarks > Add Bookmark
+2️⃣ Name: <code>GHOST</code>
+3️⃣ URL: Eita paste koro:
+<code>javascript:(function(){var s=document.createElement('script');s.src='""" + WEBSITE_URL + """/ghost.js?v='+Date.now();document.body.appendChild(s);})();</code>
+4️⃣ Save > market-qx.info chart e jao > Address bar e GHOST likho > Bookmark e tap koro
+
+<b>💻 PC Method:</b>
+Bookmark bar e GHOST bookmark e click koro chart e thaka obosthay
+
+<b>✅ Bot asbe: PA WICK PROFIT • SAFE 1M • Auto Market Detect • Draggable!</b>
+"""
+        await q.message.reply_text(guide, parse_mode='HTML')
     elif d.startswith("live_"):
         pair=d.replace("live_","")
         try:
