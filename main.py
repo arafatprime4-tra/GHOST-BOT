@@ -43,24 +43,21 @@ def health(): return "GHOST PREMIUM LIVE - DRAGGABLE + REAL SSID"
 # Ridoy chuya welcome - choto but emotional
 WELCOME = """👻 *GHOST PREMIUM* 👻
 
-Bhai, trading e 90% manush eka hare jay...
-Amra chai apni 10% winner er moddhe thaken. ❤️
+*ভাই, ট্রেডিংয়ে ৯০% মানুষ একা হেরে যায়...*
+*আমরা চাই আপনি ১০% উইনারের মধ্যে থাকেন।* ❤️
 
-Tai bot ta free, kintu sothik pothe. Kono sell na.
+*বটটা ফ্রি, কিন্তু সঠিক পথে। কোনো সেল না।*
 
-✨ Kivabe shuru?
-1️⃣ Link theke account khulun any amount deposit koren
-2️⃣ Profile theke Trader ID copy korun  
-3️⃣ Ekhane sudhu number ta pathan
+✨ *কিভাবে শুরু?*
+1️⃣ *লিংক থেকে অ্যাকাউন্ট করে যেকোনো অ্যামাউন্ট ডিপোজিট করুন*
+2️⃣ *প্রোফাইল থেকে Trader ID কপি করুন*
 
-✅ Approve holei REAL SSID signal + Draggable bot paben
-⚠️ Kono bot 100% win dey na - amra 1% risk e safe thakte shikhai
+⚠️ *কোনো বট ১০০% উইন দেয় না - আমরা ১% রিস্কে সেফ থাকতে শেখাই*
 """
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     kb=[
         [InlineKeyboardButton("🔗 Quotex Account - FREE PREMIUM", url=AFFILIATE_LINK)],
-        [InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
         [InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb))
