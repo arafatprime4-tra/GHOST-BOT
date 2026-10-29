@@ -138,6 +138,18 @@ footer { padding: 30px 0; border-top: 1px solid var(--border); color: var(--mute
   .dashboard { padding: 15px; }
   .market-row { gap: 8px; font-size: 12px; }
 }
+
+/* === PREMIUM GATE === */
+.premium-only { display: none; }
+body.premium-unlocked .premium-only { display: block; }
+body.premium-unlocked .premium-only.flex { display: flex; }
+body.premium-unlocked .premium-only.grid { display: grid; }
+body.premium-locked .premium-only { display: none !important; }
+#lockScreen { display: none; padding: 60px 20px; text-align: center; background: linear-gradient(145deg, #0a1421, #050a12); border: 1px solid #17314a; border-radius: 18px; margin: 30px auto; max-width: 700px; }
+body.premium-locked #lockScreen { display: block; }
+#premiumBanner { display: none; padding: 12px; background: #0a3320; border: 1px solid #00ff88; color: #00ff88; text-align: center; font-weight: 800; font-size: 13px; border-radius: 10px; margin: 15px auto; max-width: 1180px; }
+body.premium-unlocked #premiumBanner { display: block; }
+.lock-icon { font-size: 48px; margin-bottom: 15px; }
 </style>
 </head>
 <body>
@@ -157,6 +169,19 @@ footer { padding: 30px 0; border-top: 1px solid var(--border); color: var(--mute
   </div>
 </header>
 <main>
+<div id="premiumBanner">🔓 PREMIUM UNLOCKED — Trader ID Verified — Full Access Active ✅</div>
+<div id="lockScreen">
+  <div class="lock-icon">🔒</div>
+  <h2 style="margin:10px 0">Premium Content Locked</h2>
+  <p style="color:var(--muted)">Apni approve link chara dhukesen. Ekhane sudhu normal info dekhben.<br>Premium bookmark, signal plate, dashboard dekhte hole Telegram bot e ID pathan.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+    <a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">🤖 Telegram Bot — Get ID</a>
+    <a class="btn primary" href="https://t.me/premierghos" target="_blank">➤ Join Channel</a>
+    <a class="btn" href="https://t.me/ghostsupportbd" target="_blank">👨‍💼 Admin</a>
+  </div>
+  <p style="font-size:11px;color:var(--muted);margin-top:18px">Already approved? Apnar special link ta check korun — format: giogram-backend.onrender.com/?access=TOKEN</p>
+</div>
+
 <section class="hero" id="home">
   <div class="container hero-grid">
     <div>
@@ -172,7 +197,7 @@ footer { padding: 30px 0; border-top: 1px solid var(--border); color: var(--mute
       <div class="copy-success" id="copySuccess">✅ Copied! Quotex chart e bookmark bar e paste korun — header dhore drag kora jabe!</div>
       <p style="margin-top:12px"><span class="real-badge">👻 GHOST PREMIUM — UP Green / DOWN Red — REAL ONLY</span></p>
     </div>
-    <div class="dashboard">
+    <div class="dashboard premium-only">
       <div class="dash-head"><h3>Ghost Premium Live Panel</h3><span class="real-tag" id="liveStatus">● REAL LIVE</span></div>
       <p style="color:var(--muted);font-size:13px" id="dataSource">Fetching REAL SSID price — 1 SSID = All Market...</p>
       <div class="chart">
@@ -200,7 +225,7 @@ footer { padding: 30px 0; border-top: 1px solid var(--border); color: var(--mute
     </div>
   </div>
 </section>
-<div class="features-strip">
+<div class="features-strip premium-only">
   <div class="container strip-grid">
     <div class="strip-item"><b>◎ REAL SSID</b><small>1 SSID = All Market Live</small></div>
     <div class="strip-item"><b>✦ Draggable Bot</b><small>Header dhore move</small></div>
@@ -209,7 +234,7 @@ footer { padding: 30px 0; border-top: 1px solid var(--border); color: var(--mute
     <div class="strip-item"><b>☏ GHOST PREMIUM</b><small>UP Green / DOWN Red</small></div>
   </div>
 </div>
-<section class="content" id="features">
+<section class="content premium-only" id="features" class="content premium-only">
   <div class="container features-layout">
     <div>
       <span class="eyebrow">OUR FEATURES — GHOST PREMIUM</span>
@@ -271,7 +296,7 @@ footer { padding: 30px 0; border-top: 1px solid var(--border); color: var(--mute
     </div>
   </div>
 </section>
-<section class="content" id="education">
+<section class="content premium-only" id="education">
   <div class="container">
     <div class="center"><span class="eyebrow">LEARN WITH GHOST PREMIUM</span><h2 class="section-title">Trading Education — Heart Touching</h2><p class="section-intro">90% eka hare jay, 10% winner family te thakun — 1% risk e safe trading.</p></div>
     <div class="education-grid">
@@ -356,6 +381,51 @@ document.getElementById("demoButton").addEventListener("click", async () => {
 });
 setInterval(updateDashboard, 3000);
 setInterval(updateMarketWatch, 4000);
+
+// === PREMIUM GATE LOGIC ===
+const API_BASE_GATE = "https://giogram-backend.onrender.com";
+function getToken() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('access') || params.get('token') || params.get('premium') || params.get('id') || localStorage.getItem('ghost_premium_token') || "";
+}
+async function checkPremium() {
+  const token = getToken();
+  const body = document.body;
+  const lockInfo = document.getElementById('lockInfo');
+  if (!token) {
+    body.classList.add('premium-locked');
+    body.classList.remove('premium-unlocked');
+    console.log("No token - locked view");
+    return;
+  }
+  try {
+    let r = await fetch(`${API_BASE_GATE}/api/verify?token=${encodeURIComponent(token)}`);
+    let j = await r.json();
+    if (j.valid) {
+      body.classList.add('premium-unlocked');
+      body.classList.remove('premium-locked');
+      localStorage.setItem('ghost_premium_token', token);
+      let b = document.getElementById('premiumBanner');
+      if (b) b.innerHTML = `🔓 PREMIUM UNLOCKED — ID ${j.data.trader_id} — Deposit $${j.data.amount} — Full Access ✅`;
+      console.log("Premium unlocked", j.data);
+    } else {
+      body.classList.add('premium-locked');
+      body.classList.remove('premium-unlocked');
+      localStorage.removeItem('ghost_premium_token');
+      console.log("Invalid token", j);
+    }
+  } catch(e) {
+    console.log("Verify fail", e);
+    // If fetch fails, allow if token exists in URL (offline mode) - show premium
+    if (token && token.length > 20) {
+      body.classList.add('premium-unlocked');
+      body.classList.remove('premium-locked');
+    } else {
+      body.classList.add('premium-locked');
+    }
+  }
+}
+checkPremium();
 updateDashboard();
 updateMarketWatch();
 </script>
