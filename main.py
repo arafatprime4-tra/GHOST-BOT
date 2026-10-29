@@ -227,11 +227,11 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Short congrats with bookmarklet info
         msg = f"""🎉 <b>CONGRATULATIONS! PREMIUM APPROVED!</b> 🎉
 
-❤️ <b>Bhai, apnake welcome - 10K+ winner family er part!</b>
+❤️ <b>Bhai, apnake welcome - 1winner family er part!</b>
 
 🆔 <b>Trader ID:</b> <code>{trader_id}</code>
 💰 <b>Total Deposit:</b> <b>${amount}</b>
-📊 <b>Status:</b> ✅ PREMIUM ACTIVE - Price Action WICK PROFIT
+📊 <b>Status:</b> ✅ PREMIUM ACTIVATED 
 
 ⚠️ <b>Kono bot 100% win dey na - 1% risk e safe trading!</b>
 
