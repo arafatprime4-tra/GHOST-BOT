@@ -342,6 +342,32 @@ class QuantumEngine:
         self._update_mem()
         pair=pair.upper()
         if pair not in self.prices: pair="EURUSD"
+        
+        # HOLD LOGIC - 1M er jonno 55s ek signal hold korbe, flicker korbe na
+        now = time.time()
+        hold_time = 20 if mode=="FAST" else 55
+        if pair in self.last_signals:
+            last = self.last_signals[pair]
+            elapsed = now - last["time"]
+            if last["signal"] in ["UP","DOWN"] and elapsed < hold_time:
+                # Same signal hold - countdown dekhabe, flicker hobe na
+                remaining = int(hold_time - elapsed)
+                return {
+                    "signal": last["signal"],
+                    "pair": pair,
+                    "price": round(self.prices[pair][-1], 5 if "JPY" not in pair else 3),
+                    "strategies": last.get("strategies", ["HOLDING"]),
+                    "filter": {"trend": last["signal"], "rsi": last.get("rsi", 50), "mtf": "HOLD", "time_left": remaining, "mode": mode, "score": last.get("score", 0), "holding": True},
+                    "engine": f"GHOST HOLD {remaining}s | {mode}",
+                    "confidence": last.get("confidence", 75),
+                    "real": quotex_client.use_real,
+                    "ssid_mode": "1 SSID = All Market",
+                    "data_source": "HOLDING - No flicker",
+                    "timestamp": int(now),
+                    "holding": True,
+                    "time_left": remaining
+                }
+        
         data=self.prices[pair]; price=data[-1]
         e7=self._ema(data,7); e20=self._ema(data,20); e50=self._ema(data,50)
         rsi=self._rsi(data,14)
@@ -386,7 +412,15 @@ class QuantumEngine:
             final="UP" if score>=0.4 else "DOWN" if score<=-0.4 else "UP" if mode=="FAST" and e7 and e20 and e7>e20 else "DOWN" if mode=="FAST" else "WAIT"
         conf=min(95,50+abs(score)*20+(corr_conf if corr_conf>0 else 0)+(mem_b if mem_b>0 else 0))
 
-        self.last_signals[pair]={"signal":final,"price":price,"time":time.time()}
+        self.last_signals[pair]={
+            "signal":final,
+            "price":price,
+            "time":time.time(),
+            "strategies":reasons[:4],
+            "rsi":round(rsi,1),
+            "score":round(score,2),
+            "confidence":int(conf)
+        }
 
         return {
             "signal":final,"pair":pair,"price":round(price,5 if "JPY" not in pair else 3),
