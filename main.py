@@ -118,7 +118,7 @@ WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 
 <b>বটটা ফ্রি, কিন্তু সঠিক পথে। কোনো সেল না।</b>
 
-✨ <b>কিভাবে শুরু?</b>
+🤔 <b>কিভাবে শুরু?</b>
 1️⃣ <b>লিংক থেকে অ্যাকাউন্ট করে যেকোনো অ্যামাউন্ট ডিপোজিট করুন</b>
 2️⃣ <b>প্রোফাইল থেকে Trader ID কপি করুন</b>
 
@@ -127,8 +127,8 @@ WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     kb=[
-        [InlineKeyboardButton("🔗 Quotex Account - FREE PREMIUM", url=AFFILIATE_LINK)],
-        [InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
+        [InlineKeyboardButton("🔗 Account Create Link", url=AFFILIATE_LINK)],
+        [InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
         [InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
