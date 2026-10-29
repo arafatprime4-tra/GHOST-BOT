@@ -83,23 +83,11 @@ def api_signal():
     try:
         mode=request.args.get('mode','SAFE')
         raw_pair=request.args.get('pair','EURUSD')
-        # REAL MARKET ONLY - REJECT OTC
-        if "OTC" in raw_pair.upper():
-            return jsonify({
-                "signal_id": f"REJECT-OTC-{int(time.time())}",
-                "signal": "WAIT",
-                "status": "DATA_UNAVAILABLE",
-                "market": raw_pair.upper().replace(" OTC","").replace("(OTC)","").strip(),
-                "pair": raw_pair.upper().replace(" OTC","").replace("(OTC)","").replace("/","").strip(),
-                "direction": "WAIT",
-                "reason": "OTC rejected - REAL MARKET ONLY",
-                "risk_percent": 1,
-                "expiry_timestamp": int((time.time()+60)*1000),
-                "remainingSeconds": 60,
-                "time_left": 60
-            })
-        pair=raw_pair.upper().replace("/","").strip()
-        # Only allow real pairs
+        # OTC ALLOWED - real off থাকলে OTC দিবে
+        is_otc = "OTC" in raw_pair.upper()
+        clean_raw = raw_pair.upper().replace(" OTC","").replace("(OTC)","").replace("OTC","").strip()
+        pair=clean_raw.replace("/","").strip()
+        # Allow real + OTC pairs
         REAL = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]
         if pair not in REAL:
             return jsonify({
@@ -109,13 +97,15 @@ def api_signal():
                 "market": raw_pair,
                 "pair": pair,
                 "direction": "WAIT",
-                "reason": f"Invalid pair {pair} - REAL ONLY",
+                "reason": f"Invalid pair {pair}",
                 "risk_percent": 1,
                 "expiry_timestamp": int((time.time()+60)*1000),
                 "remainingSeconds": 60,
                 "time_left": 60
             })
-        result = signal_engine.get_signal(pair,mode)
+        # Pass OTC info to engine by adding OTC suffix if needed
+        engine_pair = pair + ("OTC" if is_otc else "")
+        result = signal_engine.get_signal(engine_pair,mode)
         # Ensure consistent structure
         if "signal_id" not in result:
             import uuid
@@ -360,7 +350,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Trader ID: <code>{trader_id}</code>
 Deposit: ${amount}
-Status: ✅ ACTIVATE 
+Status: ✅ ACTIVE
 
 🔓 YOUR SPECIAL LINK:
 <code>{premium_link}</code>
