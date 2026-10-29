@@ -1,10 +1,10 @@
 (function(){
 let s=document.createElement("style");
-s.innerHTML="#ghost-mini{position:fixed;top:70px;right:10px;z-index:9999999;background:rgba(10,10,22,0.97);border:1px solid #00d49a;border-radius:14px;padding:10px;width:200px;color:#fff;font-family:Inter,sans-serif;box-shadow:0 0 25px rgba(0,212,154,.45)} #ghost-head{font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;cursor:move;user-select:none;padding:5px;margin:-5px -5px 6px -5px;border-radius:10px 10px 0 0;background:rgba(0,212,154,.18)} .g-signal{font-size:22px;font-weight:900;text-align:center;margin:8px 0;padding:12px;border-radius:10px} .g-up{background:#00c853;color:#fff} .g-down{background:#ff1744;color:#fff} .g-wait{background:#3a3a4a;color:#fff} .g-pair{font-size:13px;text-align:center;color:#00d4ff;font-weight:800;margin-bottom:6px} .g-foot{font-size:10px;text-align:center;opacity:.7;margin-top:6px} .g-market-time{font-size:9px;color:#ffcc00;text-align:center;margin-top:4px}";
+s.innerHTML="#ghost-mini{position:fixed;top:70px;right:10px;z-index:9999999;background:rgba(10,10,22,0.97);border:1px solid #00d49a;border-radius:14px;padding:10px;width:200px;color:#fff;font-family:Inter,sans-serif;box-shadow:0 0 25px rgba(0,212,154,.45)} #ghost-head{font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;cursor:move;user-select:none;padding:5px;margin:-5px -5px 6px -5px;border-radius:10px 10px 0 0;background:rgba(0,212,154,.18)} .g-signal{font-size:22px;font-weight:900;text-align:center;margin:8px 0;padding:12px;border-radius:10px} .g-up{background:#00c853;color:#fff} .g-down{background:#ff1744;color:#fff} .g-wait{background:#3a3a4a;color:#fff} .g-pair{font-size:13px;text-align:center;color:#00d4ff;font-weight:800;margin-bottom:6px} .g-foot{font-size:10px;text-align:center;opacity:.7;margin-top:6px} .g-market-time{font-size:9px;color:#00ff88;text-align:center;margin-top:4px}";
 document.head.appendChild(s);
 let old=document.getElementById("ghost-mini");if(old)old.remove();
 let d=document.createElement("div");d.id="ghost-mini";
-d.innerHTML='<div id="ghost-head"><div style="width:7px;height:7px;background:#00ff88;border-radius:50%"></div>GHOST PREMIUM BOT<div style="margin-left:auto;opacity:.5">⋮⋮</div></div><div id="gpair" class="g-pair">DETECTING...</div><div id="gs" class="g-signal g-wait">WAIT</div><div id="gfoot" class="g-foot">SAFE 1M • SYNCING... • RISK 1%</div><div id="gmarket" class="g-market-time">Market: --s • Synced ✓</div><button onclick="this.parentElement.remove()" style="width:100%;margin-top:8px;padding:6px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #2a2a4a;font-size:10px">Close</button>';
+d.innerHTML='<div id="ghost-head"><div style="width:7px;height:7px;background:#00ff88;border-radius:50%"></div>GHOST PREMIUM BOT<div style="margin-left:auto;opacity:.5">⋮⋮</div></div><div id="gpair" class="g-pair">DETECTING...</div><div id="gs" class="g-signal g-wait">WAIT</div><div id="gfoot" class="g-foot">SAFE 1M • 60s • RISK 1%</div><div id="gmarket" class="g-market-time">Candle • PA+EMA+RSI • No Flicker</div><button onclick="this.parentElement.remove()" style="width:100%;margin-top:8px;padding:6px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #2a2a4a;font-size:10px">Close</button>';
 document.body.appendChild(d);
 let isDrag=false,startX=0,startY=0,initLeft=0,initTop=0;
 let head=document.getElementById("ghost-head");let box=document.getElementById("ghost-mini");
@@ -38,67 +38,39 @@ function detectPairInfo(){
         }
       }
     }
-    let selectors = [".current-symbol", ".pair-name", ".asset-name", "[data-qa='asset']"];
-    for(let sel of selectors){
-      let el = document.querySelector(sel);
-      if(el){
-        let txt = (el.innerText||el.textContent||"").trim();
-        let m = txt.match(/([A-Z]{3})\/([A-Z]{3})/);
-        if(m){
-          let pair = (m[1]+m[2]).toUpperCase();
-          let parentTxt = (el.parentElement ? el.parentElement.innerText : "") || "";
-          let otc = /\(OTC\)/i.test(txt) || /\(OTC\)/i.test(parentTxt.substring(0,100));
-          return {pair: pair, otc: otc, display: m[0] + (otc?" OTC":"")};
-        }
-      }
-    }
   }catch(e){}
   return {pair: "EURUSD", otc: false, display: "EURUSD"};
 }
 
-function getQuotexMarketTimeLeft(){
-  // NEW: Sync with Quotex real market timer - find "00:44" countdown near chart
+function getCandleTimeLeft(){
+  // ONLY candle timer 00:xx near price, NOT trade expiry 01:xx
   try{
-    // Look for timer elements that show seconds left in current candle
-    // In Quotex, top right near price shows "00:44" or "End of trade 00:44"
     let candidates = document.querySelectorAll('div, span');
     for(let el of candidates){
       let txt = (el.innerText||"").trim();
-      if(!txt || txt.length>20) continue;
-      // Pattern: 00:44 or 0:44 - timer, not clock 11:17 (clock is 11:17, timer is 00:xx)
-      // Timer usually starts with 00: or 01: or 02:
-      let m = txt.match(/^(00|01|02):([0-5][0-9])$/);
+      if(!txt || txt.length>6) continue;
+      let m = txt.match(/^00:([0-5][0-9])$/);
       if(m){
-        let sec = parseInt(m[2]);
-        // Additional check: timer element is small, near price, not the clock (clock is 11:17)
-        // Clock is like 11:17, timer is 00:44
-        if(txt.startsWith('00:') || txt.startsWith('01:')){
-          let rect = el.getBoundingClientRect();
-          // Timer usually near top right, price area
-          if(rect.top>0 && rect.top<300){
-            return sec + (m[1]==='01'?60:0) + (m[1]==='02'?120:0);
-          }
-        }
-      }
-      // Also check "End of trade" nearby
-      if(txt.includes('End of trade')){
-        let mm = txt.match(/([0-5][0-9]):([0-5][0-9])/);
-        if(mm){
-          return parseInt(mm[2]) + parseInt(mm[1])*60;
+        let sec = parseInt(m[1]);
+        let rect = el.getBoundingClientRect();
+        // Must be small timer near chart right side
+        if(rect.width<80 && rect.height<40 && rect.top>0 && rect.top<600){
+          return sec;
         }
       }
     }
-    // Fallback: look for any 00:xx in page header area
-    let headerText = document.body.innerText.substring(0,5000);
-    let m2 = headerText.match(/00:([0-5][0-9])/);
-    if(m2){
-      return parseInt(m2[1]);
+    // Fallback: find last 00:xx in visible text (usually candle timer)
+    let bodyText = document.body.innerText;
+    let matches = bodyText.match(/00:[0-5][0-9]/g);
+    if(matches && matches.length>0){
+      let last = matches[matches.length-1];
+      return parseInt(last.split(':')[1]);
     }
   }catch(e){}
   return null;
 }
 
-let lastPair="";let lastSignal="WAIT";let signalStartTime=0;
+let lastPair="";let currentSignal="WAIT";let signalLockedUntil=0;
 
 function upd(){
  let info=detectPairInfo();
@@ -110,59 +82,61 @@ function upd(){
    let gp=document.getElementById("gpair");
    if(gp) gp.textContent=displayPair;
  }
- let marketTimeLeft = getQuotexMarketTimeLeft();
  let url = "https://giogram-backend.onrender.com/api/signal?pair="+asset+"&mode=SAFE";
  if(GHOST_TOKEN) url += "&token="+encodeURIComponent(GHOST_TOKEN);
- let start = Date.now();
  fetch(url).then(r=>r.json()).then(j=>{
-  let elapsed = ((Date.now()-start)/1000).toFixed(1);
   let el=document.getElementById("gs");if(!el)return;
   if(!j||j.signal=="ERROR"||j.signal=="LOCKED"){el.textContent="WAIT";el.className="g-signal g-wait";return;}
   let sig=j.signal||"WAIT";
-  // HOLD LOGIC: Keep signal for full candle, don't flicker
-  if(sig!==lastSignal && (sig==="UP"||sig==="DOWN")){
-    lastSignal=sig;
-    signalStartTime=Date.now();
-  }
-  // If market time left is small (<5s), don't show new signal, WAIT for new candle
-  if(marketTimeLeft!==null && marketTimeLeft<5 && sig!=="WAIT"){
-    // Near candle end, hold WAIT to avoid late entry
-    el.textContent="WAIT";
-    el.className="g-signal g-wait";
-  }else{
-    el.textContent=sig;
-    el.className="g-signal "+(sig=="UP"?"g-up":sig=="DOWN"?"g-down":"g-wait");
-  }
-  let gp=document.getElementById("gpair");
-  if(gp) gp.textContent=displayPair;
-  let foot=document.getElementById("gfoot");
-  let marketTxt=document.getElementById("gmarket");
-  // Use Quotex real timer if available, else use backend time_left
-  let timeLeft = marketTimeLeft!==null ? marketTimeLeft : ((j.filter && j.filter.time_left) ? j.filter.time_left : 55);
-  if(foot) foot.textContent="SAFE 1M • "+timeLeft+"s left • RISK 1% • "+elapsed+"s";
-  if(marketTxt){
-    if(marketTimeLeft!==null){
-      marketTxt.textContent="Market: "+marketTimeLeft+"s • Synced ✓ • Analysis: PA+EMA+RSI+MTF";
-    }else{
-      marketTxt.textContent="Market: ~"+timeLeft+"s • Analysis: PA+EMA+RSI+MTF • Hold 55s";
+  let now = Date.now();
+  // LOCK signal for full candle to avoid flicker 55->6->11 jump
+  // If we have a UP/DOWN, lock it until candle ends (when candle timer goes 0->60)
+  if(sig==="UP" || sig==="DOWN"){
+    if(now > signalLockedUntil){
+      currentSignal = sig;
+      // Lock for 55 seconds (full candle)
+      signalLockedUntil = now + 55000;
+    }
+  }else if(sig==="WAIT"){
+    // Only allow WAIT if not locked or near candle end
+    if(now > signalLockedUntil){
+      currentSignal = "WAIT";
     }
   }
+  let finalSig = currentSignal;
+  // If candle <5s left, force WAIT to avoid late entry
+  let candleLeft = getCandleTimeLeft();
+  if(candleLeft!==null && candleLeft<5){
+    finalSig = "WAIT";
+  }
+  el.textContent=finalSig;
+  el.className="g-signal "+(finalSig=="UP"?"g-up":finalSig=="DOWN"?"g-down":"g-wait");
+  let gp=document.getElementById("gpair");
+  if(gp) gp.textContent=displayPair;
  }).catch(e=>{});
 }
 
-// Update market timer every second for perfect sync
+// SINGLE timer - only candle timer, no mixing
 setInterval(()=>{
-  let marketLeft = getQuotexMarketTimeLeft();
+  let candleLeft = getCandleTimeLeft();
   let foot=document.getElementById("gfoot");
   let marketTxt=document.getElementById("gmarket");
-  if(marketLeft!==null && foot){
-    // Update foot with real market time
-    let current = foot.textContent;
-    foot.textContent = current.replace(/\d+s left/, marketLeft+"s left");
-    if(marketTxt) marketTxt.textContent="Market: "+marketLeft+"s • Synced ✓ • PA+EMA+RSI+MTF";
+  if(candleLeft!==null){
+    if(foot) foot.textContent="SAFE 1M • "+candleLeft+"s left • RISK 1%";
+    if(marketTxt) marketTxt.textContent="Candle: "+candleLeft+"s • "+(currentSignal==="WAIT"?"Waiting":"Locked "+currentSignal)+" • No Flicker";
+  }else{
+    // Fallback if candle timer not found, use smooth countdown 60->0
+    if(foot){
+      let m = foot.textContent.match(/(\d+)s left/);
+      if(m){
+        let sec = parseInt(m[1]);
+        sec = sec<=0 ? 60 : sec-1;
+        foot.textContent="SAFE 1M • "+sec+"s left • RISK 1%";
+      }
+    }
   }
 },1000);
 
-setInterval(upd,1200);
+setInterval(upd,2000);
 upd();
 })();
