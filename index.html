@@ -139,20 +139,28 @@ footer { padding: 30px 0; border-top: 1px solid var(--border); color: var(--mute
   .market-row { gap: 8px; font-size: 12px; }
 }
 
-/* === PREMIUM GATE === */
-.premium-only { display: none; }
-body.premium-unlocked .premium-only { display: block; }
-body.premium-unlocked .premium-only.flex { display: flex; }
-body.premium-unlocked .premium-only.grid { display: grid; }
+
+
+/* === PREMIUM GATE FINAL === */
+.premium-only { display: none !important; }
+#premiumContent { display: none !important; }
+body.premium-unlocked .premium-only { display: block !important; }
+body.premium-unlocked #premiumContent { display: block !important; }
 body.premium-locked .premium-only { display: none !important; }
-#lockScreen { display: none; padding: 60px 20px; text-align: center; background: linear-gradient(145deg, #0a1421, #050a12); border: 1px solid #17314a; border-radius: 18px; margin: 30px auto; max-width: 700px; }
-body.premium-locked #lockScreen { display: block; }
+body.premium-locked #premiumContent { display: none !important; }
+body.premium-locked .hero,
+body.premium-locked .features-strip,
+body.premium-locked section.content:not(#contact) { display: none !important; }
+#lockScreen { display: none; padding: 60px 20px; text-align: center; background: linear-gradient(145deg, #0a1421, #050a12); border: 1px solid #17314a; border-radius: 18px; margin: 30px auto; max-width: 700px; min-height: 60vh; }
+body.premium-locked #lockScreen { display: block !important; }
 #premiumBanner { display: none; padding: 12px; background: #0a3320; border: 1px solid #00ff88; color: #00ff88; text-align: center; font-weight: 800; font-size: 13px; border-radius: 10px; margin: 15px auto; max-width: 1180px; }
-body.premium-unlocked #premiumBanner { display: block; }
+body.premium-unlocked #premiumBanner { display: block !important; }
+body.premium-locked #premiumBanner { display: none !important; }
 .lock-icon { font-size: 48px; margin-bottom: 15px; }
+
 </style>
 </head>
-<body>
+<body class="premium-locked">
 <header>
   <div class="container nav">
     <a class="brand" href="#home">GHOST <span>PREMIUM</span><small>TRADE SMART</small></a>
@@ -181,6 +189,9 @@ body.premium-unlocked #premiumBanner { display: block; }
   </div>
   <p style="font-size:11px;color:var(--muted);margin-top:18px">Already approved? Apnar special link ta check korun — format: giogram-backend.onrender.com/?access=TOKEN</p>
 </div>
+<div id="premiumContent">
+
+
 
 <section class="hero" id="home">
   <div class="container hero-grid">
@@ -318,6 +329,7 @@ body.premium-unlocked #premiumBanner { display: block; }
     <p style="font-size:12px;color:var(--muted);margin-top:15px">No Bot Gives 100% Win — Use 1% Risk. 1 SSID = All Market real price.</p>
   </div>
 </section>
+</div>
 <section class="content" id="contact">
   <div class="container"><div class="cta"><span class="eyebrow">JOIN GHOST PREMIUM FAMILY</span><h2 class="section-title">Trade Smart with <span class="blue">GHOST PREMIUM</span> — Draggable + Real</h2><p class="section-intro">90% eka hare, amra chai apni 10% winner er moddhe thaken. Bot free, kintu sothik pothe.</p><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">🤖 Telegram Bot — GHOST PREMIUM</a><a class="btn primary" href="https://t.me/premierghos" target="_blank">➤ Join Premier Ghost</a></div><p style="margin-top:15px;font-size:12px;color:var(--muted)">Bot ta 1 jaigai thake na — drag kore move kora jay. 1 SSID diye sob market real price.</p></div></div>
 </section>
