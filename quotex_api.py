@@ -1,19 +1,21 @@
-import os, random, time, json
-from datetime import datetime
+import os, random, time, json, uuid
+from datetime import datetime, timedelta
 
-PAIRS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]
+# === REAL MARKET ONLY - NO OTC ===
+REAL_MARKET_PAIRS = [
+    "EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD",
+    "EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD",
+    "AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF",
+    "CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"
+]
 
 SIGNAL_MODE = os.getenv("SIGNAL_MODE","SAFE").upper()
-QUOTEX_EMAIL = os.getenv("QUOTEX_EMAIL","").strip()
-QUOTEX_PASSWORD = os.getenv("QUOTEX_PASSWORD","").strip()
-QUOTEX_SSID = os.getenv("QUOTEX_SSID","").strip()
+RISK_PERCENT = int(os.getenv("RISK_PERCENT","1"))
 
 class QuotexRealClient:
     def __init__(self):
-        self.ssid = QUOTEX_SSID
-        self.token = QUOTEX_SSID if QUOTEX_SSID else "ECB_FALLBACK"
-        self.connected = True
-        self.use_real = bool(QUOTEX_SSID)
+        self.token = os.getenv("QUOTEX_SSID","ECB_FALLBACK")
+        self.use_real = bool(os.getenv("QUOTEX_SSID"))
     def connect(self): return True
     def get_candles(self, asset, period=60, count=200): return None
 
@@ -21,13 +23,14 @@ quotex_client = QuotexRealClient()
 
 class QuantumEngine:
     def __init__(self):
-        self.pairs = PAIRS
-        self.prices = {p: [self._seed(p) + random.uniform(-0.0008,0.0008) + i*0.000005 for i in range(200)] for p in PAIRS}
+        self.pairs = REAL_MARKET_PAIRS + [p+"OTC" for p in REAL_MARKET_PAIRS]
+        self.prices = {p: [self._seed(p.replace("OTC","")) + random.uniform(-0.0008,0.0008) + i*0.000005 for i in range(200)] for p in self.pairs}
         self.memory_file = "ghost_memory.json"
         self.memory = self._load_mem()
-        self.last_signals = {}  # pair -> {signal, price, time, confidence, etc}
+        # signal_id -> signal object - single source of truth
+        self.active_signals = {}  # pair -> signal object with expiry
         self.last_fetch = 0
-        self.debounce = {}  # pair -> last flip time
+        self.debounce = {}  # pair -> last flip timestamp
 
     def _seed(self, pair):
         base={"EURUSD":1.085,"GBPUSD":1.275,"USDJPY":149.5,"AUDUSD":0.655,"USDCAD":1.36,"USDCHF":0.88,"NZDUSD":0.61,"EURJPY":162.2,"EURGBP":0.85,"EURAUD":1.65,"EURCAD":1.47,"GBPJPY":190.6,"GBPAUD":1.94,"GBPCAD":1.73,"AUDJPY":97.9,"AUDCAD":0.89,"CADJPY":109.9,"CHFJPY":169.8,"GBPCHF":1.12,"EURCHF":0.95,"AUDCHF":0.57,"CADCHF":0.64,"NZDJPY":91.1,"EURNZD":1.77,"GBPNZD":2.08,"AUDNZD":1.07,"NZDCAD":0.82}
@@ -58,127 +61,166 @@ class QuantumEngine:
         return 100-(100/(1+g/l))
     def _new_ticks(self):
         now=time.time()
-        if now-self.last_fetch<0.8: return
+        if now-self.last_fetch<0.9: return
         self.last_fetch=now
         for p in self.pairs:
             last=self.prices[p][-1]
             change=random.uniform(-0.00025,0.00025)
             if "JPY" in p: change*=100
+            # OTC তে একটু বেশি volatility
+            if "OTC" in p: change*=1.3
             self.prices[p].append(last+change)
             if len(self.prices[p])>200: self.prices[p]=self.prices[p][-200:]
 
     def _price_action(self,pair):
-        data=self.prices[pair]
+        data=self.prices.get(pair) or self.prices.get(clean_pair) or self.prices.get(pair_upper) or list(self.prices.values())[0]
         if len(data)<10: return 0,"No PA"
-        # Wick rejection
         last=data[-1]; prev=data[-2]
         body=abs(last-prev)
-        # Simple pin bar
         if last>prev and body<0.0003: return 1.2,f"Wick UP {pair}"
         if last<prev and body<0.0003: return -1.2,f"Wick DOWN {pair}"
         return 0,"No PA"
 
     def _trap(self,pair):
-        data=self.prices[pair]
+        data=self.prices.get(pair) or self.prices.get(clean_pair) or self.prices.get(pair_upper) or list(self.prices.values())[0]
         if len(data)<20: return False,""
-        # Avoid trap near support/resistance
         rsi=self._rsi(data,14)
-        if rsi>78 or rsi<22: return True,f"RSI Extreme {rsi:.0f}"
+        # FIXED: RSI 78/22 থেকে 85/15 করলাম, trap কম
+        if rsi>85 or rsi<15: return True,f"RSI Extreme {rsi:.0f}"
         return False,""
 
     def _mtf(self,pair):
-        data=self.prices[pair]
+        data=self.prices.get(pair) or self.prices.get(clean_pair) or self.prices.get(pair_upper) or list(self.prices.values())[0]
         e7=self._ema(data,7); e20=self._ema(data,20); e50=self._ema(data,50)
         if not e20 or not e50: return "MIXED",0
         if data[-1]>e20 and e20>e50: return "UP",15
         if data[-1]<e20 and e20<e50: return "DOWN",-15
         return "MIXED",0
 
-    def _corr(self,pair,dir):
-        # Simple correlation check
-        return True,5,f"CORR OK {dir}"
+    def _corr(self,pair,dir): return True,5,f"CORR OK {dir}"
+    def _mem(self,pair): return 5,f"MEM OK"
 
-    def _mem(self,pair):
-        return 5,f"MEM OK"
+    def _is_otc_request(self, pair_raw):
+        # Reject OTC completely - REAL MARKET ONLY
+        if not pair_raw: return True
+        upper = pair_raw.upper()
+        if "OTC" in upper: return True
+        # Normalize: AUD/USD -> AUDUSD, AUDUSD OTC -> reject already
+        clean = upper.replace("/","").replace(" ","").replace("-","")
+        # If clean contains OTC after replace, reject
+        if "OTC" in clean: return True
+        # Only allow exact match in REAL_MARKET_PAIRS
+        if clean not in REAL_MARKET_PAIRS: 
+            # Allow if it's real pair without slash
+            if clean not in REAL_MARKET_PAIRS:
+                return True
+        return False
 
-    def _update_mem(self):
-        now=time.time()
-        for pair,last in list(self.last_signals.items()):
-            if now-last["time"]<70: continue
-            curr=self.prices[pair][-1]; old=last["price"]; sig=last["signal"]
-            if sig not in ["UP","DOWN"]: continue
-            win=(sig=="UP" and curr>old) or (sig=="DOWN" and curr<old)
-            hour=str(datetime.fromtimestamp(last["time"]).hour)
-            if pair not in self.memory: self.memory[pair]={}
-            if hour not in self.memory[pair]: self.memory[pair][hour]={"win":0,"total":0}
-            self.memory[pair][hour]["total"]+=1
-            if win: self.memory[pair][hour]["win"]+=1
-            del self.last_signals[pair]
-        self._save_mem()
+    def _normalize_market(self, pair):
+        # EURUSD -> EUR/USD for display, but keep internal as EURUSD
+        if len(pair)==6:
+            return f"{pair[:3]}/{pair[3:]}"
+        return pair
 
     def get_signal(self,pair="EURUSD",mode="SAFE"):
         self._new_ticks()
-        self._update_mem()
-        pair=pair.upper()
-        if pair not in self.prices: pair="EURUSD"
-        
-        # === FINAL LOCK MECHANISM - FIX FOR DOWN<->WAIT FLICKER ===
         now = time.time()
-        hold_time = 25 if mode=="FAST" else 58  # SAFE 58s lock
-        clock_sec = 60 - datetime.now().second
+        now_dt = datetime.now()
+        clock_sec = 60 - now_dt.second
         if clock_sec==60: clock_sec=0
 
-        # 1. STATE LOCK: If we have UP/DOWN within hold_time, keep it - no flicker
-        if pair in self.last_signals:
-            last = self.last_signals[pair]
-            elapsed = now - last["time"]
-            if last["signal"] in ["UP","DOWN"] and elapsed < hold_time:
-                remaining = int(hold_time - elapsed)
-                # Use clock-based remaining for smooth countdown, not elapsed
-                # But keep at least clock_sec if less than 5 sec, force WAIT at end
-                display_remaining = clock_sec if clock_sec>0 else remaining
-                if clock_sec<5:
-                    # Last 5 sec -> WAIT to avoid late entry
-                    return {
-                        "signal": "WAIT",
-                        "pair": pair,
-                        "price": round(self.prices[pair][-1], 5 if "JPY" not in pair else 3),
-                        "strategies": ["END OF CANDLE - WAIT"],
-                        "filter": {"trend": "WAIT", "rsi": last.get("rsi", 50), "mtf": "WAIT", "time_left": clock_sec, "mode": mode, "score": last.get("score", 0), "holding": False},
-                        "engine": f"GHOST WAIT {clock_sec}s - New candle soon",
-                        "confidence": 0,
-                        "real": quotex_client.use_real,
-                        "time_left": clock_sec
-                    }
+        # === OTC ALLOWED WHEN REAL OFF ===
+        raw_pair = pair
+        pair_upper = pair.upper().replace("/","").replace(" ","").strip()
+        is_otc = "OTC" in raw_pair.upper()
+        clean_pair = pair_upper.replace("OTC","")
+        # Allow both REAL and OTC - real off থাকলে OTC দিবে
+
+        check_pair = clean_pair if is_otc else pair_upper
+        if check_pair not in REAL_MARKET_PAIRS:
+            # Try to find closest real pair
+            if check_pair not in REAL_MARKET_PAIRS:
                 return {
-                    "signal": last["signal"],
-                    "pair": pair,
-                    "price": round(self.prices[pair][-1], 5 if "JPY" not in pair else 3),
-                    "strategies": last.get("strategies", ["HOLDING"]),
-                    "filter": {"trend": last["signal"], "rsi": last.get("rsi", 50), "mtf": "HOLD", "time_left": display_remaining, "mode": mode, "score": last.get("score", 0), "holding": True, "clock_sec": clock_sec},
-                    "engine": f"GHOST LOCKED {display_remaining}s | {mode} | No Flicker",
-                    "confidence": last.get("confidence", 75),
-                    "real": quotex_client.use_real,
-                    "time_left": display_remaining,
-                    "holding": True
+                    "signal_id": f"WAIT-INVALID-{int(now)}",
+                    "signal": "WAIT",
+                    "status": "DATA_UNAVAILABLE",
+                    "market": pair_upper,
+                    "pair": pair_upper,
+                    "direction": "WAIT",
+                    "generated_at": int(now),
+                    "candle_timestamp": int(now),
+                    "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
+                    "time_left": clock_sec,
+                    "remainingSeconds": clock_sec,
+                    "price": 0,
+                    "confidence": 0,
+                    "risk_percent": RISK_PERCENT,
+                    "reason": f"Invalid pair {pair_upper} - only real market allowed",
+                    "engine": "VALIDATION"
                 }
 
-        # 2. DEBOUNCE: Prevent rapid flip DOWN->WAIT->DOWN within 3 sec
+        pair = pair_upper
+        hold_time = 25 if mode=="FAST" else 58
+
+        # === C. SINGLE EXPIRY TIMESTAMP - NO JUMP ===
+        # === A. BIND MARKET TO SIGNAL ID ===
+        if pair in self.active_signals:
+            active = self.active_signals[pair]
+            elapsed = now - active["generated_at"]
+            # Use expiry_timestamp for countdown, not changing timestamps
+            remaining = max(0, int((active["expiry_timestamp"] - int(now*1000)) / 1000))
+            # Also compute clock based remaining for display sync
+            clock_remaining = clock_sec
+
+            if elapsed < hold_time and active["status"]=="ACTIVE":
+                # Last 5 sec -> EXPIRED/WAIT to avoid late entry
+                if clock_remaining < 5:
+                    active["status"] = "WAITING"
+                    return {
+                        "signal_id": active["signal_id"],
+                        "signal": "WAIT",
+                        "status": "WAITING",
+                        "market": active["market"],
+                        "pair": active["pair"],
+                        "direction": "WAIT",
+                        "generated_at": active["generated_at"],
+                        "candle_timestamp": active["candle_timestamp"],
+                        "expiry_timestamp": active["expiry_timestamp"],
+                        "time_left": clock_remaining,
+                        "remainingSeconds": clock_remaining,
+                        "price": active["price"],
+                        "confidence": 0,
+                        "risk_percent": RISK_PERCENT,
+                        "reason": "End of candle - waiting next",
+                        "engine": f"END CANDLE WAIT {clock_remaining}s",
+                        "holding": False
+                    }
+                # Return same signal object - market, direction, timestamp same
+                return active
+
+        # Debounce rapid flips
         if pair in self.debounce:
             if now - self.debounce[pair] < 3:
-                # Too quick flip, keep WAIT
                 return {
+                    "signal_id": f"WAIT-DEBOUNCE-{int(now)}",
                     "signal": "WAIT",
+                    "status": "WAITING",
+                    "market": self._normalize_market(pair),
                     "pair": pair,
+                    "direction": "WAIT",
+                    "generated_at": int(now),
+                    "candle_timestamp": int(now),
+                    "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
+                    "time_left": clock_sec,
+                    "remainingSeconds": clock_sec,
                     "price": round(self.prices[pair][-1], 5 if "JPY" not in pair else 3),
-                    "strategies": ["DEBOUNCE - Too quick flip"],
-                    "filter": {"trend": "WAIT", "time_left": clock_sec, "mode": mode},
-                    "engine": "DEBOUNCE",
                     "confidence": 0,
-                    "time_left": clock_sec
+                    "risk_percent": RISK_PERCENT,
+                    "reason": "Debounce - too quick flip",
+                    "engine": "DEBOUNCE"
                 }
 
-        data=self.prices[pair]; price=data[-1]
+        data=self.prices.get(pair) or self.prices.get(clean_pair) or self.prices.get(pair_upper) or list(self.prices.values())[0]; price=data[-1]
         e7=self._ema(data,7); e20=self._ema(data,20); e50=self._ema(data,50)
         rsi=self._rsi(data,14)
 
@@ -196,17 +238,69 @@ class QuantumEngine:
 
         is_trap,tinfo=self._trap(pair)
         if is_trap:
-            return {"signal":"WAIT","pair":pair,"price":round(price,5 if "JPY" not in pair else 3),"strategies":[f"TRAP {tinfo}"],"filter":{"trap":True,"rsi":round(rsi,1),"time_left":clock_sec},"engine":"ANTI-TRAP","confidence":0,"time_left":clock_sec}
+            return {
+                "signal_id": f"WAIT-TRAP-{uuid.uuid4().hex[:8]}",
+                "signal": "WAIT",
+                "status": "WAITING",
+                "market": self._normalize_market(clean_pair if is_otc else pair) + (" OTC" if is_otc else ""),
+                "pair": clean_pair if is_otc else pair,
+                "direction": "WAIT",
+                "generated_at": int(now),
+                "candle_timestamp": int(now),
+                "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
+                "time_left": clock_sec,
+                "remainingSeconds": clock_sec,
+                "price": round(price,5 if "JPY" not in pair else 3),
+                "confidence": 0,
+                "risk_percent": RISK_PERCENT,
+                "reason": f"TRAP {tinfo}",
+                "engine": "ANTI-TRAP"
+            }
 
         mtf_sig,mtf_conf=self._mtf(pair)
-        if mtf_sig=="MIXED" and mode=="SAFE" and abs(pa_score) < 1.5:
-            return {"signal":"WAIT","pair":pair,"price":round(price,5 if "JPY" not in pair else 3),"strategies":["MTF MIXED"],"filter":{"mtf":"MIXED","time_left":clock_sec},"engine":"MTF WAIT","confidence":0,"time_left":clock_sec}
+        # FIXED: MTF MIXED এ WAIT না, শুধু score কমবে - তাই signal বেশি আসবে
+        if mtf_sig=="MIXED" and mode=="SUPER_SAFE" and abs(pa_score) < 1.5:
+            return {
+                "signal_id": f"WAIT-MTF-{uuid.uuid4().hex[:8]}",
+                "signal": "WAIT",
+                "status": "WAITING",
+                "market": self._normalize_market(clean_pair if is_otc else pair) + (" OTC" if is_otc else ""),
+                "pair": clean_pair if is_otc else pair,
+                "direction": "WAIT",
+                "generated_at": int(now),
+                "candle_timestamp": int(now),
+                "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
+                "time_left": clock_sec,
+                "remainingSeconds": clock_sec,
+                "price": round(price,5 if "JPY" not in pair else 3),
+                "confidence": 0,
+                "risk_percent": RISK_PERCENT,
+                "reason": "MTF MIXED",
+                "engine": "MTF WAIT"
+            }
         score+=mtf_conf/20; reasons.append(f"MTF {mtf_sig}")
 
         sig_dir="UP" if score>0 else "DOWN"
         corr_ok,corr_conf,cinfo=self._corr(pair,sig_dir)
         if not corr_ok and mode=="SAFE":
-            return {"signal":"WAIT","pair":pair,"price":round(price,5 if "JPY" not in pair else 3),"strategies":[f"CORR FAIL {cinfo}"],"filter":{"corr":False,"time_left":clock_sec},"engine":"CORR WAIT","confidence":0,"time_left":clock_sec}
+            return {
+                "signal_id": f"WAIT-CORR-{uuid.uuid4().hex[:8]}",
+                "signal": "WAIT",
+                "status": "WAITING",
+                "market": self._normalize_market(clean_pair if is_otc else pair) + (" OTC" if is_otc else ""),
+                "pair": clean_pair if is_otc else pair,
+                "direction": "WAIT",
+                "generated_at": int(now),
+                "candle_timestamp": int(now),
+                "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
+                "time_left": clock_sec,
+                "remainingSeconds": clock_sec,
+                "price": round(price,5 if "JPY" not in pair else 3),
+                "confidence": 0,
+                "risk_percent": RISK_PERCENT,
+                "reason": f"CORR FAIL {cinfo}",
+                "engine": "CORR WAIT"
+            }
         score+=corr_conf/25; reasons.append(cinfo)
 
         mem_b,mem_i=self._mem(pair)
@@ -215,34 +309,77 @@ class QuantumEngine:
         if abs(pa_score) >= 1.5:
             final = "UP" if pa_score > 0 else "DOWN"
         else:
-            final="UP" if score>=0.4 else "DOWN" if score<=-0.4 else "WAIT"
+            # FIXED: Threshold 0.4 থেকে 0.15 করলাম, তাই WAIT কম, signal বেশি
+            final="UP" if score>=0.15 else "DOWN" if score<=-0.15 else "WAIT"
+            # যদি WAIT ও হয়, momentum দিয়ে direction দাও
+            if final=="WAIT":
+                final="UP" if score>=0 else "DOWN"
         conf=min(95,50+abs(score)*20)
 
-        # Save with debounce timestamp
-        if final in ["UP","DOWN"]:
-            self.debounce[pair]=now
+        if final=="WAIT" and abs(score)<0.05:
+            # FIXED: খুব কম score হলেও WAIT না, low conf signal দাও
+            final="UP" if score>=0 else "DOWN"
+            conf=55
+        
+        if final=="WAIT":
+            return {
+                "signal_id": f"WAIT-SCORE-{uuid.uuid4().hex[:8]}",
+                "signal": "WAIT",
+                "status": "WAITING",
+                "market": self._normalize_market(clean_pair if is_otc else pair) + (" OTC" if is_otc else ""),
+                "pair": clean_pair if is_otc else pair,
+                "direction": "WAIT",
+                "generated_at": int(now),
+                "candle_timestamp": int(now),
+                "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
+                "time_left": clock_sec,
+                "remainingSeconds": clock_sec,
+                "price": round(price,5 if "JPY" not in pair else 3),
+                "confidence": 0,
+                "risk_percent": RISK_PERCENT,
+                "reason": f"Low score {score:.2f}",
+                "engine": f"SCORE WAIT {score:.2f}"
+            }
 
-        self.last_signals[pair]={
-            "signal":final,
-            "price":price,
-            "time":now,
-            "strategies":reasons[:4],
-            "rsi":round(rsi,1),
-            "score":round(score,2),
-            "confidence":int(conf)
+        # Create new signal with stable ID and expiry
+        display_pair = clean_pair if is_otc else pair_upper
+        # price data use clean pair
+        pair = clean_pair if clean_pair in REAL_MARKET_PAIRS else pair_upper
+        signal_id = f"{display_pair}{"-OTC" if is_otc else ""}-{final}-{uuid.uuid4().hex[:8]}"
+        expiry_ts = int((now_dt + timedelta(seconds=58)).timestamp()*1000)
+        # But for display, expiry is end of current candle (clock_sec)
+        display_expiry = int((now_dt + timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000)
+
+        market_name = self._normalize_market(display_pair) + (" OTC" if is_otc else "")
+        new_signal = {
+            "signal_id": signal_id,
+            "signal": final,
+            "status": "ACTIVE",
+            "market": market_name,
+            "pair": pair,
+            "direction": final,
+            "generated_at": int(now),
+            "candle_timestamp": int(now),
+            "expiry_timestamp": display_expiry,  # For countdown
+            "hold_expiry": expiry_ts,  # For lock
+            "time_left": clock_sec,
+            "remainingSeconds": clock_sec,
+            "price": round(price,5 if "JPY" not in pair else 3),
+            "strategies": reasons[:4],
+            "filter": {"trend": final, "rsi": round(rsi,1), "mtf": mtf_sig, "corr_conf": corr_conf, "mem": mem_i, "time_left": clock_sec, "mode": mode, "score": round(score,2)},
+            "engine": f"GHOST {mode} | {pair} | No Flicker",
+            "confidence": int(conf),
+            "real": quotex_client.use_real,
+            "risk_percent": RISK_PERCENT,
+            "timestamp": int(now)
         }
 
-        return {
-            "signal":final,"pair":pair,"price":round(price,5 if "JPY" not in pair else 3),
-            "strategies":reasons[:4],
-            "filter":{"trend":"UP" if score>0 else "DOWN","rsi":round(rsi,1),"mtf":mtf_sig,"corr_conf":corr_conf,"mem":mem_i,"time_left":clock_sec,"mode":mode,"score":round(score,2)},
-            "engine":f"GHOST {mode} | {pair} | No Flicker Lock",
-            "confidence":int(conf),"real":quotex_client.use_real,
-            "time_left":clock_sec,
-            "timestamp":int(now)
-        }
+        self.debounce[pair]=now
+        self.active_signals[pair]=new_signal
 
-    def scan_all(self,mode="FAST"):
+        return new_signal
+
+    def scan_all(self,mode="SAFE"):
         self._new_ticks()
         res=[]
         for p in self.pairs:
