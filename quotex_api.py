@@ -345,7 +345,7 @@ class QuantumEngine:
         
         # HOLD LOGIC - 1M er jonno 55s ek signal hold korbe, flicker korbe na
         now = time.time()
-        hold_time = 20 if mode=="FAST" else 55
+        hold_time = 25 if mode=="FAST" else 58
         if pair in self.last_signals:
             last = self.last_signals[pair]
             elapsed = now - last["time"]
