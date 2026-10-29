@@ -1,3 +1,4 @@
+
 import os, threading, logging, re, traceback
 from flask import Flask, send_from_directory, jsonify, request
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -16,17 +17,12 @@ except:
 logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN","").strip()
 
-# ADMIN_ID fix - strip spaces, handle errors
 _admin_raw = os.getenv("ADMIN_ID","0").strip()
 try:
     ADMIN_ID = int(_admin_raw) if _admin_raw else 0
 except:
-    # Try to extract digits
     digits = re.sub(r'[^0-9]', '', _admin_raw)
     ADMIN_ID = int(digits) if digits else 0
-
-logging.info(f"=== GHOST PREMIUM STARTING ===")
-logging.info(f"ADMIN_ID raw='{_admin_raw}' parsed={ADMIN_ID}")
 
 AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
 WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com")
@@ -35,6 +31,10 @@ ACADEMY_LINK = os.getenv("ACADEMY_LINK","https://t.me/premierghos")
 APP_LINK = os.getenv("APP_LINK","https://giogram-backend.onrender.com")
 
 PAIRS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]
+
+pending_custom_msg = {}
+user_trader_map = {}
+pending_deposit_claims = {}
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
 @flask_app.after_request
@@ -63,7 +63,6 @@ def api_signal():
 def health(): 
     return f"GHOST PREMIUM LIVE - ADMIN_ID={ADMIN_ID} - OK"
 
-# === BOLD & STYLISH BANGLA WELCOME ===
 WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 
 <b>ভাই, ট্রেডিংয়ে ৯০% মানুষ একা হেরে যায়...</b>
@@ -94,7 +93,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
     user = update.effective_user
 
-    # 1. PAIR analysis
+    if user.id == ADMIN_ID and ADMIN_ID in pending_custom_msg:
+        target_uid = pending_custom_msg.pop(ADMIN_ID)
+        custom_text = text
+        try:
+            await context.bot.send_message(chat_id=int(target_uid), text=f"📩 <b>Admin Message for You:</b>\n\n{custom_text}\n\n- GHOST PREMIUM Team 👻", parse_mode='HTML')
+            await update.message.reply_text(f"✅ Custom message sent to {target_uid}:\n\n{custom_text}")
+        except Exception as e:
+            await update.message.reply_text(f"❌ Failed to send to {target_uid}: {e}")
+        return
+
     if text.upper() in PAIRS:
         pair = text.upper()
         try:
@@ -106,100 +114,200 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             trend = s["filter"].get("trend")
             strategies = "\n".join([f"• {x}" for x in s.get("strategies",[])[:3]])
             real = "✅ REAL SSID" if s.get("real") else "🔄 REAL ECB"
-            msg = f"📊 <b>{pair} REAL ANALYSIS</b> {real}\n\n{emoji} <b>Signal: {s['signal']}</b> {conf}%\n💰 Price: {price} | {trend} | RSI {rsi}\n\n🧠 Strategies:\n{strategies}\n\n⏱️ Hold 20s - Draggable bot e same signal\n🌐 {WEBSITE_URL}"
+            msg = f"📊 <b>{pair} REAL ANALYSIS</b> {real}\n\n{emoji} <b>Signal: {s['signal']}</b> {conf}%\n💰 Price: {price} | {trend} | RSI {rsi}\n\n🧠 Strategies:\n{strategies}\n\n⏱️ Hold 20s\n🌐 {WEBSITE_URL}"
             kb = [[InlineKeyboardButton(f"📈 {pair} Chart e Bot", url=WEBSITE_URL)]]
             await update.message.reply_text(msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
         except Exception as e:
             await update.message.reply_text(f"❌ {pair} analysis error: {e}")
         return
 
-    # 2. # check
     if "#" in text:
         num_only = re.sub(r'[^0-9]', '', text)
-        await update.message.reply_text(
-            f"🚫 <code>{text}</code> পাওয়া যায় নাই!\n\n"
-            f"অনুগ্রহ করে # ছাড়া শুধু ID পাঠান\n"
-            f"Example: 1234567\n\n"
-            f"💡 Tip: Profile > Trader ID copy করে শুধু নাম্বারটা পেস্ট করুন, # দিবেন না।\n\n"
-            f"আপনি পাঠিয়েছেন: {text} → সঠিক: {num_only if num_only else '1234567'}",
-            parse_mode='HTML'
-        )
+        await update.message.reply_text(f"🚫 <code>{text}</code> পাওয়া যায় নাই!\n\nঅনুগ্রহ করে # ছাড়া শুধু ID পাঠান\nExample: 1234567\n\nআপনি পাঠিয়েছেন: {text} → সঠিক: {num_only if num_only else '1234567'}", parse_mode='HTML')
         return
 
     if not text.isdigit():
         if any(c.isdigit() for c in text):
             num_only = re.sub(r'[^0-9]', '', text)
-            await update.message.reply_text(
-                f"🚫 <code>{text}</code> - ID তে শুধু নাম্বার থাকবে!\n\n"
-                f"✅ সঠিক: <code>{num_only if num_only else '1234567'}</code>\n"
-                f"❌ ভুল: <code>#1234567</code> বা <code>ID 1234567</code>\n\n"
-                f"Example: 1234567",
-                parse_mode='HTML'
-            )
+            await update.message.reply_text(f"🚫 <code>{text}</code> - ID তে শুধু নাম্বার থাকবে!\n\n✅ সঠিক: <code>{num_only if num_only else '1234567'}</code>\nExample: 1234567", parse_mode='HTML')
         else:
-            await update.message.reply_text(
-                "👻 <b>GHOST PREMIUM</b>\n\n"
-                "ID পাঠান: শুধু নাম্বার, যেমন <code>1234567</code>\n"
-                "Market analysis: যেমন <code>EURUSD</code> লিখুন\n"
-                "Help: /start\n"
-                "ID check: /myid",
-                parse_mode='HTML'
-            )
+            await update.message.reply_text("👻 <b>GHOST PREMIUM</b>\n\nID পাঠান: শুধু নাম্বার, যেমন <code>1234567</code>\nMarket analysis: যেমন <code>EURUSD</code> লিখুন\nHelp: /start\nID check: /myid", parse_mode='HTML')
         return
 
-    # Valid ID
     tid = text
     if len(tid) < 4 or len(tid) > 12:
         await update.message.reply_text("❌ ID 4-12 digit er hobe, Example: 1234567")
         return
 
-    await update.message.reply_text(
-        f"✅ ID <code>{tid}</code> Received! ❤️\n\n"
-        f"Admin check korche, 2 min er moddhe approve hobe!\n"
-        f"Approve hole GHOST PREMIUM BOT Free Access Paben!",
-        parse_mode='HTML'
-    )
-    
-    # === ADMIN NOTIFY - FIXED ===
-    try:
-        if ADMIN_ID == 0:
-            logging.warning(f"ADMIN_ID is 0! Cannot notify admin for TID {tid}. Set ADMIN_ID env var!")
-            # Still tell user
-            await update.message.reply_text("⚠️ ADMIN_ID set kora nai Render e! @userinfobot theke ID niye Render > Environment e ADMIN_ID add korun")
-            return
+    user_trader_map[user.id] = tid
+    pending_deposit_claims[user.id] = tid
 
-        kb=[[InlineKeyboardButton("✅ Approve PREMIUM", callback_data=f"ap_{user.id}_{tid}"), InlineKeyboardButton("❌ Reject", callback_data=f"rj_{user.id}")]]
-        sent = await context.bot.send_message(
-            chat_id=ADMIN_ID,
-            text=f"🆕 <b>GHOST PREMIUM NEW ID</b>\n\n🆔 Trader ID: <code>{tid}</code>\n👤 User: @{user.username or 'N/A'}\n📛 Name: {user.first_name}\n🔢 UID: {user.id}\n\n💰 Deposit check korte hobe\nADMIN_ID={ADMIN_ID}",
-            reply_markup=InlineKeyboardMarkup(kb),
-            parse_mode='HTML'
-        )
-        logging.info(f"✅ Admin notified for TID {tid} to {ADMIN_ID}, msg_id={sent.message_id}")
+    kb = [
+        [InlineKeyboardButton("✅ হ্যাঁ, ডিপোজিট করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("❌ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
+        [InlineKeyboardButton("📸 Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
+    ]
+    await update.message.reply_text(f"✅ ID <code>{tid}</code> Received! ❤️\n\n💰 <b>আপনি কি ডিপোজিট করেছেন?</b>\n\nআমাদের লিংক থেকে অ্যাকাউন্ট + ডিপোজিট করলে প্রিমিয়াম পাবেন।\nডিপোজিট করে থাকলে Yes বলুন, Admin চেক করবে।", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    
+    try:
+        if ADMIN_ID != 0:
+            kb_admin = [
+                [InlineKeyboardButton("✅ Direct Approve", callback_data=f"ap_{user.id}_{tid}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{user.id}")],
+                [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{user.id}")]
+            ]
+            await context.bot.send_message(chat_id=ADMIN_ID, text=f"📩 <b>New ID (Waiting Deposit Confirm)</b>\n\n🆔 Trader ID: <code>{tid}</code>\n👤 User ID: <code>{user.id}</code>\n👤 @{user.username or 'N/A'}\n\nUser ke deposit jiggesh kora hoise. Yes bolle janabo.", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
     except Exception as e:
-        logging.error(f"❌ Admin notify fail for TID {tid} to ADMIN_ID {ADMIN_ID}: {e}")
-        logging.error(traceback.format_exc())
-        # Try to inform admin that notify failed
+        logging.error(f"Admin notify fail {e}")
+
+async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if user.id == ADMIN_ID and ADMIN_ID in pending_custom_msg:
+        target_uid = pending_custom_msg.pop(ADMIN_ID)
         try:
-            await update.message.reply_text(f"⚠️ Admin notify failed: {e}. ADMIN_ID={ADMIN_ID} check korun")
-        except: pass
+            caption = update.message.caption or "📩 Admin sent you a file"
+            if update.message.photo:
+                await context.bot.send_photo(chat_id=int(target_uid), photo=update.message.photo[-1].file_id, caption=f"📩 <b>Admin:</b>\n\n{caption}", parse_mode='HTML')
+            elif update.message.document:
+                await context.bot.send_document(chat_id=int(target_uid), document=update.message.document.file_id, caption=f"📩 Admin: {caption}", parse_mode='HTML')
+            else:
+                await context.bot.send_message(chat_id=int(target_uid), text=f"📩 Admin: {caption}")
+            await update.message.reply_text(f"✅ Media sent to {target_uid}")
+        except Exception as e:
+            await update.message.reply_text(f"❌ Failed {e}")
+        return
+
+    tid = user_trader_map.get(user.id, "N/A")
+    kb = [[InlineKeyboardButton("✅ হ্যাঁ, ডিপোজিট করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না, করিনি", callback_data=f"dpnM_{user.id}_{tid}")]]
+    await update.message.reply_text(f"📸 <b>Screenshot/Sticker Received!</b>\n\n🆔 Trader ID: {tid}\n\n💰 <b>আপনি কি ডিপোজিট করেছেন?</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    try:
+        if ADMIN_ID != 0:
+            cap = f"📸 <b>Proof from User</b>\n\n👤 User: {user.id} @{user.username or 'N/A'}\n🆔 Trader ID: {tid}"
+            kb_admin = [[InlineKeyboardButton("✅ Approve", callback_data=f"ap_{user.id}_{tid}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{user.id}")], [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{user.id}")]]
+            if update.message.photo:
+                await context.bot.send_photo(chat_id=ADMIN_ID, photo=update.message.photo[-1].file_id, caption=cap, reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+            elif update.message.sticker:
+                await context.bot.send_sticker(chat_id=ADMIN_ID, sticker=update.message.sticker.file_id)
+                await context.bot.send_message(chat_id=ADMIN_ID, text=cap, reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+            elif update.message.document:
+                await context.bot.send_document(chat_id=ADMIN_ID, document=update.message.document.file_id, caption=cap, reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+    except Exception as e:
+        logging.error(f"Forward media fail {e}")
 
 async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    q=update.callback_query
+    q = update.callback_query
     await q.answer()
-    d=q.data
-    if d=="how_id":
-        await q.message.reply_text(
-            "❓ <b>How to Get Trader ID?</b>\n\n"
-            "1️⃣ Quotex link e click kore account khulun\n"
-            "2️⃣ Profile icon e click korun\n"
-            "3️⃣ Trader ID copy korun (শুধু নাম্বার)\n"
-            "4️⃣ Ekhane paste korun - Example: <code>1234567</code>\n\n"
-            "⚠️ #1234567 দিবেন না, শুধু 1234567",
-            parse_mode='HTML'
-        )
+    d = q.data
+    user = update.effective_user
+
+    if d == "how_id":
+        await q.message.reply_text("📸 Quotex > Profile > Trader ID copy korun, Example: 1234567\n# chara sudhu number pathan!", parse_mode='HTML')
+    elif d.startswith("proof_"):
+        parts = d.split("_")
+        tid = parts[2] if len(parts)>2 else "N/A"
+        await q.message.reply_text(f"📸 Screenshot pathan - Trader ID: {tid} er deposit proof din.")
+    elif d.startswith("dpy_"):
+        parts = d.split("_")
+        uid = parts[1]
+        trader_id = parts[2] if len(parts)>2 else user_trader_map.get(int(uid), "N/A")
+        try:
+            kb_admin = [[InlineKeyboardButton("💰 Deposit Select", callback_data=f"ap_{uid}_{trader_id}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{uid}")], [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}")]]
+            await context.bot.send_message(chat_id=ADMIN_ID, text=f"✅ <b>User Claims Deposit Done!</b>\n\n👤 User ID: {uid}\n🆔 Trader ID: {trader_id}\n👤 @{q.from_user.username or 'N/A'}\n\n🔍 Admin, check affiliate panel then Approve! Direct access na!", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+            await q.edit_message_text(f"✅ Thanks! ID {trader_id} deposit claim sent to Admin. 2-5 min wait korun! Deposit na korle access paben na.", parse_mode='HTML')
+        except Exception as e:
+            await q.edit_message_text(f"Claim noted but fail {e}")
+    elif d.startswith("dpn_"):
+        parts = d.split("_")
+        trader_id = parts[2] if len(parts)>2 else "N/A"
+        await q.edit_message_text(f"❌ <b>Deposit koren nai?</b>\n\nID {trader_id} er jonno link theke $10 deposit korun, tarpor Yes bolun!\n\nLink: {AFFILIATE_LINK}\n\nDeposit chara access na!", parse_mode='HTML')
+    elif d.startswith("dpyM_"):
+        raw = d.replace("dpyM_","")
+        sp = raw.split("_")
+        uid = sp[0]
+        trader_id = sp[1] if len(sp)>1 else user_trader_map.get(int(uid), "N/A")
+        try:
+            kb_admin = [[InlineKeyboardButton("💰 Approve Amount", callback_data=f"ap_{uid}_{trader_id}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{uid}")], [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}")]]
+            await context.bot.send_message(chat_id=ADMIN_ID, text=f"✅ <b>Media + Deposit Claim!</b>\n\n👤 User: {uid}\n🆔 ID: {trader_id}\n\nScreenshot + deposit claim. Check kore approve korun! Deposit chara access na!", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+            await q.edit_message_text(f"✅ Media + Deposit claim sent! ID {trader_id} - Admin check korbe!")
+        except Exception as e:
+            await q.edit_message_text(f"Sent but fail {e}")
+    elif d.startswith("dpnM_"):
+        raw = d.replace("dpnM_","")
+        sp = raw.split("_")
+        trader_id = sp[1] if len(sp)>1 else "N/A"
+        await q.edit_message_text(f"❌ Deposit na korle access na! ID {trader_id} er jonno deposit korun.\nLink: {AFFILIATE_LINK}", parse_mode='HTML')
+    elif d.startswith("cm_") and not d.startswith("cmdep_") and not d.startswith("cmnolink_") and not d.startswith("cmscreen_") and not d.startswith("cmwrite_"):
+        uid = d.split("_")[1]
+        if user.id != ADMIN_ID:
+            await q.message.reply_text("❌ Only admin!")
+            return
+        kb_custom = [
+            [InlineKeyboardButton("❌ Deposit nai - msg", callback_data=f"cmdep_{uid}"), InlineKeyboardButton("❌ Link theke na", callback_data=f"cmnolink_{uid}")],
+            [InlineKeyboardButton("📸 Screenshot chai", callback_data=f"cmscreen_{uid}"), InlineKeyboardButton("✍️ Nije likhbo", callback_data=f"cmwrite_{uid}")],
+            [InlineKeyboardButton("⬅️ Back", callback_data=f"ap_{uid}_N/A")]
+        ]
+        await q.edit_message_text(f"✍️ <b>Custom Message Select</b>\n\nMember ID: {uid} ke ki pathabo?\n\n1 click e preset pathate paro, na hole Nije likhbo click kore type koro:", reply_markup=InlineKeyboardMarkup(kb_custom), parse_mode='HTML')
+    elif d.startswith("cmwrite_"):
+        uid = d.split("_")[1]
+        if user.id != ADMIN_ID:
+            await q.message.reply_text("❌ Only admin!")
+            return
+        pending_custom_msg[ADMIN_ID] = int(uid)
+        await q.edit_message_text(f"✍️ <b>Type Mode ON</b>\n\nMember ID: {uid} ke ki pathabo ekhon likhun:\n\nExample: Bhai apnar account amader link theke hoise kintu deposit koren nai, $10 deposit koren tarpor ID pathan\n\nEkhon niche text likhun, ami member ke pathay dibo (Direct access jabe na):", parse_mode='HTML')
+    elif d.startswith("cmdep_"):
+        uid = d.split("_")[1]
+        msg = """📩 <b>Deposit Not Found</b>
+
+Bhai apnar Trader ID amader link theke thik ache, kintu deposit check korlam - deposit hoy nai ❌
+
+👉 Amader link theke minimum $10 deposit koren
+👉 Tarpor screenshot + Trader ID pathan
+👉 Ami sathe sathe Premium diye dibo
+
+Deposit chara access deya jabe na - Quotex er rule.
+
+Link: """ + AFFILIATE_LINK + """
+
+- GHOST PREMIUM Team 👻"""
+        try:
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
+            await q.edit_message_text(f"✅ Deposit-nai preset sent to {uid}")
+        except Exception as e:
+            await q.edit_message_text(f"❌ Send fail {e}")
+    elif d.startswith("cmnolink_"):
+        uid = d.split("_")[1]
+        msg = """❌ <b>Account Link Theke Na</b>
+
+Bhai apnar account ta amader affiliate link theke khola na.
+
+👉 Amader link theke notun account khulun: """ + AFFILIATE_LINK + """
+👉 Tarpor $10 deposit koren
+👉 Tarpor Profile theke Trader ID (sudhu number, # chara) pathan - Example: 1234567
+
+Purono account diye hobe na.
+
+- GHOST PREMIUM"""
+        try:
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
+            await q.edit_message_text(f"✅ Link-theke-na preset sent to {uid}")
+        except Exception as e:
+            await q.edit_message_text(f"❌ Fail {e}")
+    elif d.startswith("cmscreen_"):
+        uid = d.split("_")[1]
+        msg = """📸 <b>Screenshot Din</b>
+
+Bhai apnar deposit check korte screenshot lagbe.
+
+👉 Quotex > Deposit History er screenshot din
+👉 Sathe Trader ID din
+
+Ami check kore sathe sathe approve kore dibo.
+
+- GHOST PREMIUM"""
+        try:
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
+            await q.edit_message_text(f"✅ Screenshot-chao preset sent to {uid}")
+        except Exception as e:
+            await q.edit_message_text(f"❌ Fail {e}")
     elif d.startswith("ap_"):
-        # Step 1: Admin clicked Approve -> Show deposit selection $10-$100 + extra common deposits
         parts=d.split("_")
         uid=parts[1]
         trader_id=parts[2] if len(parts)>2 else "N/A"
@@ -208,13 +316,10 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("💵 $50", callback_data=f"dep_{uid}_{trader_id}_50"), InlineKeyboardButton("💵 $60", callback_data=f"dep_{uid}_{trader_id}_60"), InlineKeyboardButton("💵 $70", callback_data=f"dep_{uid}_{trader_id}_70"), InlineKeyboardButton("💵 $80", callback_data=f"dep_{uid}_{trader_id}_80")],
             [InlineKeyboardButton("💵 $90", callback_data=f"dep_{uid}_{trader_id}_90"), InlineKeyboardButton("💵 $100", callback_data=f"dep_{uid}_{trader_id}_100"), InlineKeyboardButton("💵 $150", callback_data=f"dep_{uid}_{trader_id}_150"), InlineKeyboardButton("💵 $200", callback_data=f"dep_{uid}_{trader_id}_200")],
             [InlineKeyboardButton("💵 $250", callback_data=f"dep_{uid}_{trader_id}_250"), InlineKeyboardButton("💵 $300", callback_data=f"dep_{uid}_{trader_id}_300"), InlineKeyboardButton("💵 $500", callback_data=f"dep_{uid}_{trader_id}_500"), InlineKeyboardButton("💵 $1000", callback_data=f"dep_{uid}_{trader_id}_1000")],
-            [InlineKeyboardButton("💵 $5", callback_data=f"dep_{uid}_{trader_id}_5"), InlineKeyboardButton("💵 $15", callback_data=f"dep_{uid}_{trader_id}_15"), InlineKeyboardButton("💵 $25", callback_data=f"dep_{uid}_{trader_id}_25"), InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}")]
+            [InlineKeyboardButton("💵 $5", callback_data=f"dep_{uid}_{trader_id}_5"), InlineKeyboardButton("💵 $15", callback_data=f"dep_{uid}_{trader_id}_15"), InlineKeyboardButton("💵 $25", callback_data=f"dep_{uid}_{trader_id}_25"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{uid}"), InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}")]
         ]
-        await q.edit_message_text(f"💰 <b>Deposit Select for {trader_id}</b>\n\nUser ID: {uid}\nTrader ID: {trader_id}\n\nKoto deposit korse select korun:\n$10-$100 main + extra common deposits:", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-        logging.info(f"Admin selecting deposit for {trader_id} uid {uid}")
-
+        await q.edit_message_text(f"💰 <b>Deposit Select for {trader_id}</b>\n\nUser ID: {uid}\nTrader ID: {trader_id}\n\nKoto deposit korse select korun (Check kore! Deposit chara access na):", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     elif d.startswith("dep_"):
-        # Step 2: Admin selected deposit amount -> Send SHORT congrats to user with Universal Bookmarklet guide
         parts=d.split("_")
         uid=parts[1]
         trader_id=parts[2]
@@ -224,80 +329,59 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🔖 Universal Bookmarklet Guide", callback_data="bookmark_guide"), InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK)],
             [InlineKeyboardButton("📱 App Link", url=APP_LINK), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)]
         ]
-        # Short congrats with bookmarklet info
         msg = f"""🎉 <b>CONGRATULATIONS! PREMIUM APPROVED!</b> 🎉
 
-❤️ <b>Bhai, apnake welcome - 1winner family er part!</b>
+❤️ <b>Bhai, apnake welcome - 10K+ winner family er part!</b>
 
 🆔 <b>Trader ID:</b> <code>{trader_id}</code>
 💰 <b>Total Deposit:</b> <b>${amount}</b>
-📊 <b>Status:</b> ✅ PREMIUM ACTIVATED 
+📊 <b>Status:</b> ✅ PREMIUM ACTIVE
 
 ⚠️ <b>Kono bot 100% win dey na - 1% risk e safe trading!</b>
 
 🔖 <b>Universal Bookmarklet:</b>
-Website e giye <b>COPY UNIVERSAL BOOKMARKLET</b> button e click korun - 1 ta bookmarklet e PC/Mobile/Laptop sob cholbe!
-
-🚀 <b>PA Strategy: Pin Bar, Support/Resistance Wick e o profit!</b>
+Website e giye <b>COPY</b> button e click korun!
 
 - GHOST PREMIUM Team 👻
 """
         try:
+            try:
+                with open('approved_sticker.jpg','rb') as sticker:
+                    await context.bot.send_photo(chat_id=int(uid), photo=sticker, caption=f"✅ Confirmed!\nID: {trader_id} | ${amount}")
+            except Exception as se:
+                logging.info(f"Sticker fail {se}")
             await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-            await q.edit_message_text(f"✅ Approved ID {trader_id} - Deposit ${amount} - Sent to {uid}")
-            logging.info(f"✅ Approved {trader_id} for {uid} with ${amount}")
+            await q.edit_message_text(f"✅ Approved ID {trader_id} - ${amount} - Sent to {uid} + Sticker")
         except Exception as e:
-            logging.error(f"Approve send fail {e}")
-            await q.edit_message_text(f"Approved but send fail {e}")
+            await q.edit_message_text(f"Approved but fail {e}")
     elif d.startswith("rj_"):
         uid=d.split("_")[1]
-        await context.bot.send_message(chat_id=int(uid), text="❌ Rejected - Affiliate link diye new account khulun, tarpor sudhu number ID pathan (Example: 1234567, # chara)")
-        await q.edit_message_text("❌ Rejected")
+        try:
+            try:
+                with open('rejected_sticker.jpg','rb') as sticker:
+                    await context.bot.send_photo(chat_id=int(uid), photo=sticker, caption="❌ Your Account Was Not Opened From Our Link")
+            except:
+                pass
+            await context.bot.send_message(chat_id=int(uid), text="❌ Rejected - Affiliate link diye new account khulun, tarpor ID pathan (1234567)")
+            await q.edit_message_text("❌ Rejected + Sticker sent")
+        except Exception as e:
+            await q.edit_message_text(f"Reject fail {e}")
     elif d=="bookmark_guide":
-        guide = """🔖 <b>UNIVERSAL BOOKMARKLET - ALL DEVICES</b> 🔖
+        guide = f"""🔖 <b>UNIVERSAL BOOKMARKLET</b> 🔖
 
-<b>1 ta bookmarklet e PC/Laptop/Mobile/Desktop/Tablet sob cholbe!</b>
+1 ta bookmarklet e PC/Mobile sob cholbe!
 
-<b>🌐 Website Method (Best):</b>
-1️⃣ <b>Website e jao:</b> """ + WEBSITE_URL + """
-2️⃣ <b>COPY UNIVERSAL BOOKMARKLET</b> button e click koro
-3️⃣ Bookmark bar e paste kore save koro
+🌐 Website: {WEBSITE_URL}
+COPY button e click koro
 
-<b>📱 Mobile Method:</b>
-1️⃣ Chrome > 3 dot > Bookmarks > Add Bookmark
-2️⃣ Name: <code>GHOST</code>
-3️⃣ URL: Eita paste koro:
-<code>javascript:(function(){var s=document.createElement('script');s.src='""" + WEBSITE_URL + """/ghost.js?v='+Date.now();document.body.appendChild(s);})();</code>
-4️⃣ Save > market-qx.info chart e jao > Address bar e GHOST likho > Bookmark e tap koro
+📱 Mobile: Chrome > Bookmarks > Add > Name: GHOST > URL: javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?v='+Date.now();document.body.appendChild(s);}})();
 
-<b>💻 PC Method:</b>
-Bookmark bar e GHOST bookmark e click koro chart e thaka obosthay
-
-<b>✅ Bot asbe: PA WICK PROFIT • SAFE 1M • Auto Market Detect • Draggable!</b>
+✅ Bot asbe: PA WICK PROFIT • SAFE 1M • Draggable!
 """
         await q.message.reply_text(guide, parse_mode='HTML')
-    elif d.startswith("live_"):
-        pair=d.replace("live_","")
-        try:
-            s=signal_engine.get_signal(pair,"FAST")
-            emoji="🟢" if s["signal"]=="UP" else "🔴" if s["signal"]=="DOWN" else "⏳"
-            await q.message.reply_text(f"📊 <b>{pair} REAL</b> {emoji} {s['signal']} {s.get('confidence',0)}% | {s.get('price')} | RSI {s['filter'].get('rsi')}", parse_mode='HTML')
-        except Exception as e:
-            await q.message.reply_text(f"Error {e}")
-    elif d=="scan":
-        try:
-            all_pairs=signal_engine.scan_all("FAST")
-            txt="🔮 <b>GHOST PREMIUM SCAN 27 PAIRS</b>\n\n"
-            for s in all_pairs[:6]:
-                emoji="🟢" if s["signal"]=="UP" else "🔴" if s["signal"]=="DOWN" else "⏳"
-                txt+=f"{emoji} {s['pair']} {s['signal']} {s.get('confidence',0)}%\n"
-            await q.message.reply_text(txt, parse_mode='HTML')
-        except Exception as e:
-            await q.message.reply_text(f"Scan error {e}")
 
 def run_flask():
     port=int(os.environ.get("PORT",10000))
-    logging.info(f"Flask starting on 0.0.0.0:{port}")
     flask_app.run(host="0.0.0.0", port=port)
 
 def run_bot():
@@ -308,8 +392,11 @@ def run_bot():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("myid", myid))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_handler(MessageHandler(filters.PHOTO, handle_media))
+    app.add_handler(MessageHandler(filters.Sticker.ALL, handle_media))
+    app.add_handler(MessageHandler(filters.Document.ALL, handle_media))
     app.add_handler(CallbackQueryHandler(callbacks))
-    logging.info(f"GHOST PREMIUM Bot polling started... ADMIN_ID={ADMIN_ID}")
+    logging.info(f"Bot polling ADMIN_ID={ADMIN_ID}")
     app.run_polling()
 
 if __name__=="__main__":
