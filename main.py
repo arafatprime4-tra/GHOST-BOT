@@ -1,5 +1,5 @@
 
-import os, threading, logging, re, traceback
+import os, threading, logging, re, traceback, json, secrets, time
 from flask import Flask, send_from_directory, jsonify, request
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
@@ -16,6 +16,25 @@ except:
 
 logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN","").strip()
+
+_admin_raw = os.getenv("ADMIN_ID","0").strip()
+try:
+    ADMIN_ID = int(_admin_raw) if _admin_raw else 0
+except:
+    digits = re.sub(r'[^0-9]', '', _admin_raw)
+    ADMIN_ID = int(digits) if digits else 0
+
+AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
+WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com")
+CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
+ACADEMY_LINK = os.getenv("ACADEMY_LINK","https://t.me/premierghos")
+APP_LINK = os.getenv("APP_LINK","https://giogram-backend.onrender.com")
+
+PAIRS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]
+
+pending_custom_msg = {}
+user_trader_map = {}
+pending_deposit_claims = {}
 
 # === PREMIUM TOKEN SYSTEM ===
 TOKEN_FILE = "approved_tokens.json"
@@ -48,26 +67,6 @@ def create_premium_token(trader_id, user_id, amount):
     save_tokens()
     return token
 
-
-_admin_raw = os.getenv("ADMIN_ID","0").strip()
-try:
-    ADMIN_ID = int(_admin_raw) if _admin_raw else 0
-except:
-    digits = re.sub(r'[^0-9]', '', _admin_raw)
-    ADMIN_ID = int(digits) if digits else 0
-
-AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
-WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com")
-CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
-ACADEMY_LINK = os.getenv("ACADEMY_LINK","https://t.me/premierghos")
-APP_LINK = os.getenv("APP_LINK","https://giogram-backend.onrender.com")
-
-PAIRS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]
-
-pending_custom_msg = {}
-user_trader_map = {}
-pending_deposit_claims = {}
-
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
 @flask_app.after_request
 def after_request(r): 
@@ -87,10 +86,6 @@ def api_signal():
     try:
         mode=request.args.get('mode','SAFE')
         pair=request.args.get('pair','EURUSD').upper()
-        # Optional token check for signal - if token provided, verify, else allow (can lock later)
-        # token = request.args.get('token') or request.args.get('access')
-        # if token and token not in approved_tokens:
-        #    return jsonify({"signal":"LOCKED","error":"Invalid premium token"})
         return jsonify(signal_engine.get_signal(pair,mode))
     except Exception as e: 
         return jsonify({"signal":"ERROR","error":str(e)})
@@ -109,7 +104,7 @@ def api_verify():
 
 @flask_app.route('/health')
 def health(): 
-    return f"GHOST PREMIUM LIVE - ADMIN_ID={ADMIN_ID} - OK"
+    return f"GHOST PREMIUM LIVE - ADMIN_ID={ADMIN_ID} TOKENS={len(approved_tokens)} - OK"
 
 WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 
@@ -118,17 +113,63 @@ WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 
 <b>বটটা ফ্রি, কিন্তু সঠিক পথে। কোনো সেল না।</b>
 
-🤔 <b>কিভাবে শুরু?</b>
-1️⃣ <b>লিংক থেকে অ্যাকাউন্ট করে যেকোনো অ্যামাউন্ট ডিপোজিট করুন</b>
-2️⃣ <b>প্রোফাইল থেকে Trader ID কপি করুন</b>
+✨ <b>কিভাবে শুরু?</b>
+1️⃣ <b>Account Create Link থেকে অ্যাকাউন্ট করে যেকোনো অ্যামাউন্ট ডিপোজিট করুন</b>
+2️⃣ <b>প্রোফাইল থেকে Trader ID কপি করুন (শুধু নাম্বার, # ছাড়া)</b>
+
+🌐 <b>Website:</b> https://giogram-backend.onrender.com
+👉 এখানে ঢুকলে Normal page দেখবেন (Channel + Admin)
+👉 Approve হলে আলাদা Special Premium Link পাবেন, ওখানে সব Premium জিনিস (Bookmarklet, Dashboard) দেখবেন
 
 ⚠️ <b>কোনো বট ১০০% উইন দেয় না - আমরা ১% রিস্কে সেফ থাকতে শেখাই</b>
 """
 
+ACADEMY_WELCOME = """👻 <b>GHOST PREMIUM - ACADEMY WELCOME</b> 👻
+
+Welcome to our Academy! ❤️
+
+🌐 <b>Official Website:</b>
+https://giogram-backend.onrender.com
+
+<b>এই লিঙ্কে কি দেখবেন?</b>
+• Approve না হলে: শুধু Normal Page (Channel Join + Admin)
+• Approve হলে: আলাদা Special Premium Link পাবেন, ওখানে সব Premium জিনিস (Bookmarklet COPY, Dashboard, Signal Plate) দেখবেন
+
+✨ <b>Premium পেতে:</b>
+1. Account Create Link থেকে Account করুন
+2. যেকোনো Amount Deposit করুন
+3. Trader ID (শুধু নাম্বার) Bot এ পাঠান
+4. Admin Check করে Special Link দিয়ে দিবে
+
+👻 GHOST PREMIUM Team
+"""
+
+ACADEMY_WELCOME = """
+👻 <b>GHOST PREMIUM - ACADEMY WELCOME</b> 👻
+
+Welcome to our Academy! ❤️
+
+🌐 <b>Official Website:</b>
+https://giogram-backend.onrender.com
+
+<b>এই লিঙ্কে কি দেখবেন?</b>
+• Approve না হলে: শুধু Normal Page (Channel Join + Admin)
+• Approve হলে: আলাদা Special Premium Link পাবেন, ওখানে সব Premium জিনিস (Bookmarklet COPY, Dashboard, Signal Plate) দেখবেন
+
+✨ <b>Premium পেতে:</b>
+1. Account Create Link থেকে Account করুন
+2. যেকোনো Amount Deposit করুন
+3. Trader ID (শুধু নাম্বার) Bot এ পাঠান
+4. Admin Check করে Special Link দিয়ে দিবে
+
+👻 GHOST PREMIUM Team
+"""
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     kb=[
-        [InlineKeyboardButton("🔗 Account Create Link", url=AFFILIATE_LINK)],
-        [InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
+        [InlineKeyboardButton("Account Create Link", url=AFFILIATE_LINK)],
+        [InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
         [InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
@@ -245,6 +286,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await q.answer()
     d = q.data
     user = update.effective_user
+    logging.info(f"Callback: {d} from {user.id}")
 
     if d == "how_id":
         await q.message.reply_text("📸 Quotex > Profile > Trader ID copy korun, Example: 1234567\n# chara sudhu number pathan!", parse_mode='HTML')
@@ -302,7 +344,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.edit_message_text(f"✍️ <b>Type Mode ON</b>\n\nMember ID: {uid} ke ki pathabo ekhon likhun:\n\nExample: Bhai apnar account amader link theke hoise kintu deposit koren nai, $10 deposit koren tarpor ID pathan\n\nEkhon niche text likhun, ami member ke pathay dibo (Direct access jabe na):", parse_mode='HTML')
     elif d.startswith("cmdep_"):
         uid = d.split("_")[1]
-        msg = """📩 <b>Deposit Not Found</b>
+        msg = f"""📩 <b>Deposit Not Found</b>
 
 Bhai apnar Trader ID amader link theke thik ache, kintu deposit check korlam - deposit hoy nai ❌
 
@@ -312,7 +354,7 @@ Bhai apnar Trader ID amader link theke thik ache, kintu deposit check korlam - d
 
 Deposit chara access deya jabe na - Quotex er rule.
 
-Link: """ + AFFILIATE_LINK + """
+Link: {AFFILIATE_LINK}
 
 - GHOST PREMIUM Team 👻"""
         try:
@@ -322,11 +364,11 @@ Link: """ + AFFILIATE_LINK + """
             await q.edit_message_text(f"❌ Send fail {e}")
     elif d.startswith("cmnolink_"):
         uid = d.split("_")[1]
-        msg = """❌ <b>Account Link Theke Na</b>
+        msg = f"""❌ <b>Account Link Theke Na</b>
 
 Bhai apnar account ta amader affiliate link theke khola na.
 
-👉 Amader link theke notun account khulun: """ + AFFILIATE_LINK + """
+👉 Amader link theke notun account khulun: {AFFILIATE_LINK}
 👉 Tarpor $10 deposit koren
 👉 Tarpor Profile theke Trader ID (sudhu number, # chara) pathan - Example: 1234567
 
@@ -368,22 +410,33 @@ Ami check kore sathe sathe approve kore dibo.
         ]
         await q.edit_message_text(f"💰 <b>Deposit Select for {trader_id}</b>\n\nUser ID: {uid}\nTrader ID: {trader_id}\n\nKoto deposit korse select korun (Check kore! Deposit chara access na):", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     elif d.startswith("dep_"):
-        parts=d.split("_")
-        uid=parts[1]
-        trader_id=parts[2]
-        amount=parts[3]
-        # Generate special premium link with token
-        premium_token = create_premium_token(trader_id, uid, amount)
-        premium_link = f"{WEBSITE_URL}/?access={premium_token}"
-        # Personalized ghost.js link with token (optional extra security)
-        personalized_ghost = f"{WEBSITE_URL}/ghost.js?token={premium_token}"
-        kb=[
-            [InlineKeyboardButton("🔓 PREMIUM ACCESS - CLICK HERE", url=premium_link)],
-            [InlineKeyboardButton("🌐 Website + Bookmarklet", url=premium_link)],
-            [InlineKeyboardButton("🔖 Bookmarklet Guide", callback_data="bookmark_guide"), InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK)],
-            [InlineKeyboardButton("📱 App Link", url=APP_LINK), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)]
-        ]
-        msg = f"""🎉 <b>CONGRATULATIONS! PREMIUM APPROVED!</b> 🎉
+        # FIXED: full try-except with imports
+        try:
+            parts=d.split("_")
+            uid=parts[1]
+            trader_id=parts[2]
+            amount=parts[3]
+            # Generate premium token robustly
+            premium_token = ""
+            try:
+                premium_token = create_premium_token(trader_id, uid, amount)
+            except Exception as e:
+                logging.error(f"Token create fail {e}, fallback")
+                premium_token = f"{trader_id}_{uid}_{amount}_{secrets.token_urlsafe(8)}"
+                try:
+                    approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "amount": str(amount), "created": int(time.time()), "fallback": True}
+                    save_tokens()
+                except Exception as se:
+                    logging.error(f"Fallback save fail {se}")
+            
+            premium_link = f"{WEBSITE_URL}/?access={premium_token}"
+            kb=[
+                [InlineKeyboardButton("🔓 PREMIUM ACCESS - CLICK HERE", url=premium_link)],
+                [InlineKeyboardButton("🌐 Website + Bookmarklet", url=premium_link)],
+                [InlineKeyboardButton("🔖 Bookmarklet Guide", callback_data="bookmark_guide"), InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK)],
+                [InlineKeyboardButton("📱 App Link", url=APP_LINK), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)]
+            ]
+            msg = f"""🎉 <b>CONGRATULATIONS! PREMIUM APPROVED!</b> 🎉
 
 ❤️ <b>Bhai, apnake welcome - 10K+ winner family er part!</b>
 
@@ -394,29 +447,28 @@ Ami check kore sathe sathe approve kore dibo.
 🔓 <b>YOUR SPECIAL PREMIUM LINK (Secret):</b>
 <code>{premium_link}</code>
 
-⚠️ <b>Ei link ta sudhu apnar jonno - onno keu dile kaj korbe na? Kaj korbe kintu sudhu apnar ID er jonno - share korben na.</b>
+⚠️ <b>Ei link ta sudhu apnar jonno - share korben na.</b>
 
 👉 Ei link e gele sob Premium jinis dekhte paben:
 - Bookmarklet COPY button
 - Signal plate, Dashboard
-- Academy, App Link
 
-❌ Normal link e gele ( {WEBSITE_URL} ) sudhu Channel + Admin dekhbe, premium dekhbe na.
+❌ Normal link e gele sudhu Channel + Admin dekhbe.
 
 🔖 <b>Bookmarklet:</b> Premium link er vitore giye COPY button e click korun!
 
 - GHOST PREMIUM Team 👻
 """
-        try:
             try:
                 with open('approved_sticker.jpg','rb') as sticker:
                     await context.bot.send_photo(chat_id=int(uid), photo=sticker, caption=f"✅ Confirmed!\nID: {trader_id} | ${amount}")
             except Exception as se:
                 logging.info(f"Sticker fail {se}")
             await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-            await q.edit_message_text(f"✅ Approved ID {trader_id} - ${amount} - Sent to {uid} + Sticker")
+            await q.edit_message_text(f"✅ Approved ID {trader_id} - ${amount} - Sent to {uid}\nLink: {premium_link}")
         except Exception as e:
-            await q.edit_message_text(f"Approved but fail {e}")
+            logging.error(f"dep_ outer fail {traceback.format_exc()}")
+            await q.edit_message_text(f"❌ Error: {e}\n{traceback.format_exc()[:500]} - Try again")
     elif d.startswith("rj_"):
         uid=d.split("_")[1]
         try:
