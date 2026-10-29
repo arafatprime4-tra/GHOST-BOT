@@ -49,12 +49,12 @@ function getRealPair(){
     for(let el of document.querySelectorAll('div, span')){
       let txt=(el.innerText||"").trim();
       // Match EUR/USD 75% format - exactly what you see when you change market
-      let m=txt.match(/^([A-Z]{3}\/[A-Z]{3})\s+\d+%\s*$/);
+      let m=txt.match(/^([A-Z]{3}\/[A-Z]{3})(\s*OTC)?\s+\d+%\s*$/i);
       if(m){
         let r=el.getBoundingClientRect();
         // Bottom area where pair selector is
         if(r.top > window.innerHeight*0.6 && r.top < window.innerHeight*0.95){
-          bottomPair={pair:m[1].replace('/','').toUpperCase(),display:m[1].replace('/','')};
+          let isOTCpair=/OTC/i.test(txt); bottomPair={pair:m[1].replace('/','').toUpperCase()+(isOTCpair?"OTC":""),display:m[1].replace('/','')+(isOTCpair?" OTC":"")};
           break;
         }
       }
@@ -83,8 +83,9 @@ function getRealPair(){
     if(buyBtn){
       let br=buyBtn.getBoundingClientRect();let best=null;let bd=9999;
       for(let el of document.querySelectorAll('div, span')){
-        let txt=(el.innerText||"").trim();if(txt.length>30||txt.length<5) continue;if(!txt.includes('%')) continue;if(/OTC/i.test(txt)) continue;
-        let m=txt.match(/^([A-Z]{3}\/[A-Z]{3})/);if(!m) continue;
+        let txt=(el.innerText||"").trim();if(txt.length>30||txt.length<5) continue;if(!txt.includes('%')) continue;// OTC allowed - real off থাকলে OTC দিবে
+        // let isOTC=/OTC/i.test(txt); // OTC allowed
+        let m=txt.match(/^([A-Z]{3}\/[A-Z]{3})(\s*OTC)?/i);if(!m) continue;
         let r=el.getBoundingClientRect();if(r.top>br.top) continue;if(br.top-r.top>350) continue;
         let d=br.top-r.top;if(d<bd){bd=d;best={pair:m[1].replace('/','').toUpperCase(),display:m[1].replace('/','')};}
       }
