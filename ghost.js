@@ -14,15 +14,24 @@ function dragMove(e){if(!isDrag)return;let cx=e.touches?e.touches[0].clientX:e.c
 function dragEnd(){isDrag=false;}
 head.addEventListener("mousedown",dragStart);document.addEventListener("mousemove",dragMove);document.addEventListener("mouseup",dragEnd);
 head.addEventListener("touchstart",dragStart,{passive:false});document.addEventListener("touchmove",dragMove,{passive:false});document.addEventListener("touchend",dragEnd);
+// Get token from script URL or localStorage
+let GHOST_TOKEN = "";
+try{
+  let scripts = document.getElementsByTagName('script');
+  for(let sc of scripts){ if(sc.src && sc.src.includes('ghost.js')){ let u=new URL(sc.src); GHOST_TOKEN = u.searchParams.get('token') || u.searchParams.get('access') || ""; if(GHOST_TOKEN) break; } }
+  if(!GHOST_TOKEN) GHOST_TOKEN = localStorage.getItem('ghost_premium_token') || "";
+}catch(e){}
 function isOTC(){try{let txt=(document.body.innerText||"").toUpperCase();if(txt.includes("OTC")) return true;}catch(e){}return false;}
-function getPair(){try{let sels=[".current-symbol",".pair-name",".asset-name","[data-pair]",".usermenu__info-name"];for(let sel of sels){let el=document.querySelector(sel);if(el){let txt=el.textContent.replace(/[^A-Z\\/]/gi,"").replace("/","").toUpperCase();if(/^[A-Z]{6,7}$/.test(txt))return txt;}}let topBar=document.body.innerText.substring(0,2000);let m1=topBar.match(/([A-Z]{3})\/([A-Z]{3})/);if(m1)return(m1[1]+m1[2]).toUpperCase();let m=document.body.innerHTML.match(/(EURUSD|GBPUSD|USDJPY|CADJPY|AUDUSD|AUDCHF|EURJPY|GBPJPY|EURCAD|EURGBP)/i);if(m)return m[1].toUpperCase();}catch(e){}return"EURUSD";}
+function getPair(){try{let sels=[".current-symbol",".pair-name",".asset-name","[data-pair]",".usermenu__info-name"];for(let sel of sels){let el=document.querySelector(sel);if(el){let txt=el.textContent.replace(/[^A-Z\/]/gi,"").replace("/","").toUpperCase();if(/^[A-Z]{6,7}$/.test(txt))return txt;}}let topBar=document.body.innerText.substring(0,2000);let m1=topBar.match(/([A-Z]{3})\/([A-Z]{3})/);if(m1)return(m1[1]+m1[2]).toUpperCase();let m=document.body.innerHTML.match(/(EURUSD|GBPUSD|USDJPY|CADJPY|AUDUSD|AUDCHF|EURJPY|GBPJPY|EURCAD|EURGBP)/i);if(m)return m[1].toUpperCase();}catch(e){}return"EURUSD";}
 let lastPair="";let countdown=55;
 function upd(){
  let asset=getPair();let otc=isOTC();let displayPair=asset+(otc?" OTC":"");
  if(displayPair!==lastPair){lastPair=displayPair;let gp=document.getElementById("gpair");if(gp)gp.textContent=displayPair;}
- fetch("https://giogram-backend.onrender.com/api/signal?pair="+asset+"&mode=SAFE").then(r=>r.json()).then(j=>{
+ let url = "https://giogram-backend.onrender.com/api/signal?pair="+asset+"&mode=SAFE";
+ if(GHOST_TOKEN) url += "&token="+encodeURIComponent(GHOST_TOKEN);
+ fetch(url).then(r=>r.json()).then(j=>{
   let el=document.getElementById("gs");if(!el)return;
-  if(!j||j.signal=="ERROR"){el.textContent="WAIT";el.className="g-signal g-wait";return;}
+  if(!j||j.signal=="ERROR"||j.signal=="LOCKED"){el.textContent=j.signal=="LOCKED"?"LOCKED": "WAIT";el.className="g-signal g-wait";return;}
   let sig=j.signal||"WAIT";
   el.textContent=sig;
   el.className="g-signal "+(sig=="UP"?"g-up":sig=="DOWN"?"g-down":"g-wait");
