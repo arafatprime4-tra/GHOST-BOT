@@ -82,10 +82,51 @@ def serve_static(path):
 def api_signal():
     try:
         mode=request.args.get('mode','SAFE')
-        pair=request.args.get('pair','EURUSD').upper()
-        return jsonify(signal_engine.get_signal(pair,mode))
+        raw_pair=request.args.get('pair','EURUSD')
+        # REAL MARKET ONLY - REJECT OTC
+        if "OTC" in raw_pair.upper():
+            return jsonify({
+                "signal_id": f"REJECT-OTC-{int(time.time())}",
+                "signal": "WAIT",
+                "status": "DATA_UNAVAILABLE",
+                "market": raw_pair.upper().replace(" OTC","").replace("(OTC)","").strip(),
+                "pair": raw_pair.upper().replace(" OTC","").replace("(OTC)","").replace("/","").strip(),
+                "direction": "WAIT",
+                "reason": "OTC rejected - REAL MARKET ONLY",
+                "risk_percent": 1,
+                "expiry_timestamp": int((time.time()+60)*1000),
+                "remainingSeconds": 60,
+                "time_left": 60
+            })
+        pair=raw_pair.upper().replace("/","").strip()
+        # Only allow real pairs
+        REAL = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]
+        if pair not in REAL:
+            return jsonify({
+                "signal_id": f"REJECT-INVALID-{int(time.time())}",
+                "signal": "WAIT",
+                "status": "DATA_UNAVAILABLE",
+                "market": raw_pair,
+                "pair": pair,
+                "direction": "WAIT",
+                "reason": f"Invalid pair {pair} - REAL ONLY",
+                "risk_percent": 1,
+                "expiry_timestamp": int((time.time()+60)*1000),
+                "remainingSeconds": 60,
+                "time_left": 60
+            })
+        result = signal_engine.get_signal(pair,mode)
+        # Ensure consistent structure
+        if "signal_id" not in result:
+            import uuid
+            result["signal_id"] = f"{pair}-{result.get('signal','WAIT')}-{uuid.uuid4().hex[:8]}"
+        if "market" not in result:
+            result["market"] = f"{pair[:3]}/{pair[3:]}" if len(pair)==6 else pair
+        if "remainingSeconds" not in result:
+            result["remainingSeconds"] = result.get("time_left", 60)
+        return jsonify(result)
     except Exception as e: 
-        return jsonify({"signal":"ERROR","error":str(e)})
+        return jsonify({"signal_id": f"ERROR-{int(time.time())}","signal":"WAIT","status":"DATA_UNAVAILABLE","reason":str(e),"remainingSeconds":60,"time_left":60})
 
 @flask_app.route('/api/verify')
 def api_verify():
@@ -319,7 +360,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Trader ID: <code>{trader_id}</code>
 Deposit: ${amount}
-Status: ✅ ACTIVE
+Status: ✅ ACTIVATE 
 
 🔓 YOUR SPECIAL LINK:
 <code>{premium_link}</code>
