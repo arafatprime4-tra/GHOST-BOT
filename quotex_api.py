@@ -1,7 +1,8 @@
+
 import os, random, time, json, uuid
 from datetime import datetime, timedelta
+from typing import List, Dict, Tuple
 
-# === REAL MARKET ONLY - NO OTC ===
 REAL_MARKET_PAIRS = [
     "EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD",
     "EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD",
@@ -9,56 +10,328 @@ REAL_MARKET_PAIRS = [
     "CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"
 ]
 
-SIGNAL_MODE = os.getenv("SIGNAL_MODE","SAFE").upper()
-RISK_PERCENT = int(os.getenv("RISK_PERCENT","1"))
+# ==================== PRICE ACTION FILTER - PURE OHLC ONLY ====================
+# No RSI, MACD, BB - Only Open, High, Low, Close
 
-class QuotexRealClient:
+class Candle:
+    def __init__(self, o, h, l, c, idx=0):
+        self.open = o
+        self.high = h
+        self.low = l
+        self.close = c
+        self.idx = idx
+        self.body = abs(c - o)
+        self.upper_wick = h - max(o, c)
+        self.lower_wick = min(o, c) - l
+        self.is_bull = c > o
+        self.is_bear = c < o
+        self.range = h - l
+
+class PriceActionFilter:
+    """
+    GHOST QUANTUM X - 4 Price Action Logics
+    Pure Price Action, no indicators
+    """
+    
     def __init__(self):
-        self.token = os.getenv("QUOTEX_SSID","ECB_FALLBACK")
-        self.use_real = bool(os.getenv("QUOTEX_SSID"))
-    def connect(self): return True
-    def get_candles(self, asset, period=60, count=200): return None
+        self.order_blocks = {}  # pair -> list of OB zones
+        self.fvgs = {}  # pair -> list of FVG zones
+    
+    # 1. MARKET STRUCTURE FILTER - BOS & CHOCH
+    def detect_market_structure(self, candles: List[Candle]) -> Dict:
+        """
+        Higher High + Higher Low = Only CALL
+        Lower Low + Lower High = Only PUT
+        Ranging = Both low conf
+        BOS = Break of Structure, CHOCH = Change of Character
+        """
+        if len(candles) < 10:
+            return {"structure": "RANGING", "bias": "BOTH", "bos": False, "choch": False, "reason": "Not enough data"}
+        
+        # Find swing highs and lows (last 10 candles)
+        swing_highs = []
+        swing_lows = []
+        for i in range(2, len(candles)-2):
+            # Swing high: high > prev 2 and next 2
+            if candles[i].high > candles[i-1].high and candles[i].high > candles[i-2].high and \
+               candles[i].high > candles[i+1].high and candles[i].high > candles[i+2].high:
+                swing_highs.append((i, candles[i].high))
+            # Swing low
+            if candles[i].low < candles[i-1].low and candles[i].low < candles[i-2].low and \
+               candles[i].low < candles[i+1].low and candles[i].low < candles[i+2].low:
+                swing_lows.append((i, candles[i].low))
+        
+        if len(swing_highs) < 2 or len(swing_lows) < 2:
+            return {"structure": "RANGING", "bias": "BOTH", "bos": False, "choch": False, "reason": "Ranging - no clear structure"}
+        
+        # Last 2 swing highs/lows
+        last_h1, last_h2 = swing_highs[-1][1], swing_highs[-2][1]
+        last_l1, last_l2 = swing_lows[-1][1], swing_lows[-2][1]
+        
+        # Detect HH/HL and LL/LH
+        hh = last_h1 > last_h2
+        hl = last_l1 > last_l2
+        ll = last_l1 < last_l2
+        lh = last_h1 < last_h2
+        
+        # BOS & CHOCH
+        bos = False
+        choch = False
+        if hh and hl:
+            bos = True
+            structure = "BULLISH"
+            bias = "CALL"
+            reason = f"BOS Bullish HH+HL {last_h2:.5f}->{last_h1:.5f}"
+        elif ll and lh:
+            bos = True
+            structure = "BEARISH"
+            bias = "PUT"
+            reason = f"BOS Bearish LL+LH {last_h2:.5f}->{last_h1:.5f}"
+        else:
+            # Check CHOCH - trend change
+            # Previously bullish now bearish = CHOCH
+            if len(swing_highs) >= 3:
+                if swing_highs[-3][1] < swing_highs[-2][1] and swing_highs[-1][1] < swing_highs[-2][1]:
+                    choch = True
+                    structure = "CHOCH_BEARISH"
+                    bias = "PUT"
+                    reason = f"CHOCH Bearish fail to make HH"
+                elif swing_lows[-3][1] > swing_lows[-2][1] and swing_lows[-1][1] > swing_lows[-2][1]:
+                    choch = True
+                    structure = "CHOCH_BULLISH"
+                    bias = "CALL"
+                    reason = f"CHOCH Bullish fail to make LL"
+                else:
+                    structure = "RANGING"
+                    bias = "BOTH"
+                    reason = "Ranging market"
+            else:
+                structure = "RANGING"
+                bias = "BOTH"
+                reason = "Ranging"
+        
+        return {
+            "structure": structure,
+            "bias": bias,
+            "bos": bos,
+            "choch": choch,
+            "hh": hh, "hl": hl, "ll": ll, "lh": lh,
+            "reason": reason,
+            "last_high": last_h1,
+            "last_low": last_l1
+        }
+    
+    # 2. LIQUIDITY GRAB / TRAP FILTER
+    def detect_liquidity_grab(self, candles: List[Candle]) -> Dict:
+        """
+        Sweep recent High/Low - wick beyond prev high/low and close back inside
+        Top grab + rejection = Strong PUT 85%
+        Bottom grab + rejection = Strong CALL 85%
+        """
+        if len(candles) < 6:
+            return {"grab": False, "type": "NONE", "signal": "WAIT", "conf": 0, "reason": "No data"}
+        
+        last = candles[-1]
+        prev_high = max(c.high for c in candles[-6:-1])
+        prev_low = min(c.low for c in candles[-6:-1])
+        
+        # Top liquidity grab
+        if last.high > prev_high and last.close < prev_high:
+            # Rejection wick at top
+            wick_ratio = last.upper_wick / (last.body + 0.00001)
+            if wick_ratio > 1.5:  # Strong rejection
+                return {
+                    "grab": True,
+                    "type": "TOP_GRAB",
+                    "signal": "PUT",
+                    "conf": 85,
+                    "reason": f"Liquidity Grab Top {prev_high:.5f} swept, rejection wick {wick_ratio:.1f}x",
+                    "is_trap": True,
+                    "swept_level": prev_high
+                }
+        
+        # Bottom liquidity grab
+        if last.low < prev_low and last.close > prev_low:
+            wick_ratio = last.lower_wick / (last.body + 0.00001)
+            if wick_ratio > 1.5:
+                return {
+                    "grab": True,
+                    "type": "BOTTOM_GRAB",
+                    "signal": "CALL",
+                    "conf": 85,
+                    "reason": f"Liquidity Grab Bottom {prev_low:.5f} swept, rejection wick {wick_ratio:.1f}x",
+                    "is_trap": True,
+                    "swept_level": prev_low
+                }
+        
+        return {"grab": False, "type": "NONE", "signal": "WAIT", "conf": 0, "reason": "No liquidity grab", "is_trap": False}
+    
+    # 3. ORDER BLOCK + FVG DETECTION
+    def detect_order_block(self, candles: List[Candle], pair="EURUSD") -> Dict:
+        """
+        Bullish OB: Last bearish candle before strong bullish move
+        Bearish OB: Last bullish candle before strong bearish move
+        FVG: 3 candle gap
+        """
+        if len(candles) < 5:
+            return {"ob": False, "fvg": False, "signal": "WAIT", "conf": 0, "reason": "No data"}
+        
+        # --- Order Block ---
+        # Bullish OB: bearish candle -> bullish impulse (2+ bullish with big body)
+        for i in range(len(candles)-4, 0, -1):
+            if candles[i].is_bear:
+                # Next 2 candles bullish with strong body
+                if i+2 < len(candles):
+                    c1, c2 = candles[i+1], candles[i+2]
+                    if c1.is_bull and c2.is_bull and (c1.body + c2.body) > candles[i].body * 1.5:
+                        # Bullish OB found
+                        ob_high = candles[i].high
+                        ob_low = candles[i].low
+                        curr = candles[-1]
+                        # Price returns to OB zone?
+                        if ob_low <= curr.close <= ob_high or abs(curr.close - ob_low) < 0.0003:
+                            return {
+                                "ob": True,
+                                "type": "BULLISH_OB",
+                                "signal": "CALL",
+                                "conf": 80,
+                                "reason": f"Bullish OB Retest {ob_low:.5f}-{ob_high:.5f}",
+                                "zone": (ob_low, ob_high),
+                                "price_action_type": "Order Block Retest"
+                            }
+        
+        # Bearish OB
+        for i in range(len(candles)-4, 0, -1):
+            if candles[i].is_bull:
+                if i+2 < len(candles):
+                    c1, c2 = candles[i+1], candles[i+2]
+                    if c1.is_bear and c2.is_bear and (c1.body + c2.body) > candles[i].body * 1.5:
+                        ob_high = candles[i].high
+                        ob_low = candles[i].low
+                        curr = candles[-1]
+                        if ob_low <= curr.close <= ob_high or abs(curr.close - ob_high) < 0.0003:
+                            return {
+                                "ob": True,
+                                "type": "BEARISH_OB",
+                                "signal": "PUT",
+                                "conf": 80,
+                                "reason": f"Bearish OB Retest {ob_low:.5f}-{ob_high:.5f}",
+                                "zone": (ob_low, ob_high),
+                                "price_action_type": "Order Block Retest"
+                            }
+        
+        # --- FVG Detection ---
+        for i in range(1, len(candles)-1):
+            c1, c2, c3 = candles[i-1], candles[i], candles[i+1]
+            # Bullish FVG: c3.low > c1.high (gap)
+            if c3.low > c1.high:
+                fvg_top = c3.low
+                fvg_bottom = c1.high
+                curr = candles[-1]
+                if fvg_bottom <= curr.close <= fvg_top or abs(curr.close - fvg_bottom) < 0.0002:
+                    return {
+                        "fvg": True,
+                        "type": "BULLISH_FVG",
+                        "signal": "CALL",
+                        "conf": 75,
+                        "reason": f"Bullish FVG Fill {fvg_bottom:.5f}-{fvg_top:.5f}",
+                        "zone": (fvg_bottom, fvg_top),
+                        "price_action_type": "FVG Fill"
+                    }
+            # Bearish FVG: c3.high < c1.low
+            if c3.high < c1.low:
+                fvg_top = c1.low
+                fvg_bottom = c3.high
+                curr = candles[-1]
+                if fvg_bottom <= curr.close <= fvg_top or abs(curr.close - fvg_top) < 0.0002:
+                    return {
+                        "fvg": True,
+                        "type": "BEARISH_FVG",
+                        "signal": "PUT",
+                        "conf": 75,
+                        "reason": f"Bearish FVG Fill {fvg_bottom:.5f}-{fvg_top:.5f}",
+                        "zone": (fvg_bottom, fvg_top),
+                        "price_action_type": "FVG Fill"
+                    }
+        
+        return {"ob": False, "fvg": False, "signal": "WAIT", "conf": 0, "reason": "No OB/FVG"}
+    
+    # 4. REJECTION WICK CONFIRMATION
+    def detect_rejection_wick(self, candles: List[Candle]) -> Dict:
+        """
+        Wick 2.5x larger than body at Resistance = PUT
+        Wick 2.5x larger than body at Support = CALL
+        """
+        if len(candles) < 10:
+            return {"rejection": False, "signal": "WAIT", "conf": 0}
+        
+        last = candles[-1]
+        # Recent high/low as S/R
+        recent_high = max(c.high for c in candles[-10:-1])
+        recent_low = min(c.low for c in candles[-10:-1])
+        
+        # Upper wick 2.5x body at resistance
+        if last.upper_wick > last.body * 2.5:
+            # At resistance?
+            if last.high >= recent_high * 0.9995:  # Near resistance
+                return {
+                    "rejection": True,
+                    "type": "UPPER_REJECTION",
+                    "signal": "PUT",
+                    "conf": 78,
+                    "reason": f"Rejection Wick at Resistance {last.upper_wick/last.body:.1f}x body",
+                    "wick_ratio": last.upper_wick / (last.body+0.00001),
+                    "price_action_type": "Rejection Wick"
+                }
+        
+        # Lower wick 2.5x body at support
+        if last.lower_wick > last.body * 2.5:
+            if last.low <= recent_low * 1.0005:  # Near support
+                return {
+                    "rejection": True,
+                    "type": "LOWER_REJECTION",
+                    "signal": "CALL",
+                    "conf": 78,
+                    "reason": f"Rejection Wick at Support {last.lower_wick/last.body:.1f}x body",
+                    "wick_ratio": last.lower_wick / (last.body+0.00001),
+                    "price_action_type": "Rejection Wick"
+                }
+        
+        return {"rejection": False, "signal": "WAIT", "conf": 0, "reason": "No rejection wick"}
 
-quotex_client = QuotexRealClient()
+# ==================== QUANTUM ENGINE WITH PA FILTER ====================
 
 class QuantumEngine:
     def __init__(self):
         self.pairs = REAL_MARKET_PAIRS + [p+"OTC" for p in REAL_MARKET_PAIRS]
         self.prices = {p: [self._seed(p.replace("OTC","")) + random.uniform(-0.0008,0.0008) + i*0.000005 for i in range(200)] for p in self.pairs}
+        # Generate OHLC from prices
+        self.candles = {p: self._gen_candles(self.prices[p]) for p in self.pairs}
         self.memory_file = "ghost_memory.json"
-        self.memory = self._load_mem()
-        # signal_id -> signal object - single source of truth
-        self.active_signals = {}  # pair -> signal object with expiry
+        self.memory = {}
+        self.active_signals = {}
         self.last_fetch = 0
-        self.debounce = {}  # pair -> last flip timestamp
-
+        self.pa_filter = PriceActionFilter()
+        self.pa_enabled = True  # Toggle
+    
     def _seed(self, pair):
         base={"EURUSD":1.085,"GBPUSD":1.275,"USDJPY":149.5,"AUDUSD":0.655,"USDCAD":1.36,"USDCHF":0.88,"NZDUSD":0.61,"EURJPY":162.2,"EURGBP":0.85,"EURAUD":1.65,"EURCAD":1.47,"GBPJPY":190.6,"GBPAUD":1.94,"GBPCAD":1.73,"AUDJPY":97.9,"AUDCAD":0.89,"CADJPY":109.9,"CHFJPY":169.8,"GBPCHF":1.12,"EURCHF":0.95,"AUDCHF":0.57,"CADCHF":0.64,"NZDJPY":91.1,"EURNZD":1.77,"GBPNZD":2.08,"AUDNZD":1.07,"NZDCAD":0.82}
         return base.get(pair,1.0)
-    def _load_mem(self):
-        try:
-            if os.path.exists(self.memory_file):
-                with open(self.memory_file) as f: return json.load(f)
-        except: pass
-        return {}
-    def _save_mem(self):
-        try:
-            with open(self.memory_file,'w') as f: json.dump(self.memory,f)
-        except: pass
-    def _ema(self,d,p):
-        if len(d)<p: return None
-        k=2/(p+1); e=sum(d[:p])/p
-        for x in d[p:]: e=x*k+e*(1-k)
-        return e
-    def _rsi(self,d,per=14):
-        if len(d)<per+1: return 50
-        g=l=0
-        for i in range(len(d)-per,len(d)):
-            dd=d[i]-d[i-1]
-            if dd>0: g+=dd
-            else: l+=-dd
-        if l==0: return 68
-        return 100-(100/(1+g/l))
+    
+    def _gen_candles(self, price_list):
+        candles=[]
+        for i in range(len(price_list)-1):
+            o = price_list[i]
+            c = price_list[i+1]
+            # Generate realistic wicks
+            body = abs(c-o)
+            upper_wick = random.uniform(0, body*1.5 + 0.0002)
+            lower_wick = random.uniform(0, body*1.5 + 0.0002)
+            h = max(o,c) + upper_wick
+            l = min(o,c) - lower_wick
+            candles.append(Candle(o,h,l,c,i))
+        return candles[-100:]  # last 100 candles
+    
     def _new_ticks(self):
         now=time.time()
         if now-self.last_fetch<0.9: return
@@ -67,326 +340,161 @@ class QuantumEngine:
             last=self.prices[p][-1]
             change=random.uniform(-0.00025,0.00025)
             if "JPY" in p: change*=100
-            # OTC তে একটু বেশি volatility
             if "OTC" in p: change*=1.3
             self.prices[p].append(last+change)
             if len(self.prices[p])>200: self.prices[p]=self.prices[p][-200:]
-
-    def _price_action(self,pair):
-        data=self.prices.get(pair) or self.prices.get(clean_pair) or self.prices.get(pair_upper) or list(self.prices.values())[0]
-        if len(data)<10: return 0,"No PA"
-        last=data[-1]; prev=data[-2]
-        body=abs(last-prev)
-        if last>prev and body<0.0003: return 1.2,f"Wick UP {pair}"
-        if last<prev and body<0.0003: return -1.2,f"Wick DOWN {pair}"
-        return 0,"No PA"
-
-    def _trap(self,pair):
-        data=self.prices.get(pair) or self.prices.get(clean_pair) or self.prices.get(pair_upper) or list(self.prices.values())[0]
-        if len(data)<20: return False,""
-        rsi=self._rsi(data,14)
-        # FIXED: RSI 78/22 থেকে 85/15 করলাম, trap কম
-        if rsi>85 or rsi<15: return True,f"RSI Extreme {rsi:.0f}"
-        return False,""
-
-    def _mtf(self,pair):
-        data=self.prices.get(pair) or self.prices.get(clean_pair) or self.prices.get(pair_upper) or list(self.prices.values())[0]
-        e7=self._ema(data,7); e20=self._ema(data,20); e50=self._ema(data,50)
-        if not e20 or not e50: return "MIXED",0
-        if data[-1]>e20 and e20>e50: return "UP",15
-        if data[-1]<e20 and e20<e50: return "DOWN",-15
-        return "MIXED",0
-
-    def _corr(self,pair,dir): return True,5,f"CORR OK {dir}"
-    def _mem(self,pair): return 5,f"MEM OK"
-
-    def _is_otc_request(self, pair_raw):
-        # Reject OTC completely - REAL MARKET ONLY
-        if not pair_raw: return True
-        upper = pair_raw.upper()
-        if "OTC" in upper: return True
-        # Normalize: AUD/USD -> AUDUSD, AUDUSD OTC -> reject already
-        clean = upper.replace("/","").replace(" ","").replace("-","")
-        # If clean contains OTC after replace, reject
-        if "OTC" in clean: return True
-        # Only allow exact match in REAL_MARKET_PAIRS
-        if clean not in REAL_MARKET_PAIRS: 
-            # Allow if it's real pair without slash
-            if clean not in REAL_MARKET_PAIRS:
-                return True
-        return False
-
-    def _normalize_market(self, pair):
-        # EURUSD -> EUR/USD for display, but keep internal as EURUSD
-        if len(pair)==6:
-            return f"{pair[:3]}/{pair[3:]}"
-        return pair
-
-    def get_signal(self,pair="EURUSD",mode="SAFE"):
+            self.candles[p]=self._gen_candles(self.prices[p])
+    
+    def get_signal(self, pair="EURUSD", mode="SAFE"):
         self._new_ticks()
-        now = time.time()
-        now_dt = datetime.now()
-        clock_sec = 60 - now_dt.second
+        now=time.time()
+        now_dt=datetime.now()
+        clock_sec=60-now_dt.second
         if clock_sec==60: clock_sec=0
-
-        # === OTC ALLOWED WHEN REAL OFF ===
-        raw_pair = pair
-        pair_upper = pair.upper().replace("/","").replace(" ","").strip()
-        is_otc = "OTC" in raw_pair.upper()
-        clean_pair = pair_upper.replace("OTC","")
-        # Allow both REAL and OTC - real off থাকলে OTC দিবে
-
-        check_pair = clean_pair if is_otc else pair_upper
-        if check_pair not in REAL_MARKET_PAIRS:
-            # Try to find closest real pair
-            if check_pair not in REAL_MARKET_PAIRS:
-                return {
-                    "signal_id": f"WAIT-INVALID-{int(now)}",
-                    "signal": "WAIT",
-                    "status": "DATA_UNAVAILABLE",
-                    "market": pair_upper,
-                    "pair": pair_upper,
-                    "direction": "WAIT",
-                    "generated_at": int(now),
-                    "candle_timestamp": int(now),
-                    "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
-                    "time_left": clock_sec,
-                    "remainingSeconds": clock_sec,
-                    "price": 0,
-                    "confidence": 0,
-                    "risk_percent": RISK_PERCENT,
-                    "reason": f"Invalid pair {pair_upper} - only real market allowed",
-                    "engine": "VALIDATION"
-                }
-
-        pair = pair_upper
-        hold_time = 25 if mode=="FAST" else 58
-
-        # === C. SINGLE EXPIRY TIMESTAMP - NO JUMP ===
-        # === A. BIND MARKET TO SIGNAL ID ===
-        if pair in self.active_signals:
-            active = self.active_signals[pair]
-            elapsed = now - active["generated_at"]
-            # Use expiry_timestamp for countdown, not changing timestamps
-            remaining = max(0, int((active["expiry_timestamp"] - int(now*1000)) / 1000))
-            # Also compute clock based remaining for display sync
-            clock_remaining = clock_sec
-
-            if elapsed < hold_time and active["status"]=="ACTIVE":
-                # Last 5 sec -> EXPIRED/WAIT to avoid late entry
-                if clock_remaining < 5:
-                    active["status"] = "WAITING"
-                    return {
-                        "signal_id": active["signal_id"],
-                        "signal": "WAIT",
-                        "status": "WAITING",
-                        "market": active["market"],
-                        "pair": active["pair"],
-                        "direction": "WAIT",
-                        "generated_at": active["generated_at"],
-                        "candle_timestamp": active["candle_timestamp"],
-                        "expiry_timestamp": active["expiry_timestamp"],
-                        "time_left": clock_remaining,
-                        "remainingSeconds": clock_remaining,
-                        "price": active["price"],
-                        "confidence": 0,
-                        "risk_percent": RISK_PERCENT,
-                        "reason": "End of candle - waiting next",
-                        "engine": f"END CANDLE WAIT {clock_remaining}s",
-                        "holding": False
-                    }
-                # Return same signal object - market, direction, timestamp same
-                return active
-
-        # Debounce rapid flips
-        if pair in self.debounce:
-            if now - self.debounce[pair] < 3:
-                return {
-                    "signal_id": f"WAIT-DEBOUNCE-{int(now)}",
-                    "signal": "WAIT",
-                    "status": "WAITING",
-                    "market": self._normalize_market(pair),
-                    "pair": pair,
-                    "direction": "WAIT",
-                    "generated_at": int(now),
-                    "candle_timestamp": int(now),
-                    "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
-                    "time_left": clock_sec,
-                    "remainingSeconds": clock_sec,
-                    "price": round(self.prices[pair][-1], 5 if "JPY" not in pair else 3),
-                    "confidence": 0,
-                    "risk_percent": RISK_PERCENT,
-                    "reason": "Debounce - too quick flip",
-                    "engine": "DEBOUNCE"
-                }
-
-        data=self.prices.get(pair) or self.prices.get(clean_pair) or self.prices.get(pair_upper) or list(self.prices.values())[0]; price=data[-1]
-        e7=self._ema(data,7); e20=self._ema(data,20); e50=self._ema(data,50)
-        rsi=self._rsi(data,14)
-
-        score=0; reasons=[]
-        pa_score, pa_reason = self._price_action(pair)
-        score += pa_score
-        if pa_score != 0: reasons.append(pa_reason)
-        if e20 and e50:
-            if price>e20 and e20>e50 and 20<rsi<80: score+=1.5; reasons.append(f"UP EMA {pair}")
-            elif price<e20 and e20<e50 and 20<rsi<80: score-=1.5; reasons.append(f"DOWN EMA {pair}")
-            elif price>e20: score+=0.5; reasons.append("UP price>EMA20")
-            else: score-=0.5; reasons.append("DOWN price<EMA20")
-        if data[-1]>data[-2]: score+=0.6; reasons.append("Mom UP")
-        else: score-=0.6; reasons.append("Mom DOWN")
-
-        is_trap,tinfo=self._trap(pair)
-        if is_trap:
-            return {
-                "signal_id": f"WAIT-TRAP-{uuid.uuid4().hex[:8]}",
-                "signal": "WAIT",
-                "status": "WAITING",
-                "market": self._normalize_market(clean_pair if is_otc else pair) + (" OTC" if is_otc else ""),
-                "pair": clean_pair if is_otc else pair,
-                "direction": "WAIT",
-                "generated_at": int(now),
-                "candle_timestamp": int(now),
-                "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
-                "time_left": clock_sec,
-                "remainingSeconds": clock_sec,
-                "price": round(price,5 if "JPY" not in pair else 3),
-                "confidence": 0,
-                "risk_percent": RISK_PERCENT,
-                "reason": f"TRAP {tinfo}",
-                "engine": "ANTI-TRAP"
-            }
-
-        mtf_sig,mtf_conf=self._mtf(pair)
-        # FIXED: MTF MIXED এ WAIT না, শুধু score কমবে - তাই signal বেশি আসবে
-        if mtf_sig=="MIXED" and mode=="SUPER_SAFE" and abs(pa_score) < 1.5:
-            return {
-                "signal_id": f"WAIT-MTF-{uuid.uuid4().hex[:8]}",
-                "signal": "WAIT",
-                "status": "WAITING",
-                "market": self._normalize_market(clean_pair if is_otc else pair) + (" OTC" if is_otc else ""),
-                "pair": clean_pair if is_otc else pair,
-                "direction": "WAIT",
-                "generated_at": int(now),
-                "candle_timestamp": int(now),
-                "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
-                "time_left": clock_sec,
-                "remainingSeconds": clock_sec,
-                "price": round(price,5 if "JPY" not in pair else 3),
-                "confidence": 0,
-                "risk_percent": RISK_PERCENT,
-                "reason": "MTF MIXED",
-                "engine": "MTF WAIT"
-            }
-        score+=mtf_conf/20; reasons.append(f"MTF {mtf_sig}")
-
-        sig_dir="UP" if score>0 else "DOWN"
-        corr_ok,corr_conf,cinfo=self._corr(pair,sig_dir)
-        if not corr_ok and mode=="SAFE":
-            return {
-                "signal_id": f"WAIT-CORR-{uuid.uuid4().hex[:8]}",
-                "signal": "WAIT",
-                "status": "WAITING",
-                "market": self._normalize_market(clean_pair if is_otc else pair) + (" OTC" if is_otc else ""),
-                "pair": clean_pair if is_otc else pair,
-                "direction": "WAIT",
-                "generated_at": int(now),
-                "candle_timestamp": int(now),
-                "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
-                "time_left": clock_sec,
-                "remainingSeconds": clock_sec,
-                "price": round(price,5 if "JPY" not in pair else 3),
-                "confidence": 0,
-                "risk_percent": RISK_PERCENT,
-                "reason": f"CORR FAIL {cinfo}",
-                "engine": "CORR WAIT"
-            }
-        score+=corr_conf/25; reasons.append(cinfo)
-
-        mem_b,mem_i=self._mem(pair)
-        score+=mem_b/20; reasons.append(mem_i)
-
-        if abs(pa_score) >= 1.5:
-            final = "UP" if pa_score > 0 else "DOWN"
-        else:
-            # FIXED: Threshold 0.4 থেকে 0.15 করলাম, তাই WAIT কম, signal বেশি
-            final="UP" if score>=0.15 else "DOWN" if score<=-0.15 else "WAIT"
-            # যদি WAIT ও হয়, momentum দিয়ে direction দাও
-            if final=="WAIT":
-                final="UP" if score>=0 else "DOWN"
-        conf=min(95,50+abs(score)*20)
-
-        if final=="WAIT" and abs(score)<0.05:
-            # FIXED: খুব কম score হলেও WAIT না, low conf signal দাও
-            final="UP" if score>=0 else "DOWN"
-            conf=55
         
-        if final=="WAIT":
+        raw_pair=pair
+        pair_upper=pair.upper().replace("/","").replace(" ","").strip()
+        is_otc="OTC" in raw_pair.upper()
+        clean_pair=pair_upper.replace("OTC","")
+        check_pair=clean_pair if clean_pair in REAL_MARKET_PAIRS else pair_upper
+        
+        # Get candles for PA
+        candles=self.candles.get(pair_upper) or self.candles.get(check_pair) or self.candles.get(check_pair+"OTC") or []
+        if not candles:
+            candles=self.candles.get("EURUSD",[])
+        
+        # ===== PRICE ACTION FILTER (NEW LAYER) =====
+        pa_result=None
+        if self.pa_enabled and len(candles)>=10:
+            struct=self.pa_filter.detect_market_structure(candles)
+            liq=self.pa_filter.detect_liquidity_grab(candles)
+            ob_fvg=self.pa_filter.detect_order_block(candles, check_pair)
+            rej=self.pa_filter.detect_rejection_wick(candles)
+            
+            # Priority: Liquidity Grab > OB/FVG > Rejection > Structure
+            if liq["grab"]:
+                pa_result=liq
+                pa_result["price_action_type"]="Liquidity Grab"
+            elif ob_fvg.get("ob") or ob_fvg.get("fvg"):
+                pa_result=ob_fvg
+            elif rej["rejection"]:
+                pa_result=rej
+            elif struct["bos"] or struct["choch"]:
+                pa_result={
+                    "signal": "CALL" if struct["bias"]=="CALL" else "PUT" if struct["bias"]=="PUT" else "WAIT",
+                    "conf": 82 if struct["bos"] else 75,
+                    "reason": struct["reason"],
+                    "price_action_type": f"{struct['structure']} - {struct['reason']}",
+                    "structure": struct,
+                    "is_trap": False
+                }
+            else:
+                # Ranging - low conf but still signal
+                pa_result={
+                    "signal": "CALL" if candles[-1].is_bull else "PUT",
+                    "conf": 60,
+                    "reason": struct["reason"],
+                    "price_action_type": "Ranging",
+                    "structure": struct,
+                    "is_trap": False
+                }
+        
+        # If PA gives strong signal (>=75%), use it
+        if pa_result and pa_result.get("conf",0)>=70:
+            final=pa_result["signal"]
+            conf=pa_result["conf"]
+            reason=pa_result["reason"]
+            pa_type=pa_result.get("price_action_type","Price Action")
+            is_trap=pa_result.get("is_trap",False)
+            
+            # Structure filter: only allow CALL in bullish structure, PUT in bearish
+            if pa_result.get("structure"):
+                bias=pa_result["structure"]["bias"]
+                if bias=="CALL" and final=="PUT":
+                    final="WAIT"
+                    conf=0
+                elif bias=="PUT" and final=="CALL":
+                    final="WAIT"
+                    conf=0
+            
+            if final!="WAIT":
+                price=self.prices.get(pair_upper, [1.0])[-1] if isinstance(self.prices.get(pair_upper), list) else self.prices.get(check_pair, [1.0])[-1]
+                if isinstance(price, list): price=price[-1]
+                expiry=int((now_dt+timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000)
+                return {
+                    "signal_id": f"{check_pair}{'-OTC' if is_otc else ''}-{final}-PA-{uuid.uuid4().hex[:6]}",
+                    "pair": check_pair,
+                    "market": f"{check_pair[:3]}/{check_pair[3:]}{' OTC' if is_otc else ''}" if len(check_pair)==6 else check_pair,
+                    "signal": final,
+                    "direction": final,
+                    "confidence": conf,
+                    "reason": reason,
+                    "price_action_type": pa_type,
+                    "is_trap": is_trap,
+                    "status": "ACTIVE",
+                    "price": round(price,5 if "JPY" not in check_pair else 3),
+                    "expiry_timestamp": expiry,
+                    "time_left": clock_sec,
+                    "remainingSeconds": clock_sec,
+                    "generated_at": int(now),
+                    "filter": {"trend": final, "pa_type": pa_type, "mode": mode, "pa_enabled": True},
+                    "engine": f"GHOST QUANTUM X - {pa_type}",
+                    "strategies": [reason, pa_type, f"Structure: {pa_result.get('structure',{}).get('structure','N/A')}"],
+                    "timestamp": int(now),
+                    "risk_percent": 1
+                }
+        
+        # ===== FALLBACK TO OLD LOGIC IF PA NOT STRONG =====
+        # Simple momentum fallback - never WAIT forever
+        if len(candles)>=2:
+            last=candles[-1]
+            prev=candles[-2]
+            if last.close>prev.close:
+                final="CALL"
+            else:
+                final="PUT"
+            price=self.prices.get(pair_upper, [1.0])[-1]
+            if isinstance(price, list): price=price[-1]
+            expiry=int((now_dt+timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000)
             return {
-                "signal_id": f"WAIT-SCORE-{uuid.uuid4().hex[:8]}",
-                "signal": "WAIT",
-                "status": "WAITING",
-                "market": self._normalize_market(clean_pair if is_otc else pair) + (" OTC" if is_otc else ""),
-                "pair": clean_pair if is_otc else pair,
-                "direction": "WAIT",
-                "generated_at": int(now),
-                "candle_timestamp": int(now),
-                "expiry_timestamp": int((now_dt + timedelta(seconds=clock_sec)).timestamp()*1000),
+                "signal_id": f"{check_pair}{'-OTC' if is_otc else ''}-{final}-MOM-{uuid.uuid4().hex[:6]}",
+                "pair": check_pair,
+                "market": f"{check_pair[:3]}/{check_pair[3:]}{' OTC' if is_otc else ''}" if len(check_pair)==6 else check_pair,
+                "signal": final,
+                "direction": final,
+                "confidence": 65,
+                "reason": f"Momentum {prev.close:.5f}->{last.close:.5f}",
+                "price_action_type": "Momentum",
+                "is_trap": False,
+                "status": "ACTIVE",
+                "price": round(price,5 if "JPY" not in check_pair else 3),
+                "expiry_timestamp": expiry,
                 "time_left": clock_sec,
                 "remainingSeconds": clock_sec,
-                "price": round(price,5 if "JPY" not in pair else 3),
-                "confidence": 0,
-                "risk_percent": RISK_PERCENT,
-                "reason": f"Low score {score:.2f}",
-                "engine": f"SCORE WAIT {score:.2f}"
+                "generated_at": int(now),
+                "filter": {"trend": final, "mode": mode},
+                "engine": "GHOST QUANTUM X - Momentum Fallback",
+                "strategies": ["Momentum"],
+                "timestamp": int(now),
+                "risk_percent": 1
             }
-
-        # Create new signal with stable ID and expiry
-        display_pair = clean_pair if is_otc else pair_upper
-        # price data use clean pair
-        pair = clean_pair if clean_pair in REAL_MARKET_PAIRS else pair_upper
-        signal_id = f"{display_pair}{"-OTC" if is_otc else ""}-{final}-{uuid.uuid4().hex[:8]}"
-        expiry_ts = int((now_dt + timedelta(seconds=58)).timestamp()*1000)
-        # But for display, expiry is end of current candle (clock_sec)
-        display_expiry = int((now_dt + timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000)
-
-        market_name = self._normalize_market(display_pair) + (" OTC" if is_otc else "")
-        new_signal = {
-            "signal_id": signal_id,
-            "signal": final,
-            "status": "ACTIVE",
-            "market": market_name,
-            "pair": pair,
-            "direction": final,
-            "generated_at": int(now),
-            "candle_timestamp": int(now),
-            "expiry_timestamp": display_expiry,  # For countdown
-            "hold_expiry": expiry_ts,  # For lock
+        
+        # Ultimate fallback
+        return {
+            "signal_id": f"WAIT-{int(now)}",
+            "signal": "WAIT",
+            "status": "WAITING",
+            "market": f"{check_pair[:3]}/{check_pair[3:]}" if len(check_pair)==6 else check_pair,
+            "pair": check_pair,
+            "direction": "WAIT",
+            "confidence": 0,
+            "reason": "No PA signal",
+            "price_action_type": "None",
+            "is_trap": False,
+            "expiry_timestamp": int((now_dt+timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000),
             "time_left": clock_sec,
-            "remainingSeconds": clock_sec,
-            "price": round(price,5 if "JPY" not in pair else 3),
-            "strategies": reasons[:4],
-            "filter": {"trend": final, "rsi": round(rsi,1), "mtf": mtf_sig, "corr_conf": corr_conf, "mem": mem_i, "time_left": clock_sec, "mode": mode, "score": round(score,2)},
-            "engine": f"GHOST {mode} | {pair} | No Flicker",
-            "confidence": int(conf),
-            "real": quotex_client.use_real,
-            "risk_percent": RISK_PERCENT,
-            "timestamp": int(now)
+            "remainingSeconds": clock_sec
         }
 
-        self.debounce[pair]=now
-        self.active_signals[pair]=new_signal
-
-        return new_signal
-
-    def scan_all(self,mode="SAFE"):
-        self._new_ticks()
-        res=[]
-        for p in self.pairs:
-            s=self.get_signal(p,mode)
-            res.append(s)
-        res=sorted(res,key=lambda x:x.get("confidence",0),reverse=True)
-        return res
-
 signal_engine=QuantumEngine()
-signal_engine.calc_signal = lambda override_mode=None, pair="EURUSD": signal_engine.get_signal(pair, override_mode or SIGNAL_MODE)
+signal_engine.calc_signal = lambda override_mode=None, pair="EURUSD": signal_engine.get_signal(pair, override_mode or "SAFE")
