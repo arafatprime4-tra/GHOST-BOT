@@ -257,23 +257,25 @@ class QuantumEngine:
                 score -= 1.2
                 reasons.append("PA Resistance Wick Bounce DOWN")
         
-        # 6. Consecutive wick profit - 2 same direction wicks
+        # 6. Consecutive wick profit - 2 same direction wicks (SAFE - fixed)
         if len(data)>=10:
             last_wicks = []
-            for i in range(-5, 0):
-                h = max(data[i-2:i+1]) if len(data)>=abs(i)+2 else data[i]
-                l = min(data[i-2:i+1]) if len(data)>=abs(i)+2 else data[i]
-                # Simplified wick direction
-                if data[i] > data[i-1]:
-                    last_wicks.append(1)
-                else:
-                    last_wicks.append(-1)
-            if last_wicks[-2:] == [1,1] and score>0:
-                score += 0.5
-                reasons.append("PA Trend Wick Continuation UP")
-            if last_wicks[-2:] == [-1,-1] and score<0:
-                score -= 0.5
-                reasons.append("PA Trend Wick Continuation DOWN")
+            try:
+                for idx in range(len(data)-5, len(data)):
+                    if idx > 0 and idx < len(data):
+                        if data[idx] > data[idx-1]:
+                            last_wicks.append(1)
+                        else:
+                            last_wicks.append(-1)
+                if len(last_wicks) >= 2:
+                    if last_wicks[-2:] == [1,1] and score>0:
+                        score += 0.5
+                        reasons.append("PA Trend Wick Continuation UP")
+                    if last_wicks[-2:] == [-1,-1] and score<0:
+                        score -= 0.5
+                        reasons.append("PA Trend Wick Continuation DOWN")
+            except:
+                pass
         
         reason_str = " | ".join(reasons[:2]) if reasons else "No PA"
         return score, reason_str
