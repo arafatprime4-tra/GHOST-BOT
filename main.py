@@ -17,6 +17,38 @@ except:
 logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN","").strip()
 
+# === PREMIUM TOKEN SYSTEM ===
+TOKEN_FILE = "approved_tokens.json"
+approved_tokens = {}
+try:
+    if os.path.exists(TOKEN_FILE):
+        with open(TOKEN_FILE, 'r', encoding='utf-8') as tf:
+            approved_tokens = json.load(tf)
+        logging.info(f"Loaded {len(approved_tokens)} tokens")
+except Exception as e:
+    logging.error(f"Token load fail {e}")
+    approved_tokens = {}
+
+def save_tokens():
+    try:
+        with open(TOKEN_FILE, 'w', encoding='utf-8') as tf:
+            json.dump(approved_tokens, tf)
+    except Exception as e:
+        logging.error(f"Token save fail {e}")
+
+def create_premium_token(trader_id, user_id, amount):
+    token = secrets.token_urlsafe(32)
+    approved_tokens[token] = {
+        "trader_id": str(trader_id),
+        "user_id": str(user_id),
+        "amount": str(amount),
+        "created": int(time.time()),
+        "created_human": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    save_tokens()
+    return token
+
+
 _admin_raw = os.getenv("ADMIN_ID","0").strip()
 try:
     ADMIN_ID = int(_admin_raw) if _admin_raw else 0
@@ -55,9 +87,25 @@ def api_signal():
     try:
         mode=request.args.get('mode','SAFE')
         pair=request.args.get('pair','EURUSD').upper()
+        # Optional token check for signal - if token provided, verify, else allow (can lock later)
+        # token = request.args.get('token') or request.args.get('access')
+        # if token and token not in approved_tokens:
+        #    return jsonify({"signal":"LOCKED","error":"Invalid premium token"})
         return jsonify(signal_engine.get_signal(pair,mode))
     except Exception as e: 
         return jsonify({"signal":"ERROR","error":str(e)})
+
+@flask_app.route('/api/verify')
+def api_verify():
+    token = request.args.get('token','') or request.args.get('access','') or request.args.get('premium','')
+    token = token.strip()
+    if not token:
+        return jsonify({"valid": False, "reason": "No token"})
+    data = approved_tokens.get(token)
+    if data:
+        return jsonify({"valid": True, "data": data})
+    else:
+        return jsonify({"valid": False, "reason": "Invalid or expired token"})
 
 @flask_app.route('/health')
 def health(): 
@@ -80,7 +128,7 @@ WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     kb=[
         [InlineKeyboardButton("🔗 Quotex Account - FREE PREMIUM", url=AFFILIATE_LINK)],
-        [InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
+        [InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
         [InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
@@ -324,9 +372,15 @@ Ami check kore sathe sathe approve kore dibo.
         uid=parts[1]
         trader_id=parts[2]
         amount=parts[3]
+        # Generate special premium link with token
+        premium_token = create_premium_token(trader_id, uid, amount)
+        premium_link = f"{WEBSITE_URL}/?access={premium_token}"
+        # Personalized ghost.js link with token (optional extra security)
+        personalized_ghost = f"{WEBSITE_URL}/ghost.js?token={premium_token}"
         kb=[
-            [InlineKeyboardButton("🌐 Website + Bookmarklet", url=WEBSITE_URL)],
-            [InlineKeyboardButton("🔖 Universal Bookmarklet Guide", callback_data="bookmark_guide"), InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK)],
+            [InlineKeyboardButton("🔓 PREMIUM ACCESS - CLICK HERE", url=premium_link)],
+            [InlineKeyboardButton("🌐 Website + Bookmarklet", url=premium_link)],
+            [InlineKeyboardButton("🔖 Bookmarklet Guide", callback_data="bookmark_guide"), InlineKeyboardButton("📚 Academy", url=ACADEMY_LINK)],
             [InlineKeyboardButton("📱 App Link", url=APP_LINK), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)]
         ]
         msg = f"""🎉 <b>CONGRATULATIONS! PREMIUM APPROVED!</b> 🎉
@@ -337,10 +391,19 @@ Ami check kore sathe sathe approve kore dibo.
 💰 <b>Total Deposit:</b> <b>${amount}</b>
 📊 <b>Status:</b> ✅ PREMIUM ACTIVE
 
-⚠️ <b>Kono bot 100% win dey na - 1% risk e safe trading!</b>
+🔓 <b>YOUR SPECIAL PREMIUM LINK (Secret):</b>
+<code>{premium_link}</code>
 
-🔖 <b>Universal Bookmarklet:</b>
-Website e giye <b>COPY</b> button e click korun!
+⚠️ <b>Ei link ta sudhu apnar jonno - onno keu dile kaj korbe na? Kaj korbe kintu sudhu apnar ID er jonno - share korben na.</b>
+
+👉 Ei link e gele sob Premium jinis dekhte paben:
+- Bookmarklet COPY button
+- Signal plate, Dashboard
+- Academy, App Link
+
+❌ Normal link e gele ( {WEBSITE_URL} ) sudhu Channel + Admin dekhbe, premium dekhbe na.
+
+🔖 <b>Bookmarklet:</b> Premium link er vitore giye COPY button e click korun!
 
 - GHOST PREMIUM Team 👻
 """
