@@ -1,55 +1,46 @@
 (function(){
 let css=document.createElement("style");
 css.innerHTML=`
-#ghost-bot{position:fixed;top:100px;right:10px;z-index:2147483647;width:240px;background:#0a0f1e;border:1px solid #00ff88;border-radius:10px;box-shadow:0 4px 20px #0008;font-family:Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
-.gh-h{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#0f1c2f;border-bottom:1px solid #1a324a;cursor:move}
-.gh-h b{font-size:10px;color:#fff;letter-spacing:.8px}
-.gh-h span{font-size:7px;color:#6a8a9a;display:block}
-.gh-x{width:18px;height:18px;background:#1a2035;border:1px solid #2a3455;border-radius:4px;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px}
-.gh-x:hover{background:#ff1744;border-color:#ff1744}
-.gh-body{padding:8px 10px}
-.gh-pair-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.gh-pair{font-size:11px;font-weight:800;color:#fff}
-.gh-badge{font-size:6px;background:#0a2a1a;border:1px solid #00ff88;color:#00ff88;padding:2px 5px;border-radius:10px}
-.gh-sig{height:42px;background:#111a2a;border:1px solid #1e344e;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:6px}
-.gh-sig.up{background:linear-gradient(145deg,#0a2a1a,#0f3a22);border-color:#00ff88;color:#00ff88}
-.gh-sig.down{background:linear-gradient(145deg,#2a1515,#1e0f15);border-color:#ff3a5a;color:#ff3a5a}
-.gh-sig b{font-size:16px;letter-spacing:1px}
-.gh-info{display:flex;justify-content:space-between;font-size:7px;color:#6a8a9a;margin-bottom:4px}
-.gh-info b{font-size:8px;color:#fff}
-.gh-timer{font-size:12px;color:#00ff88;font-weight:800;text-align:center;margin:4px 0}
-.gh-price{font-size:7px;color:#6a8a9a;text-align:center;border-top:1px solid #1a2f4a;padding-top:5px;margin-top:5px}
-.gh-price b{color:#00ff88}
+#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:285px;background:linear-gradient(180deg,#0d1428,#080d1c);border:1.5px solid #00ff88;border-radius:14px;box-shadow:0 0 20px rgba(0,255,136,.2),0 10px 30px #000c;font-family:Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
+.gh-h{padding:10px 14px;background:#0a1528;border-bottom:1px solid #122a3a;display:flex;align-items:center;gap:8px}
+.gh-dot{width:9px;height:9px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88;flex-shrink:0}
+.gh-h b{font-size:11px;color:#fff;letter-spacing:.8px;font-weight:900}
+.gh-pair{font-size:13px;font-weight:900;color:#1e90ff;text-align:center;margin:10px 0 8px;letter-spacing:1px}
+.gh-sig{margin:0 14px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;letter-spacing:1.5px;transition:all .2s;cursor:default}
+.gh-sig.up{background:linear-gradient(145deg,#00c853,#009624);color:#fff;box-shadow:0 4px 15px rgba(0,200,83,.3)}
+.gh-sig.down{background:linear-gradient(145deg,#ff1744,#d5002b);color:#fff;box-shadow:0 4px 15px rgba(255,23,68,.3)}
+.gh-sig.wait{background:#1a233a;color:#5a6f8a;border:1px solid #22314a}
+.gh-meta{font-size:10px;color:#5a6f8a;text-align:center;margin:10px 0 12px;letter-spacing:.5px;font-weight:600}
+.gh-close{margin:0 14px 14px;height:38px;background:#131a2e;border:1px solid #1e2d4a;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:11px;font-weight:600;cursor:pointer}
+.gh-close:hover{background:#1a2340;color:#fff}
 `;
 document.head.appendChild(css);
 let old=document.getElementById("ghost-bot");if(old) old.remove();
 let box=document.createElement("div");box.id="ghost-bot";
 box.innerHTML=`
-<div class="gh-h" id="gh-h"><div><b>GHOST BOT</b><span>SAFE 1M • REAL ONLY</span></div><div class="gh-x" id="gh-x">✕</div></div>
-<div class="gh-body">
-  <div class="gh-pair-row"><div class="gh-pair" id="gh-pair">EUR/USD</div><div class="gh-badge">REAL MARKET ✓</div></div>
-  <div class="gh-sig" id="gh-sig"><span id="gh-arrow">⏳</span><b id="gh-txt">WAIT</b></div>
-  <div class="gh-info"><span>CONFIDENCE <b id="gh-conf">0%</b></span><span>TREND <b id="gh-trend">WAIT</b></span><span>RISK <b>1%</b></span></div>
-  <div class="gh-timer" id="gh-timer">00:00</div>
-  <div class="gh-price">PRICE <b id="gh-price">0.00000</b> • <span id="gh-time">--:--:--</span> • 99-100%</div>
-</div>
+<div class="gh-h"><div class="gh-dot"></div><b>GHOST BOT</b></div>
+<div class="gh-pair" id="gh-pair">EURUSD</div>
+<div class="gh-sig wait" id="gh-sig"><span id="gh-txt">WAIT</span></div>
+<div class="gh-meta" id="gh-meta">SAFE 1M • <span id="gh-sec">--s</span> • RISK 1%</div>
+<div class="gh-close" id="gh-close">Close</div>
 `;
 document.body.appendChild(box);
 
-let x=document.getElementById("gh-x");
-x.addEventListener("click",e=>{e.stopPropagation();document.getElementById("ghost-bot")?.remove();});
-x.addEventListener("touchend",e=>{e.stopPropagation();document.getElementById("ghost-bot")?.remove();});
+document.getElementById("gh-close").addEventListener("click",e=>{e.stopPropagation();document.getElementById("ghost-bot")?.remove();});
+document.getElementById("gh-close").addEventListener("touchend",e=>{e.stopPropagation();document.getElementById("ghost-bot")?.remove();});
 
-let isDrag=false,sx=0,sy=0,il=0,it=0;let h=document.getElementById("gh-h");
-function pos(){let r=box.getBoundingClientRect();return{left:r.left,top:r.top};}
-function ds(e){if(e.target.closest("#gh-x")) return; isDrag=true;let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;sx=cx;sy=cy;let p=pos();il=p.left;it=p.top;box.style.right="auto";e.preventDefault();}
+let isDrag=false,sx=0,sy=0,il=0,it=0;
+let hd=document.querySelector("#ghost-bot .gh-h");
+function getPos(){let r=box.getBoundingClientRect();return{left:r.left,top:r.top};}
+function ds(e){if(e.target.closest("#gh-close")) return; isDrag=true;let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;sx=cx;sy=cy;let p=getPos();il=p.left;it=p.top;box.style.left=p.left+"px";box.style.right="auto";box.style.bottom="auto";box.style.transform="none";e.preventDefault();}
 function dm(e){if(!isDrag)return;let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;box.style.left=(il+cx-sx)+"px";box.style.top=(it+cy-sy)+"px";e.preventDefault();}
 function de(){isDrag=false;}
-h.addEventListener("mousedown",ds);document.addEventListener("mousemove",dm);document.addEventListener("mouseup",de);
-h.addEventListener("touchstart",ds,{passive:false});document.addEventListener("touchmove",dm,{passive:false});document.addEventListener("touchend",de);
+hd.addEventListener("mousedown",ds);document.addEventListener("mousemove",dm);document.addEventListener("mouseup",de);
+hd.addEventListener("touchstart",ds,{passive:false});document.addEventListener("touchmove",dm,{passive:false});document.addEventListener("touchend",de);
 
 let TOKEN="";try{let ss=document.getElementsByTagName('script');for(let s of ss){if(s.src&&s.src.includes('ghost.js')){let u=new URL(s.src);TOKEN=u.searchParams.get('token')||u.searchParams.get('access')||"";if(TOKEN)break;}}if(!TOKEN)TOKEN=localStorage.getItem('ghost_premium_token')||"";}catch(e){}
-let currentSignal=null;let stablePair="EURUSD";let stableDisplay="EUR/USD";let stableLock=0;
+
+let currentSignal=null;let stablePair="EURUSD";let stableDisplay="EURUSD";let stableLock=0;let lastGoodSignal=null;
 
 function getRealPair(){
   try{
@@ -61,43 +52,71 @@ function getRealPair(){
         let txt=(el.innerText||"").trim();if(txt.length>30||txt.length<5) continue;if(!txt.includes('%')) continue;if(/OTC/i.test(txt)) continue;
         let m=txt.match(/^([A-Z]{3}\/[A-Z]{3})/);if(!m) continue;
         let r=el.getBoundingClientRect();if(r.top>br.top) continue;if(br.top-r.top>350) continue;
-        let d=br.top-r.top;if(d<bd){bd=d;best={pair:m[1].replace('/','').toUpperCase(),display:m[1]};}
+        let d=br.top-r.top;if(d<bd){bd=d;best={pair:m[1].replace('/','').toUpperCase(),display:m[1].replace('/','')};}
       }
       if(best){let now=Date.now();if(best.pair!==stablePair){if(now>stableLock){stablePair=best.pair;stableDisplay=best.display;stableLock=now+10000;}}else{stableDisplay=best.display;}return {pair:stablePair,display:stableDisplay};}
     }
   }catch(e){}
   return {pair:stablePair,display:stableDisplay};
 }
-function getRealPrice(){
-  try{for(let el of document.querySelectorAll('div, span')){let txt=(el.innerText||"").trim();if(txt.match(/^\d+\.\d{3,5}$/)&&txt.length>=6&&txt.length<=9){let r=el.getBoundingClientRect();if(r.top>50&&r.top<300&&r.left>window.innerWidth*0.4){return txt;}}}}catch(e){}return null;
-}
+
 function updateUI(j){
-  let pe=document.getElementById("gh-pair");if(pe) pe.textContent=j.market||stableDisplay;
-  let sig=document.getElementById("gh-sig");let txt=document.getElementById("gh-txt");let arr=document.getElementById("gh-arrow");
+  let pairEl=document.getElementById("gh-pair");if(pairEl) pairEl.textContent=j.market||stableDisplay;
+  let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");
   let dir=j.direction||j.signal;
-  if(sig&&txt){sig.className="gh-sig "+(dir==="UP"?"up":dir==="DOWN"?"down":"");if(dir==="UP"){txt.textContent="UP";arr.textContent="↗";}else if(dir==="DOWN"){txt.textContent="DOWN";arr.textContent="↘";}else{txt.textContent="WAIT";arr.textContent="⏳";}}
-  let cf=document.getElementById("gh-conf");if(cf) cf.textContent=(j.confidence||0)+"%";
-  let tr=document.getElementById("gh-trend");if(tr) tr.textContent=j.filter?.trend||dir||"WAIT";
-  let pr=document.getElementById("gh-price");if(pr){let rp=getRealPrice();pr.textContent=rp||j.price||"0.00000";}
+  if(sigEl&&txtEl){
+    if(dir==="UP"){sigEl.className="gh-sig up";txtEl.textContent="UP";lastGoodSignal=j;}
+    else if(dir==="DOWN"){sigEl.className="gh-sig down";txtEl.textContent="DOWN";lastGoodSignal=j;}
+    else{
+      // WAIT দেখাবে না, আগের ভালো signal ধরে রাখবে expiry পর্যন্ত
+      if(lastGoodSignal && Date.now() < lastGoodSignal.expiry_timestamp){
+        // keep last signal
+        return;
+      }
+      sigEl.className="gh-sig wait";txtEl.textContent="WAIT";
+    }
+  }
 }
+
 function fetchSig(){
   let info=getRealPair();let asset=info.pair;
   if((document.body.innerText||"").includes("Select trade pair")) return;
   let url="https://giogram-backend.onrender.com/api/signal?pair="+asset+"&mode=SAFE";
   if(TOKEN) url+="&token="+encodeURIComponent(TOKEN);
   fetch(url).then(r=>r.json()).then(j=>{
-    if(!j||j.signal=="ERROR") return;
-    if(j.status==="ACTIVE"&&(j.signal==="UP"||j.signal==="DOWN")){currentSignal=j;updateUI(j);}
-    else if(j.signal==="WAIT"){if(!currentSignal||Date.now()>currentSignal.expiry_timestamp){currentSignal={...j,market:info.display,pair:asset,direction:"WAIT",signal:"WAIT",expiry_timestamp:Date.now()+60000};updateUI(currentSignal);}}
+    if(!j) return;
+    if(j.signal=="ERROR") return;
+    if(j.status==="ACTIVE"&&(j.signal==="UP"||j.signal==="DOWN")){
+      currentSignal=j;
+      updateUI(j);
+    }else if(j.signal==="WAIT"){
+      // WAIT হলে আগের signal expiry পর্যন্ত ধরে রাখো, শুধু WAIT দেখাইও না
+      if(!currentSignal || Date.now() > currentSignal.expiry_timestamp){
+        // যদি আগের signal নাই, তাহলে WAIT দেখাও কিন্তু lastGood থাকলে সেটাই রাখো
+        if(lastGoodSignal && Date.now() < lastGoodSignal.expiry_timestamp){
+          updateUI(lastGoodSignal);
+        }else{
+          let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");
+          if(sigEl&&txtEl){sigEl.className="gh-sig wait";txtEl.textContent="WAIT";}
+        }
+      }
+    }
   }).catch(()=>{});
 }
+
+// Timer - SAFE 1M • 10s • RISK 1% এর 10s টা real candle timer থেকে
 setInterval(()=>{
-  let tn=document.getElementById("gh-time");if(tn) tn.textContent=new Date().toLocaleTimeString('en-GB',{hour12:false});
-  let rp=getRealPrice();let pr=document.getElementById("gh-price");if(rp&&pr) pr.textContent=rp;
-  if(!currentSignal){let tm=document.getElementById("gh-timer");if(tm){let s=60-new Date().getSeconds();if(s===60)s=0;tm.textContent="00:"+(s<10?"0"+s:s);}return;}
+  if(!currentSignal){
+    let secEl=document.getElementById("gh-sec");
+    if(secEl){let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";}
+    return;
+  }
   let rem=Math.max(0,Math.ceil((currentSignal.expiry_timestamp-Date.now())/1000));
-  let tm=document.getElementById("gh-timer");if(tm){let m=Math.floor(rem/60);let s=rem%60;tm.textContent=(m<10?"0"+m:m)+":"+(s<10?"0"+s:s);}
-  if(rem<=0) currentSignal=null;
+  let secEl=document.getElementById("gh-sec");
+  if(secEl) secEl.textContent=rem+"s";
+  if(rem<=0){currentSignal=null;lastGoodSignal=null;}
 },500);
-setInterval(fetchSig,4000);fetchSig();
+
+setInterval(fetchSig,3000);
+fetchSig();
 })();
