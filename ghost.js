@@ -143,12 +143,41 @@ function runPAFilter(candles){
   return {signal:candles[candles.length-1].bull?"CALL":"PUT",conf:60,reason:struct.reason,pa_type:"Ranging",structure:struct,is_trap:false};
 }
 
-// BOT LOGIC
+// BOT LOGIC - FIXED FLICKER + MARKET AUTO
 let TOKEN="";try{let ss=document.getElementsByTagName('script');for(let s of ss){if(s.src&&s.src.includes('ghost.js')){let u=new URL(s.src);TOKEN=u.searchParams.get('token')||u.searchParams.get('access')||"";if(TOKEN)break;}}if(!TOKEN)TOKEN=localStorage.getItem('ghost_premium_token')||"";}catch(e){}
-let currentSignal=null;let stablePair="EURUSD";let stableDisplay="EURUSD";let stableLock=0;let lastGoodSignal=null;let priceHistory=[];let candleHistory=[];
+let currentSignal=null;let stablePair="EURUSD";let stableDisplay="EURUSD";let stableLock=0;let priceHistory=[];let candleHistory=[];
+let lockedSignalId="";let lockedUntil=0;let lockedPair="";
 
 function getRealPair(){
   try{
+    // Method 1: Bottom bar (CAD/JPY 83%, AUD/USD 85% etc) - most reliable for manual change
+    for(let el of document.querySelectorAll('div, span, button')){
+      let txt=(el.innerText||"").trim();
+      // Match "CAD/JPY 83%" or "AUD/USD 85%" at bottom
+      let m=txt.match(/^([A-Z]{3}\/[A-Z]{3})\s+(\d+)%\s*$/i);
+      if(m){
+        let r=el.getBoundingClientRect();
+        // Bottom area
+        if(r.top>window.innerHeight*0.75 && r.top<window.innerHeight*0.98){
+          let pair=m[1].replace('/','').toUpperCase();
+          let display=m[1].replace('/','');
+          let now=Date.now();
+          if(pair!==stablePair){
+            // Immediate change if user manually selects
+            if(now>stableLock){
+              stablePair=pair;stableDisplay=display;stableLock=now+2000;
+              // Clear lock when pair changes
+              lockedSignalId="";lockedUntil=0;currentSignal=null;
+              console.log('Pair changed to',pair);
+              return {pair:stablePair,display:stableDisplay,changed:true};
+            }
+          }
+          stableDisplay=display;
+          return {pair:stablePair,display:stableDisplay,changed:false};
+        }
+      }
+    }
+    // Method 2: Near Buy button (top right)
     for(let el of document.querySelectorAll('div, span')){
       let txt=(el.innerText||"").trim();
       let m=txt.match(/^([A-Z]{3}\/[A-Z]{3})(\s*OTC)?\s+\d+%\s*$/i);
@@ -161,7 +190,7 @@ function getRealPair(){
           let now=Date.now();
           if(pair!==stablePair&&now>stableLock){
             stablePair=pair;stableDisplay=display;stableLock=now+1500;
-            currentSignal=null;lastGoodSignal=null;
+            lockedSignalId="";lockedUntil=0;currentSignal=null;
             return {pair:stablePair,display:stableDisplay,changed:true};
           }
           stableDisplay=display;
@@ -192,38 +221,70 @@ function updateUI(j){
   let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
   let dir=j.signal||j.direction;
   if(sigEl&&txtEl){
-    if(dir==="CALL"||dir==="UP"){sigEl.className="gh-sig up";txtEl.textContent="UP";reasonEl.textContent=j.reason||j.price_action_type||"";lastGoodSignal=j;}
-    else if(dir==="PUT"||dir==="DOWN"){sigEl.className="gh-sig down";txtEl.textContent="DOWN";reasonEl.textContent=j.reason||j.price_action_type||"";lastGoodSignal=j;}
+    if(dir==="CALL"||dir==="UP"){sigEl.className="gh-sig up";txtEl.textContent="UP";reasonEl.textContent=j.reason||j.price_action_type||"";}
+    else if(dir==="PUT"||dir==="DOWN"){sigEl.className="gh-sig down";txtEl.textContent="DOWN";reasonEl.textContent=j.reason||j.price_action_type||"";}
     else{sigEl.className="gh-sig wait";txtEl.textContent="WAIT";reasonEl.textContent=j.reason||"Analyzing...";}
     if(paEl) paEl.textContent=`${j.price_action_type||j.reason||"Momentum"} | ${j.confidence||0}% ${j.is_trap?"| TRAP":""}`;
   }
 }
 function fetchSig(forcePair){
+  let now=Date.now();
+  // 58s LOCK - no flip during active signal
+  if(lockedSignalId && now<lockedUntil && currentSignal){
+    // Keep locked signal, don't fetch new
+    return;
+  }
   let info=forcePair?{pair:forcePair,display:forcePair,changed:true}:getRealPair();
   let asset=info.pair;
   if((document.body.innerText||"").includes("Select trade pair")) return;
+  // If pair changed, clear lock
+  if(info.changed){
+    lockedSignalId="";lockedUntil=0;currentSignal=null;
+  }
   let url="https://giogram-backend.onrender.com/api/signal?pair="+asset+"&mode=SAFE";
   if(TOKEN) url+="&token="+encodeURIComponent(TOKEN);
   fetch(url).then(r=>r.json()).then(j=>{
     if(!j||j.signal=="ERROR") return;
     if(j.signal==="UP") j.signal="CALL";
     if(j.signal==="DOWN") j.signal="PUT";
+    // PAIR CHECK - ensure response pair matches current pair
+    let responsePair=(j.pair||"").replace("OTC","").toUpperCase();
+    let currentClean=stablePair.replace("OTC","").toUpperCase();
+    if(responsePair && responsePair!==currentClean && !info.changed){
+      // Stale response, ignore
+      return;
+    }
     if(j.status==="ACTIVE"&&(j.signal==="CALL"||j.signal==="PUT")){
-      currentSignal=j;updateUI(j);
-    }else if(j.signal==="WAIT"){
-      if(lastGoodSignal&&Date.now()<lastGoodSignal.expiry_timestamp){
-        updateUI(lastGoodSignal);
-      }else{
-        if(candleHistory.length>=10&&paEnabled){
-          let pa=runPAFilter(candleHistory);
-          if(pa&&pa.signal!=="WAIT"){
-            let now=new Date();let clockSec=60-now.getSeconds();
-            let fake={...pa,market:stableDisplay,pair:stablePair,confidence:pa.conf,expiry_timestamp:Date.now()+clockSec*1000};
-            currentSignal=fake;updateUI(fake);return;
-          }
-        }
+      // LOCK SIGNAL for 58 seconds
+      if(!lockedSignalId || now>=lockedUntil){
+        lockedSignalId=j.signal_id|| (stablePair+"-"+j.signal+"-"+now);
+        lockedUntil=now+58000; // 58s lock
+        lockedPair=stablePair;
+        currentSignal=j;
         updateUI(j);
       }
+    }else if(j.signal==="WAIT"){
+      // If locked and still valid, keep showing locked
+      if(lockedSignalId && now<lockedUntil && currentSignal){
+        updateUI(currentSignal);
+        return;
+      }
+      // PA fallback local
+      if(candleHistory.length>=10&&paEnabled){
+        let pa=runPAFilter(candleHistory);
+        if(pa&&pa.signal!=="WAIT"){
+          let clockSec=60-new Date().getSeconds();
+          let fake={...pa,market:stableDisplay,pair:stablePair,confidence:pa.conf,expiry_timestamp:now+clockSec*1000,signal_id:stablePair+"-PA-"+now};
+          if(!lockedSignalId || now>=lockedUntil){
+            lockedSignalId=fake.signal_id;
+            lockedUntil=now+58000;
+            currentSignal=fake;
+            updateUI(fake);
+          }
+          return;
+        }
+      }
+      if(!currentSignal) updateUI(j);
     }
   }).catch(()=>{});
 }
@@ -243,12 +304,24 @@ setInterval(()=>{
 setInterval(()=>{
   let info=getRealPair();
   if(info.changed) fetchSig(info.pair);
-  if(!currentSignal){let secEl=document.getElementById("gh-sec");if(secEl){let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";}return;}
+  if(!currentSignal){
+    let secEl=document.getElementById("gh-sec");
+    if(secEl){let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";}
+    return;
+  }
   let rem=Math.max(0,Math.ceil((currentSignal.expiry_timestamp-Date.now())/1000));
   let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=rem+"s";
-  if(rem<=0){currentSignal=null;}
+  if(rem<=0){
+    // Expiry reached, clear lock
+    currentSignal=null;
+    lockedSignalId="";
+    lockedUntil=0;
+  }else{
+    // Keep showing locked signal
+    updateUI(currentSignal);
+  }
 },500);
-setInterval(()=>{let info=getRealPair();if(info.changed) fetchSig(info.pair);},1200);
-setInterval(()=>fetchSig(),3000);
+setInterval(()=>{let info=getRealPair();if(info.changed) fetchSig(info.pair);},1000);
+setInterval(()=>fetchSig(),4000);
 fetchSig();
 })();
