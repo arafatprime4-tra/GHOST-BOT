@@ -49,99 +49,143 @@ function de(){isDrag=false;}
 hd.addEventListener("mousedown",ds);document.addEventListener("mousemove",dm);document.addEventListener("mouseup",de);
 hd.addEventListener("touchstart",ds,{passive:false});document.addEventListener("touchmove",dm,{passive:false});document.addEventListener("touchend",de);
 
-// ===== PRICE ACTION FILTER JS (PURE OHLC) - QUANTUM X =====
+
+// ===== SMC FULL - SMART MONEY CONCEPTS - QUANTUM X =====
 class Candle{constructor(o,h,l,c){this.open=o;this.high=h;this.low=l;this.close=c;this.body=Math.abs(c-o);this.upper=h-Math.max(o,c);this.lower=Math.min(o,c)-l;this.bull=c>o;this.bear=c<o;}}
 
 function detectMarketStructure(candles){
-  if(candles.length<10) return {structure:"RANGING",bias:"BOTH",reason:"Analyzing structure..."};
+  if(candles.length<12) return {structure:"RANGING",bias:"BOTH",reason:"Analyzing structure..."};
   let highs=[],lows=[];
-  for(let i=2;i<candles.length-2;i++){
-    if(candles[i].high>candles[i-1].high&&candles[i].high>candles[i-2].high&&candles[i].high>candles[i+1].high&&candles[i].high>candles[i+2].high) highs.push([i,candles[i].high]);
-    if(candles[i].low<candles[i-1].low&&candles[i].low<candles[i-2].low&&candles[i].low<candles[i+1].low&&candles[i].low<candles[i+2].low) lows.push([i,candles[i].low]);
+  for(let i=3;i<candles.length-3;i++){
+    if(candles[i].high>candles[i-1].high&&candles[i].high>candles[i-2].high&&candles[i].high>candles[i-3].high&&candles[i].high>candles[i+1].high&&candles[i].high>candles[i+2].high&&candles[i].high>candles[i+3].high) highs.push([i,candles[i].high]);
+    if(candles[i].low<candles[i-1].low&&candles[i].low<candles[i-2].low&&candles[i].low<candles[i-3].low&&candles[i].low<candles[i+1].low&&candles[i].low<candles[i+2].low&&candles[i].low<candles[i+3].low) lows.push([i,candles[i].low]);
   }
   if(highs.length<2||lows.length<2) return {structure:"RANGING",bias:"BOTH",reason:"Ranging"};
   let h1=highs[highs.length-1][1],h2=highs[highs.length-2][1];
   let l1=lows[lows.length-1][1],l2=lows[lows.length-2][1];
   let hh=h1>h2,hl=l1>l2,ll=l1<l2,lh=h1<h2;
-  if(hh&&hl) return {structure:"BULLISH",bias:"CALL",bos:true,reason:`BOS HH+HL ${h2.toFixed(5)}→${h1.toFixed(5)}`};
-  if(ll&&lh) return {structure:"BEARISH",bias:"PUT",bos:true,reason:`BOS LL+LH ${h2.toFixed(5)}→${h1.toFixed(5)}`};
-  return {structure:"RANGING",bias:"BOTH",bos:false,reason:"Ranging market"};
+  if(hh&&hl) return {structure:"BULLISH_BOS",bias:"CALL",bos:true,choch:false,reason:`BOS HH+HL ${h2.toFixed(5)}→${h1.toFixed(5)}`};
+  if(ll&&lh) return {structure:"BEARISH_BOS",bias:"PUT",bos:true,choch:false,reason:`BOS LL+LH ${h2.toFixed(5)}→${h1.toFixed(5)}`};
+  if(highs.length>=3 && highs[highs.length-3][1] < highs[highs.length-2][1] && highs[highs.length-1][1] < highs[highs.length-2][1]) return {structure:"CHOCH_BEARISH",bias:"PUT",bos:false,choch:true,reason:"CHOCH Bearish - Failed HH"};
+  if(lows.length>=3 && lows[lows.length-3][1] > lows[lows.length-2][1] && lows[lows.length-1][1] > lows[lows.length-2][1]) return {structure:"CHOCH_BULLISH",bias:"CALL",bos:false,choch:true,reason:"CHOCH Bullish - Failed LL"};
+  return {structure:"RANGING",bias:"BOTH",bos:false,choch:false,reason:"Ranging market"};
 }
-function detectLiquidityGrab(candles){
-  if(candles.length<6) return {grab:false};
+function detectLiquidity(candles){
+  if(candles.length<8) return {grab:false};
   let last=candles[candles.length-1];
-  let prevHigh=Math.max(...candles.slice(-6,-1).map(c=>c.high));
-  let prevLow=Math.min(...candles.slice(-6,-1).map(c=>c.low));
+  let prevHigh=Math.max(...candles.slice(-8,-1).map(c=>c.high));
+  let prevLow=Math.min(...candles.slice(-8,-1).map(c=>c.low));
+  let highs=candles.slice(-6,-1).map(c=>c.high);
+  let lows=candles.slice(-6,-1).map(c=>c.low);
+  let eqHigh=highs.some(h=>Math.abs(h-prevHigh)<0.00015);
+  let eqLow=lows.some(l=>Math.abs(l-prevLow)<0.00015);
   if(last.high>prevHigh&&last.close<prevHigh){
     let ratio=last.upper/(last.body+0.00001);
-    if(ratio>1.5) return {grab:true,type:"TOP_GRAB",signal:"PUT",conf:85,reason:`Liquidity Grab Top ${prevHigh.toFixed(5)} swept`,is_trap:true,pa_type:"Liquidity Grab"};
+    if(ratio>1.2) return {grab:true,type:"BUY_SIDE_LIQUIDITY",signal:"PUT",conf:88,reason:`Buy Side Liquidity ${prevHigh.toFixed(5)} swept ${eqHigh?'(Equal Highs)':''}`,is_trap:true,pa_type:"Liquidity Grab"};
   }
   if(last.low<prevLow&&last.close>prevLow){
     let ratio=last.lower/(last.body+0.00001);
-    if(ratio>1.5) return {grab:true,type:"BOTTOM_GRAB",signal:"CALL",conf:85,reason:`Liquidity Grab Bottom ${prevLow.toFixed(5)} swept`,is_trap:true,pa_type:"Liquidity Grab"};
+    if(ratio>1.2) return {grab:true,type:"SELL_SIDE_LIQUIDITY",signal:"CALL",conf:88,reason:`Sell Side Liquidity ${prevLow.toFixed(5)} swept ${eqLow?'(Equal Lows)':''}`,is_trap:true,pa_type:"Liquidity Grab"};
   }
   return {grab:false};
 }
-function detectOrderBlockFVG(candles){
-  if(candles.length<5) return {ob:false,fvg:false};
-  for(let i=candles.length-4;i>0;i--){
+function detectOrderBlock(candles){
+  if(candles.length<6) return {ob:false};
+  for(let i=candles.length-5;i>1;i--){
     if(candles[i].bear){
-      if(i+2<candles.length){
-        let c1=candles[i+1],c2=candles[i+2];
-        if(c1.bull&&c2.bull&&(c1.body+c2.body)>candles[i].body*1.5){
+      if(i+3<candles.length){
+        let c1=candles[i+1],c2=candles[i+2],c3=candles[i+3];
+        if(c1.bull&&c2.bull&&(c1.body+c2.body)>candles[i].body*1.8&&c3.close>candles[i].high){
           let curr=candles[candles.length-1];
-          if(candles[i].low<=curr.close&&curr.close<=candles[i].high) return {ob:true,type:"BULLISH_OB",signal:"CALL",conf:80,reason:`Bullish OB Retest ${candles[i].low.toFixed(5)}`,pa_type:"Order Block Retest"};
+          if(candles[i].low<=curr.close&&curr.close<=candles[i].high) return {ob:true,type:"BULLISH_OB",signal:"CALL",conf:82,reason:`Bullish OB ${candles[i].low.toFixed(5)}-${candles[i].high.toFixed(5)} Retest`,pa_type:"Order Block Retest"};
+          if(curr.close>candles[i].high&&curr.bull) return {ob:true,type:"BULLISH_BREAKER",signal:"CALL",conf:80,reason:`Bullish Breaker ${candles[i].high.toFixed(5)} Break`,pa_type:"Breaker Block"};
         }
       }
     }
     if(candles[i].bull){
-      if(i+2<candles.length){
-        let c1=candles[i+1],c2=candles[i+2];
-        if(c1.bear&&c2.bear&&(c1.body+c2.body)>candles[i].body*1.5){
+      if(i+3<candles.length){
+        let c1=candles[i+1],c2=candles[i+2],c3=candles[i+3];
+        if(c1.bear&&c2.bear&&(c1.body+c2.body)>candles[i].body*1.8&&c3.close<candles[i].low){
           let curr=candles[candles.length-1];
-          if(candles[i].low<=curr.close&&curr.close<=candles[i].high) return {ob:true,type:"BEARISH_OB",signal:"PUT",conf:80,reason:`Bearish OB Retest ${candles[i].high.toFixed(5)}`,pa_type:"Order Block Retest"};
+          if(candles[i].low<=curr.close&&curr.close<=candles[i].high) return {ob:true,type:"BEARISH_OB",signal:"PUT",conf:82,reason:`Bearish OB ${candles[i].low.toFixed(5)}-${candles[i].high.toFixed(5)} Retest`,pa_type:"Order Block Retest"};
+          if(curr.close<candles[i].low&&curr.bear) return {ob:true,type:"BEARISH_BREAKER",signal:"PUT",conf:80,reason:`Bearish Breaker ${candles[i].low.toFixed(5)} Break`,pa_type:"Breaker Block"};
         }
       }
     }
   }
+  return {ob:false};
+}
+function detectFVG(candles){
+  if(candles.length<4) return {fvg:false};
   for(let i=1;i<candles.length-1;i++){
     let c1=candles[i-1],c2=candles[i],c3=candles[i+1];
-    if(c3.low>c1.high){
+    if(c3.low>c1.high&&c2.bull&&c2.body>(c1.body+c3.body)/2){
       let curr=candles[candles.length-1];
-      if(c1.high<=curr.close&&curr.close<=c3.low) return {fvg:true,type:"BULLISH_FVG",signal:"CALL",conf:75,reason:`Bullish FVG Fill`,pa_type:"FVG Fill"};
+      if(c1.high<=curr.close&&curr.close<=c3.low){
+        let mid=(c1.high+c3.low)/2;
+        let conf=curr.close<=mid?85:75;
+        return {fvg:true,type:"BULLISH_FVG",signal:"CALL",conf:conf,reason:`Bullish FVG ${c1.high.toFixed(5)}-${c3.low.toFixed(5)} Mitigation`,pa_type:"FVG Mitigation"};
+      }
     }
-    if(c3.high<c1.low){
+    if(c3.high<c1.low&&c2.bear&&c2.body>(c1.body+c3.body)/2){
       let curr=candles[candles.length-1];
-      if(c3.high<=curr.close&&curr.close<=c1.low) return {fvg:true,type:"BEARISH_FVG",signal:"PUT",conf:75,reason:`Bearish FVG Fill`,pa_type:"FVG Fill"};
+      if(c3.high<=curr.close&&curr.close<=c1.low){
+        let mid=(c3.high+c1.low)/2;
+        let conf=curr.close>=mid?85:75;
+        return {fvg:true,type:"BEARISH_FVG",signal:"PUT",conf:conf,reason:`Bearish FVG ${c3.high.toFixed(5)}-${c1.low.toFixed(5)} Mitigation`,pa_type:"FVG Mitigation"};
+      }
     }
   }
-  return {ob:false,fvg:false};
+  return {fvg:false};
+}
+function detectPremiumDiscount(candles){
+  if(candles.length<20) return {zone:"EQUILIBRIUM",bias:"BOTH"};
+  let recentHigh=Math.max(...candles.slice(-20).map(c=>c.high));
+  let recentLow=Math.min(...candles.slice(-20).map(c=>c.low));
+  let curr=candles[candles.length-1].close;
+  let range=recentHigh-recentLow;
+  if(range==0) return {zone:"EQUILIBRIUM",bias:"BOTH"};
+  let premium=recentLow+range*0.7;
+  let discount=recentLow+range*0.3;
+  if(curr>=premium) return {zone:"PREMIUM",bias:"PUT",reason:`Premium Zone ${curr.toFixed(5)} >= ${premium.toFixed(5)}`};
+  if(curr<=discount) return {zone:"DISCOUNT",bias:"CALL",reason:`Discount Zone ${curr.toFixed(5)} <= ${discount.toFixed(5)}`};
+  return {zone:"EQUILIBRIUM",bias:"BOTH",reason:"Equilibrium"};
 }
 function detectRejectionWick(candles){
-  if(candles.length<10) return {rejection:false};
+  if(candles.length<12) return {rejection:false};
   let last=candles[candles.length-1];
-  let recentHigh=Math.max(...candles.slice(-10,-1).map(c=>c.high));
-  let recentLow=Math.min(...candles.slice(-10,-1).map(c=>c.low));
+  let recentHigh=Math.max(...candles.slice(-12,-1).map(c=>c.high));
+  let recentLow=Math.min(...candles.slice(-12,-1).map(c=>c.low));
   if(last.upper>last.body*2.5&&last.high>=recentHigh*0.9995){
-    return {rejection:true,type:"UPPER_REJECTION",signal:"PUT",conf:78,reason:`Rejection Wick at Resistance ${(last.upper/(last.body+0.00001)).toFixed(1)}x`,pa_type:"Rejection Wick"};
+    return {rejection:true,type:"BEARISH_REJECTION",signal:"PUT",conf:80,reason:`Rejection Wick at Premium ${(last.upper/(last.body+0.00001)).toFixed(1)}x`,pa_type:"Rejection Wick"};
   }
   if(last.lower>last.body*2.5&&last.low<=recentLow*1.0005){
-    return {rejection:true,type:"LOWER_REJECTION",signal:"CALL",conf:78,reason:`Rejection Wick at Support ${(last.lower/(last.body+0.00001)).toFixed(1)}x`,pa_type:"Rejection Wick"};
+    return {rejection:true,type:"BULLISH_REJECTION",signal:"CALL",conf:80,reason:`Rejection Wick at Discount ${(last.lower/(last.body+0.00001)).toFixed(1)}x`,pa_type:"Rejection Wick"};
   }
   return {rejection:false};
 }
 function runPAFilter(candles){
   if(!paEnabled) return null;
   let struct=detectMarketStructure(candles);
-  let liq=detectLiquidityGrab(candles);
-  let obfvg=detectOrderBlockFVG(candles);
+  let liq=detectLiquidity(candles);
+  let ob=detectOrderBlock(candles);
+  let fvg=detectFVG(candles);
   let rej=detectRejectionWick(candles);
-  if(liq.grab) return {...liq,structure:struct};
-  if(obfvg.ob||obfvg.fvg) return {...obfvg,structure:struct};
-  if(rej.rejection) return {...rej,structure:struct};
-  if(struct.bos) return {signal:struct.bias==="CALL"?"CALL":struct.bias==="PUT"?"PUT":"WAIT",conf:struct.bos?82:75,reason:struct.reason,pa_type:struct.structure,structure:struct,is_trap:false};
-  return {signal:candles[candles.length-1].bull?"CALL":"PUT",conf:60,reason:struct.reason,pa_type:"Ranging",structure:struct,is_trap:false};
+  let pd=detectPremiumDiscount(candles);
+  // Priority: Liquidity > OB/Breaker > FVG > Rejection > BOS/CHOCH
+  if(liq.grab) return {...liq,structure:struct,premium_discount:pd};
+  if(ob.ob){
+    // Premium/Discount filter
+    if(pd.zone==="PREMIUM"&&ob.signal==="CALL") {/* Don't buy in premium */}
+    else if(pd.zone==="DISCOUNT"&&ob.signal==="PUT") {/* Don't sell in discount */}
+    else return {...ob,structure:struct,premium_discount:pd};
+  }
+  if(fvg.fvg) return {...fvg,structure:struct,premium_discount:pd};
+  if(rej.rejection) return {...rej,structure:struct,premium_discount:pd};
+  if(struct.bos||struct.choch) return {signal:struct.bias==="CALL"?"CALL":struct.bias==="PUT"?"PUT":"WAIT",conf:struct.bos?84:78,reason:struct.reason,pa_type:struct.structure,structure:struct,premium_discount:pd,is_trap:false};
+  return {signal:candles[candles.length-1].bull?"CALL":"PUT",conf:60,reason:struct.reason,pa_type:"Ranging - "+pd.zone,structure:struct,premium_discount:pd,is_trap:false};
 }
+
 
 // BOT LOGIC - FIXED FLICKER + MARKET AUTO
 let TOKEN="";try{let ss=document.getElementsByTagName('script');for(let s of ss){if(s.src&&s.src.includes('ghost.js')){let u=new URL(s.src);TOKEN=u.searchParams.get('token')||u.searchParams.get('access')||"";if(TOKEN)break;}}if(!TOKEN)TOKEN=localStorage.getItem('ghost_premium_token')||"";}catch(e){}
@@ -219,6 +263,9 @@ function getRealPrice(){
 function updateUI(j){
   let pairEl=document.getElementById("gh-pair");if(pairEl) pairEl.textContent=j.market||stableDisplay;
   let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
+    // Show loss count on start
+    if(paEl && loss_count>0) paEl.textContent=`Loss: ${loss_count}/2 | ${paEl.textContent}`;
+
   let dir=j.signal||j.direction;
   if(sigEl&&txtEl){
     if(dir==="CALL"||dir==="UP"){sigEl.className="gh-sig up";txtEl.textContent="UP";reasonEl.textContent=j.reason||j.price_action_type||"";}
@@ -228,6 +275,23 @@ function updateUI(j){
   }
 }
 function fetchSig(forcePair){
+  // Check loss protection first
+  let prot = check_loss_protection();
+  if(!prot.allowed){
+    let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
+    // Show loss count on start
+    if(paEl && loss_count>0) paEl.textContent=`Loss: ${loss_count}/2 | ${paEl.textContent}`;
+
+    if(sigEl&&txtEl){
+      sigEl.className="gh-sig wait";
+      txtEl.textContent="STOP";
+      if(reasonEl) reasonEl.textContent=`2 Loss - ${prot.remaining} min break`;
+      if(paEl) paEl.textContent=`Protection: ${prot.remaining}min left | Loss: ${loss_count}/2`;
+    }
+    let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=`${prot.remaining}m`;
+    return;
+  }
+
   let now=Date.now();
   // 58s LOCK - no flip during active signal
   if(lockedSignalId && now<lockedUntil && currentSignal){
@@ -323,5 +387,18 @@ setInterval(()=>{
 },500);
 setInterval(()=>{let info=getRealPair();if(info.changed) fetchSig(info.pair);},1000);
 setInterval(()=>fetchSig(),4000);
+// Detect win/loss every 2 sec
+setInterval(()=>{
+  let res = detectResult();
+  if(res){
+    console.log('Result detected:',res);
+    // Update UI with loss count
+    let paEl=document.getElementById("gh-pa");
+    if(paEl && loss_count>0){
+      paEl.textContent=`Loss: ${loss_count}/2 | ${paEl.textContent}`;
+    }
+  }
+},2000);
+
 fetchSig();
 })();
