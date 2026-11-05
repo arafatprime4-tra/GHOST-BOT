@@ -344,12 +344,30 @@ const navlinks = document.getElementById("navlinks");
 menuToggle.addEventListener("click", () => { navlinks.classList.toggle("open"); });
 document.querySelectorAll(".navlinks a").forEach(link => { link.addEventListener("click", () => { navlinks.classList.remove("open"); }); });
 document.getElementById("year").textContent = new Date().getFullYear();
-const GHOST_CODE = `javascript:(function(){var s=document.createElement('script');s.src='https://giogram-backend.onrender.com/ghost.js?v='+Date.now();document.body.appendChild(s);})();`;
+const GHOST_CODE_BASE = `javascript:(function(){var s=document.createElement('script');s.src='https://giogram-backend.onrender.com/ghost.js`;
+function getGhostCode(){
+  const token = new URLSearchParams(window.location.search).get('access') || new URLSearchParams(window.location.search).get('token') || localStorage.getItem('ghost_premium_token') || '';
+  if(token){
+    return `${GHOST_CODE_BASE}?token=${encodeURIComponent(token)}&v='+Date.now();document.body.appendChild(s);})();`;
+  } else {
+    return `${GHOST_CODE_BASE}?v='+Date.now();document.body.appendChild(s);})();`;
+  }
+}
+const GHOST_CODE = getGhostCode();
 const copyBtn = document.getElementById("copyBotBtn");
 const copySuccess = document.getElementById("copySuccess");
 copyBtn.addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText(GHOST_CODE); copySuccess.style.display = "block"; copyBtn.textContent = "✅ Copied! — Draggable"; setTimeout(()=>{ copySuccess.style.display="none"; copyBtn.textContent="📋 COPY UNIVERSAL BOOKMARKLET (PC+MOBILE)"; }, 2500); }
-  catch(e) { prompt("Copy this code and create bookmark:", GHOST_CODE); }
+  try { 
+    const dynamicCode = getGhostCode();
+    await navigator.clipboard.writeText(dynamicCode); 
+    copySuccess.style.display = "block"; 
+    copyBtn.textContent = "✅ Copied! — With Token"; 
+    setTimeout(()=>{ copySuccess.style.display="none"; copyBtn.textContent="📋 COPY UNIVERSAL BOOKMARKLET (PC+MOBILE)"; }, 2500); 
+  }
+  catch(e) { 
+    const dynamicCode = getGhostCode();
+    prompt("Copy this code and create bookmark:", dynamicCode); 
+  }
 });
 const API_BASE = "https://giogram-backend.onrender.com";
 async function fetchSignal(pair, mode="SAFE") {
