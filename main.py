@@ -686,7 +686,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
-                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Price Action Academy", url=ACADEMY_LINK)]
+                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK)]
             ]
             msg = f"""🎉 CONGRATULATIONS PREMIUM APPROVED 🎉
 
@@ -700,7 +700,11 @@ Status: ✅ ACTIVE
 🔖 YOUR BOOKMARKLET (WITH TOKEN - Auto blocks if deleted):
 <code>{bookmarklet_with_token}</code>
 
-⚠️ IMPORTANT: Bookmarklet e token ache, tai tumi jodi user ke delete koro, or bookmarklet auto BLOCK hoye jabe - BOT e BLOCKED dekhabe!
+⚠️ IMPORTANT: 💯Rules Required <code>এটা মানতেই হবে। এটা মেনে লস করলে Ghost কখনো দায়ভার নিবে না</code>
+<b>NOTE:</b> 
+<b>✓ 💵 MANAGEMENT (MUST)</>
+<b>✓ ⚠️1 STEP MTG (নিবেন না)</b>
+<b>✓ 🚫NOTHING IS 100%</b>
 
 Normal link e sudhu Channel+Admin, ei link e sob Premium.
 
