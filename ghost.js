@@ -342,7 +342,28 @@ function runPAFilter(candles){
 }
 
 // ===== BOT LOGIC - FIXED MARKET DETECT + NO WAIT =====
-let TOKEN="";try{let ss=document.getElementsByTagName('script');for(let s of ss){if(s.src&&s.src.includes('ghost.js')){let u=new URL(s.src);TOKEN=u.searchParams.get('token')||u.searchParams.get('access')||"";if(TOKEN)break;}}if(!TOKEN)TOKEN=localStorage.getItem('ghost_premium_token')||"";}catch(e){}
+let TOKEN="";try{
+  // Try to get token from script URL (bookmarklet with token)
+  let ss=document.getElementsByTagName('script');
+  for(let s of ss){
+    if(s.src&&s.src.includes('ghost.js')){
+      try{
+        let u=new URL(s.src);
+        TOKEN=u.searchParams.get('token')||u.searchParams.get('access')||u.searchParams.get('premium')||"";
+        if(TOKEN) break;
+      }catch(e){}
+    }
+  }
+  // Try URL params
+  if(!TOKEN){
+    let urlParams = new URLSearchParams(window.location.search);
+    TOKEN = urlParams.get('token')||urlParams.get('access')||urlParams.get('premium')||"";
+  }
+  // Try localStorage (premium link saved token)
+  if(!TOKEN) TOKEN=localStorage.getItem('ghost_premium_token')||"";
+  // Save token if found in URL
+  if(TOKEN) localStorage.setItem('ghost_premium_token', TOKEN);
+}catch(e){}
 
 let currentSignal=null;
 let currentPair="GBPUSD";
@@ -474,6 +495,23 @@ function fetchSignal(forcePair){
     if(!j) return;
     if(j.signal==="UP") j.signal="CALL";
     if(j.signal==="DOWN") j.signal="PUT";
+    // === CHECK IF PREMIUM EXPIRED / DELETED / SUSPENDED - BLOCK BOOKMARKLET ===
+    if(j.status==="EXPIRED" || j.status==="DELETED" || j.status==="SUSPENDED" || j.is_expired || j.is_deleted || j.is_suspended){
+      let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
+      if(sigEl&&txtEl){
+        sigEl.className="gh-sig wait";
+        sigEl.style.background="#330000";
+        sigEl.style.border="2px solid #ff0000";
+        txtEl.textContent="BLOCKED";
+        if(reasonEl) reasonEl.textContent=j.reason||"Premium revoked - Contact Admin";
+        if(paEl) paEl.textContent="❌ DELETED - Bot disabled";
+      }
+      let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent="EXPIRED";
+      currentSignal=null;
+      lockedSignalId="BLOCKED";
+      lockedUntil=Date.now()+999999999; // Block forever until reload with valid token
+      return;
+    }
     // If server returns WAIT, use local PA filter instead of WAIT
     if(j.signal==="WAIT" || !j.signal){
       if(candleHistory.length>=8 && paEnabled){
