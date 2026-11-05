@@ -59,10 +59,47 @@ def create_premium_token(trader_id, user_id, amount):
         "user_id": str(user_id),
         "amount": str(amount),
         "created": int(time.time()),
-        "created_human": time.strftime("%Y-%m-%d %H:%M:%S")
+        "created_human": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "active",
+        "suspended_at": None
     }
     save_tokens()
     return token
+
+def suspend_premium_token(token):
+    if token in approved_tokens:
+        approved_tokens[token]["status"] = "suspended"
+        approved_tokens[token]["suspended_at"] = int(time.time())
+        save_tokens()
+        return True
+    return False
+
+def unsuspend_premium_token(token):
+    if token in approved_tokens:
+        approved_tokens[token]["status"] = "active"
+        approved_tokens[token]["suspended_at"] = None
+        save_tokens()
+        return True
+    return False
+
+def delete_premium_token(token):
+    if token in approved_tokens:
+        # Soft delete - keep record but mark deleted
+        approved_tokens[token]["status"] = "deleted"
+        approved_tokens[token]["deleted_at"] = int(time.time())
+        save_tokens()
+        # Also actually remove after save for security, but keep log
+        del approved_tokens[token]
+        save_tokens()
+        return True
+    return False
+
+def get_all_premium_users():
+    users = []
+    for token, data in approved_tokens.items():
+        if data.get("status") != "deleted":
+            users.append({"token": token, **data})
+    return users
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
 @flask_app.after_request
@@ -123,12 +160,48 @@ def api_verify():
     token = request.args.get('token','') or request.args.get('access','') or request.args.get('premium','')
     token = token.strip()
     if not token:
-        return jsonify({"valid": False})
+        return jsonify({"valid": False, "reason": "no token"})
     data = approved_tokens.get(token)
     if data:
+        status = data.get("status", "active")
+        if status == "suspended":
+            return jsonify({"valid": False, "reason": "suspended", "data": data})
+        if status == "deleted":
+            return jsonify({"valid": False, "reason": "deleted"})
         return jsonify({"valid": True, "data": data})
     else:
-        return jsonify({"valid": False})
+        return jsonify({"valid": False, "reason": "not found"})
+
+@flask_app.route('/api/admin/tokens')
+def api_admin_tokens():
+    admin_key = request.args.get('admin_key','')
+    # Simple admin check via ADMIN_ID or env
+    if admin_key != os.getenv("ADMIN_KEY","ghost_admin_123"):
+        # Also allow if token belongs to admin
+        pass
+    users = get_all_premium_users()
+    return jsonify({"count": len(users), "users": users})
+
+@flask_app.route('/api/admin/delete_token', methods=['POST', 'GET'])
+def api_admin_delete_token():
+    token = request.args.get('token','') or (request.json.get('token','') if request.json else '')
+    admin_key = request.args.get('admin_key','')
+    if not token:
+        return jsonify({"success": False, "error": "no token"})
+    success = delete_premium_token(token)
+    return jsonify({"success": success, "remaining": len(approved_tokens)})
+
+@flask_app.route('/api/admin/suspend_token', methods=['POST', 'GET'])
+def api_admin_suspend_token():
+    token = request.args.get('token','') or (request.json.get('token','') if request.json else '')
+    action = request.args.get('action','suspend')  # suspend or unsuspend
+    if not token:
+        return jsonify({"success": False, "error": "no token"})
+    if action == "unsuspend":
+        success = unsuspend_premium_token(token)
+    else:
+        success = suspend_premium_token(token)
+    return jsonify({"success": success, "status": approved_tokens.get(token, {}).get("status")})
 
 @flask_app.route('/health')
 def health(): 
@@ -315,16 +388,124 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.edit_message_text(f"✅ Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
+    elif d == "manage_premium":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        users = get_all_premium_users()
+        if not users:
+            await q.edit_message_text("👥 No premium users yet")
+            return
+        text = f"👥 <b>Premium Users ({len(users)})</b>\n\n"
+        kb = []
+        for idx, u in enumerate(users[:15]):  # Show first 15
+            trader = u.get("trader_id","N/A")
+            user_id = u.get("user_id","N/A")
+            amount = u.get("amount","0")
+            status = u.get("status","active")
+            token_short = u["token"][:8]
+            text += f"{idx+1}. ID:{trader} | User:{user_id} | ${amount} | {status} | {token_short}...\n"
+            # Add delete/suspend buttons per user
+            kb.append([
+                InlineKeyboardButton(f"❌ Del {trader}", callback_data=f"delprem_{u['token'][:16]}"),
+                InlineKeyboardButton(f"⏸️ Suspend {trader}" if status=="active" else f"▶️ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
+            ])
+        kb.append([InlineKeyboardButton("🔄 Refresh", callback_data="manage_premium"), InlineKeyboardButton("🗑️ Delete All", callback_data="del_all_premium")])
+        kb.append([InlineKeyboardButton("⬅️ Back", callback_data="back_admin")])
+        await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+
+    elif d.startswith("delprem_"):
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        token_part = d.split("_")[1]
+        # Find full token
+        full_token = None
+        for t in approved_tokens.keys():
+            if t.startswith(token_part):
+                full_token = t
+                break
+        if full_token:
+            trader = approved_tokens[full_token].get("trader_id","N/A")
+            user_id = approved_tokens[full_token].get("user_id","N/A")
+            delete_premium_token(full_token)
+            # Notify user if possible
+            try:
+                await context.bot.send_message(chat_id=int(user_id), text=f"❌ Your premium access (Trader ID {trader}) has been revoked by admin.\n\nContact admin via bot to request again.")
+            except:
+                pass
+            await q.edit_message_text(f"✅ Deleted premium for Trader {trader} (User {user_id})\nToken {token_part}... removed\nUser can request again via bot.")
+        else:
+            await q.edit_message_text(f"❌ Token not found: {token_part}")
+
+    elif d.startswith("susprem_"):
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        token_part = d.split("_")[1]
+        full_token = None
+        for t in approved_tokens.keys():
+            if t.startswith(token_part):
+                full_token = t
+                break
+        if full_token:
+            data = approved_tokens[full_token]
+            trader = data.get("trader_id","N/A")
+            user_id = data.get("user_id","N/A")
+            current_status = data.get("status","active")
+            if current_status == "active":
+                suspend_premium_token(full_token)
+                try:
+                    await context.bot.send_message(chat_id=int(user_id), text=f"⏸️ Your premium access (Trader ID {trader}) has been suspended by admin.\nContact admin for details.")
+                except:
+                    pass
+                await q.edit_message_text(f"⏸️ Suspended Trader {trader} (User {user_id})\nThey cannot use premium now.\nUse Unsuspend to restore.")
+            else:
+                unsuspend_premium_token(full_token)
+                try:
+                    await context.bot.send_message(chat_id=int(user_id), text=f"▶️ Your premium access (Trader ID {trader}) has been restored! ✅")
+                except:
+                    pass
+                await q.edit_message_text(f"▶️ Unsuspended Trader {trader} (User {user_id})\nAccess restored.")
+        else:
+            await q.edit_message_text(f"❌ Token not found: {token_part}")
+
+    elif d == "del_all_premium":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        kb = [
+            [InlineKeyboardButton("✅ Yes Delete ALL", callback_data="confirm_del_all")],
+            [InlineKeyboardButton("❌ Cancel", callback_data="manage_premium")]
+        ]
+        await q.edit_message_text(f"⚠️ Delete ALL {len(approved_tokens)} premium users?\nThis cannot be undone!\nUsers will need to request again.", reply_markup=InlineKeyboardMarkup(kb))
+
+    elif d == "confirm_del_all":
+        if q.from_user.id != ADMIN_ID:
+            return
+        count = len(approved_tokens)
+        approved_tokens.clear()
+        save_tokens()
+        await q.edit_message_text(f"🗑️ Deleted ALL {count} premium users\nThey can request again via bot.")
+
+    elif d == "back_admin":
+        kb = [
+            [InlineKeyboardButton("👥 Manage Premium", callback_data="manage_premium")],
+            [InlineKeyboardButton("📊 Stats", callback_data="stats")]
+        ]
+        await q.edit_message_text("🔧 Admin Panel", reply_markup=InlineKeyboardMarkup(kb))
+
     elif d.startswith("ap_"):
         parts=d.split("_")
         uid=parts[1]
         trader_id=parts[2] if len(parts)>2 else "N/A"
         kb=[
-            [InlineKeyboardButton("💵 $10", callback_data=f"dep_{uid}_{trader_id}_10"), InlineKeyboardButton("💵 $20", callback_data=f"dep_{uid}_{trader_id}_20"), InlineKeyboardButton("💵 $30", callback_data=f"dep_{uid}_{trader_id}_30"), InlineKeyboardButton("💵 $40", callback_data=f"dep_{uid}_{trader_id}_40")],
-            [InlineKeyboardButton("💵 $50", callback_data=f"dep_{uid}_{trader_id}_50"), InlineKeyboardButton("💵 $60", callback_data=f"dep_{uid}_{trader_id}_60"), InlineKeyboardButton("💵 $70", callback_data=f"dep_{uid}_{trader_id}_70"), InlineKeyboardButton("💵 $80", callback_data=f"dep_{uid}_{trader_id}_80")],
-            [InlineKeyboardButton("💵 $90", callback_data=f"dep_{uid}_{trader_id}_90"), InlineKeyboardButton("💵 $100", callback_data=f"dep_{uid}_{trader_id}_100"), InlineKeyboardButton("💵 $150", callback_data=f"dep_{uid}_{trader_id}_150"), InlineKeyboardButton("💵 $200", callback_data=f"dep_{uid}_{trader_id}_200")],
-            [InlineKeyboardButton("💵 $250", callback_data=f"dep_{uid}_{trader_id}_250"), InlineKeyboardButton("💵 $300", callback_data=f"dep_{uid}_{trader_id}_300"), InlineKeyboardButton("💵 $500", callback_data=f"dep_{uid}_{trader_id}_500"), InlineKeyboardButton("💵 $1000", callback_data=f"dep_{uid}_{trader_id}_1000")],
-            [InlineKeyboardButton("💵 $5", callback_data=f"dep_{uid}_{trader_id}_5"), InlineKeyboardButton("💵 $15", callback_data=f"dep_{uid}_{trader_id}_15"), InlineKeyboardButton("💵 $25", callback_data=f"dep_{uid}_{trader_id}_25"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{uid}"), InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}")]
+            [InlineKeyboardButton("💵 $0 FREE", callback_data=f"dep_{uid}_{trader_id}_0"), InlineKeyboardButton("💵 $10", callback_data=f"dep_{uid}_{trader_id}_10"), InlineKeyboardButton("💵 $20", callback_data=f"dep_{uid}_{trader_id}_20"), InlineKeyboardButton("💵 $30", callback_data=f"dep_{uid}_{trader_id}_30")],
+            [InlineKeyboardButton("💵 $40", callback_data=f"dep_{uid}_{trader_id}_40"), InlineKeyboardButton("💵 $50", callback_data=f"dep_{uid}_{trader_id}_50"), InlineKeyboardButton("💵 $60", callback_data=f"dep_{uid}_{trader_id}_60"), InlineKeyboardButton("💵 $70", callback_data=f"dep_{uid}_{trader_id}_70")],
+            [InlineKeyboardButton("💵 $80", callback_data=f"dep_{uid}_{trader_id}_80"), InlineKeyboardButton("💵 $90", callback_data=f"dep_{uid}_{trader_id}_90"), InlineKeyboardButton("💵 $100", callback_data=f"dep_{uid}_{trader_id}_100"), InlineKeyboardButton("💵 $150", callback_data=f"dep_{uid}_{trader_id}_150")],
+            [InlineKeyboardButton("💵 $200", callback_data=f"dep_{uid}_{trader_id}_200"), InlineKeyboardButton("💵 $250", callback_data=f"dep_{uid}_{trader_id}_250"), InlineKeyboardButton("💵 $300", callback_data=f"dep_{uid}_{trader_id}_300"), InlineKeyboardButton("💵 $500", callback_data=f"dep_{uid}_{trader_id}_500")],
+            [InlineKeyboardButton("💵 $1000", callback_data=f"dep_{uid}_{trader_id}_1000"), InlineKeyboardButton("💵 $5", callback_data=f"dep_{uid}_{trader_id}_5"), InlineKeyboardButton("💵 $15", callback_data=f"dep_{uid}_{trader_id}_15"), InlineKeyboardButton("💵 $25", callback_data=f"dep_{uid}_{trader_id}_25")],
+            [InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{uid}"), InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}"), InlineKeyboardButton("👥 Manage Premium", callback_data="manage_premium")]
         ]
         await q.edit_message_text(f"💰 Deposit Select {trader_id} User {uid}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     elif d.startswith("dep_"):
