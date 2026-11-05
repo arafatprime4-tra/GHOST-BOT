@@ -682,7 +682,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
             # Bookmarklet WITH token - so if you delete token, bookmarklet stops working
-            bookmarklet_with_token = "javascript:(function(){var s=document.createElement('script');s.src='" + WEBSITE_URL + "/ghost.js?token=" + premium_token + "&v='+Date.now();document.body.appendChild(s);})();"
+            bookmarklet_with_token = f"javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?token={premium_token}&v='+Date.now();document.body.appendChild(s);}})();"
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
@@ -764,13 +764,5 @@ def run_bot():
     app.run_polling()
 
 if __name__=="__main__":
-    if BOT_TOKEN:
-        threading.Thread(target=run_flask, daemon=True).start()
-        try:
-            run_bot()
-        except Exception as e:
-            logging.error(f"Bot crashed: {e}")
-            run_flask()
-    else:
-        logging.warning("BOT_TOKEN missing - Flask only")
-        run_flask()
+    threading.Thread(target=run_flask, daemon=True).start()
+    run_bot()
