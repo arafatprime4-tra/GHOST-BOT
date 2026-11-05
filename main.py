@@ -120,6 +120,85 @@ def api_signal():
     try:
         mode=request.args.get('mode','SAFE')
         raw_pair=request.args.get('pair','EURUSD')
+        # === PREMIUM TOKEN CHECK - BLOCK DELETED USERS EVEN IF BOOKMARKLET SAVED ===
+        token = request.args.get('token','') or request.args.get('access','') or request.args.get('premium','') or ''
+        token = token.strip()
+        
+        # If token is provided, validate it - this blocks deleted/suspended users
+        if token:
+            data = approved_tokens.get(token)
+            if not data:
+                # Token deleted - BLOCK BOT even if bookmarklet saved
+                return jsonify({
+                    "signal_id": f"EXPIRED-{int(time.time())}",
+                    "signal": "WAIT",
+                    "status": "EXPIRED",
+                    "market": raw_pair,
+                    "pair": raw_pair.replace("/","").replace("OTC",""),
+                    "direction": "WAIT",
+                    "reason": "❌ Premium revoked - Token deleted",
+                    "price_action_type": "EXPIRED - Contact Admin",
+                    "confidence": 0,
+                    "risk_percent": 0,
+                    "expiry_timestamp": int((time.time()+60)*1000),
+                    "remainingSeconds": 0,
+                    "time_left": 0,
+                    "is_expired": True
+                })
+            status = data.get("status", "active")
+            if status == "suspended":
+                return jsonify({
+                    "signal_id": f"SUSPENDED-{int(time.time())}",
+                    "signal": "WAIT",
+                    "status": "SUSPENDED",
+                    "market": raw_pair,
+                    "pair": raw_pair.replace("/","").replace("OTC",""),
+                    "direction": "WAIT",
+                    "reason": "⏸️ Premium suspended by admin",
+                    "price_action_type": "SUSPENDED",
+                    "confidence": 0,
+                    "risk_percent": 0,
+                    "expiry_timestamp": int((time.time()+60)*1000),
+                    "remainingSeconds": 0,
+                    "time_left": 0,
+                    "is_suspended": True
+                })
+            if status == "deleted":
+                return jsonify({
+                    "signal_id": f"DELETED-{int(time.time())}",
+                    "signal": "WAIT",
+                    "status": "DELETED",
+                    "market": raw_pair,
+                    "pair": raw_pair.replace("/","").replace("OTC",""),
+                    "direction": "WAIT",
+                    "reason": "❌ Premium deleted - Contact admin for new access",
+                    "price_action_type": "DELETED",
+                    "confidence": 0,
+                    "risk_percent": 0,
+                    "expiry_timestamp": int((time.time()+60)*1000),
+                    "remainingSeconds": 0,
+                    "time_left": 0,
+                    "is_deleted": True
+                })
+        else:
+            # No token provided - check if we should require token (to block deleted users who clear localStorage)
+            # For now, allow free usage but log it - if you want to force premium only, uncomment below
+            # If you want to block all free usage (only premium can use bot), enable this:
+            # return jsonify({
+            #     "signal_id": f"NO-TOKEN-{int(time.time())}",
+            #     "signal": "WAIT",
+            #     "status": "NO_TOKEN",
+            #     "market": raw_pair,
+            #     "pair": raw_pair.replace("/","").replace("OTC",""),
+            #     "direction": "WAIT",
+            #     "reason": "🔒 Premium token required - Open your premium link first",
+            #     "price_action_type": "NO TOKEN",
+            #     "confidence": 0,
+            #     "remainingSeconds": 0,
+            #     "time_left": 0
+            # })
+            pass  # Allow free usage for now
+        
         # OTC ALLOWED - real off থাকলে OTC দিবে
         is_otc = "OTC" in raw_pair.upper()
         clean_raw = raw_pair.upper().replace(" OTC","").replace("(OTC)","").replace("OTC","").strip()
@@ -602,6 +681,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "amount": str(amount), "created": int(time.time())}
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
+            # Bookmarklet WITH token - so if you delete token, bookmarklet stops working
+            bookmarklet_with_token = f"javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?token={premium_token}&v='+Date.now();document.body.appendChild(s);}})();"
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
@@ -615,6 +696,11 @@ Status: ✅ ACTIVE
 
 🔓 YOUR SPECIAL LINK:
 <code>{premium_link}</code>
+
+🔖 YOUR BOOKMARKLET (WITH TOKEN - Auto blocks if deleted):
+<code>{bookmarklet_with_token}</code>
+
+⚠️ IMPORTANT: Bookmarklet e token ache, tai tumi jodi user ke delete koro, or bookmarklet auto BLOCK hoye jabe - BOT e BLOCKED dekhabe!
 
 Normal link e sudhu Channel+Admin, ei link e sob Premium.
 
@@ -638,8 +724,21 @@ Normal link e sudhu Channel+Admin, ei link e sob Premium.
         except Exception as e:
             await q.edit_message_text(f"Fail {e}")
     elif d=="bookmark_guide":
-        guide = f"Bookmarklet: javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?v='+Date.now();document.body.appendChild(s);}})();"
-        await q.message.reply_text(guide)
+        guide = f"""🔖 <b>Bookmarklet Guide (WITH TOKEN SYSTEM)</b>
+
+1️⃣ Premium link theke token auto save hoy localStorage e
+2️⃣ Bookmarklet e token thakle: ghost.js?token=YOUR_TOKEN
+3️⃣ Jodi admin token delete kore, bot e BLOCKED dekhabe - Bookmarklet thakleo kaj korbe na!
+
+<b>Normal Bookmarklet (No token - Free):</b>
+<code>javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?v='+Date.now();document.body.appendChild(s);}})();</code>
+
+<b>Premium Bookmarklet (With token - Blockable):</b>
+<code>javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?token=YOUR_TOKEN&v='+Date.now();document.body.appendChild(s);}})();</code>
+
+Delete korle token invalid hoye jay, tai bookmarklet thakleo BLOCKED dekhabe!
+"""
+        await q.message.reply_text(guide, parse_mode='HTML')
 
 def run_flask():
     port=int(os.environ.get("PORT",10000))
