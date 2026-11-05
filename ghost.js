@@ -49,19 +49,23 @@ function de(){isDrag=false;}
 hd.addEventListener("mousedown",ds);document.addEventListener("mousemove",dm);document.addEventListener("mouseup",de);
 hd.addEventListener("touchstart",ds,{passive:false});document.addEventListener("touchmove",dm,{passive:false});document.addEventListener("touchend",de);
 
-// ===== LOSS PROTECTION - 2 Loss = 30 Min Stop =====
+// ===== LOSS PROTECTION - 2 Loss = 30 Min Stop - ADVANCED FIX =====
 let loss_count = parseInt(localStorage.getItem('ghost_loss_count')||'0');
 let last_loss_time = localStorage.getItem('ghost_last_loss_time') ? new Date(localStorage.getItem('ghost_last_loss_time')) : null;
+let consecutive_losses = parseInt(localStorage.getItem('ghost_consecutive_losses')||'0');
 
 function check_loss_protection(){
-  if(loss_count >= 2 && last_loss_time){
+  if(consecutive_losses >= 2 && last_loss_time){
     let now = new Date();
     let diffMin = (now - last_loss_time) / 1000 / 60;
     if(diffMin < 30){
-      return {allowed:false, remaining: Math.ceil(30-diffMin)};
+      return {allowed:false, remaining: Math.ceil(30-diffMin), minutes_left: (30 - diffMin).toFixed(1)};
     }else{
+      // 30 min over - reset
+      consecutive_losses = 0;
       loss_count = 0;
       localStorage.setItem('ghost_loss_count','0');
+      localStorage.setItem('ghost_consecutive_losses','0');
       last_loss_time = null;
       localStorage.removeItem('ghost_last_loss_time');
       return {allowed:true, remaining:0};
@@ -69,46 +73,192 @@ function check_loss_protection(){
   }
   return {allowed:true, remaining:0};
 }
+
 function register_loss(){
+  consecutive_losses++;
   loss_count++;
   last_loss_time = new Date();
   localStorage.setItem('ghost_loss_count', loss_count.toString());
+  localStorage.setItem('ghost_consecutive_losses', consecutive_losses.toString());
   localStorage.setItem('ghost_last_loss_time', last_loss_time.toISOString());
+  console.log(`❌ LOSS registered: ${consecutive_losses}/2 consecutive, total ${loss_count}`);
+  // Vibrate if mobile
+  try{ if(navigator.vibrate) navigator.vibrate([100,50,100]); }catch(e){}
+  // Show toast
+  showProtectionToast(`❌ LOSS ${consecutive_losses}/2`, consecutive_losses >=2 ? '30 min STOP!' : 'Continue');
 }
+
 function register_win(){
-  if(loss_count>0){
-    loss_count = 0;
-    localStorage.setItem('ghost_loss_count','0');
-    last_loss_time = null;
-    localStorage.removeItem('ghost_last_loss_time');
+  console.log(`✅ WIN registered - resetting consecutive losses`);
+  if(consecutive_losses>0){
+    consecutive_losses = 0;
+    localStorage.setItem('ghost_consecutive_losses','0');
   }
+  showProtectionToast(`✅ WIN - Losses reset`, '0/2');
 }
-function detectResult(){
+
+function showProtectionToast(title, subtitle){
   try{
-    for(let el of document.querySelectorAll('div, span')){
-      let txt=(el.innerText||"").trim();
-      if(txt.includes('RESULT') && txt.includes('P/L')){
-        let parent = el.parentElement;
-        let full = parent ? parent.innerText : txt;
-        let lastResult = localStorage.getItem('ghost_last_result_text');
-        if(lastResult !== full){
-          if(full.includes('-') && full.match(/-\s*\$?\d/)){
-            if(!full.includes('+')){
-              localStorage.setItem('ghost_last_result_text', full);
-              register_loss();
-              return {type:'LOSS'};
+    let toast = document.getElementById('ghost-toast');
+    if(!toast){
+      toast = document.createElement('div');
+      toast.id = 'ghost-toast';
+      toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:2147483648;background:#1a1a0a;border:1px solid #d4af37;color:#fff;padding:8px 14px;border-radius:8px;font-size:10px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.5);transition:all .3s;';
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = `${title}<br><small style="color:#d4af37">${subtitle}</small>`;
+    toast.style.display = 'block';
+    toast.style.opacity = '1';
+    setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>{toast.style.display='none'},300); },2500);
+  }catch(e){}
+}
+
+// ADVANCED RESULT DETECTION - MutationObserver + Multiple Patterns
+function detectResultAdvanced(){
+  try{
+    // Pattern 1: Look for Quotex profit/loss popup - common selectors
+    let selectors = [
+      '[class*="profit"]', '[class*="result"]', '[class*="deal"]', 
+      '[class*="payout"]', '[class*="trade-result"]', '[class*="position-profit"]'
+    ];
+    
+    for(let sel of selectors){
+      try{
+        let els = document.querySelectorAll(sel);
+        for(let el of els){
+          let txt = (el.innerText||'').toLowerCase();
+          let fullText = el.innerText||'';
+          // Check if visible and contains $ or profit
+          let rect = el.getBoundingClientRect();
+          if(rect.width==0 || rect.height==0) continue;
+          if(fullText.includes('$') || txt.includes('profit') || txt.includes('loss') || txt.includes('result')){
+            // Check if it's a trade result (not just UI)
+            if(fullText.match(/[+-]\s*\$?\d+\.?\d*/)){
+              let lastResult = localStorage.getItem('ghost_last_result_full');
+              if(lastResult !== fullText+Date.now().toString().slice(-3)){ // debounce
+                // Determine win/loss by color or text
+                let isLoss = false;
+                // Check by color (red = loss, green = win)
+                let style = window.getComputedStyle(el);
+                let color = style.color || '';
+                let bg = style.backgroundColor || '';
+                // Check text patterns
+                if(fullText.includes('-$') || fullText.match(/-\s*\d+\.\d+\s*\$/) || fullText.toLowerCase().includes('loss')){
+                  isLoss = true;
+                } else if(fullText.includes('+$') || fullText.match(/\+\s*\$?\d+/) || fullText.toLowerCase().includes('profit')){
+                  // Check if profit is positive
+                  let m = fullText.match(/([+-]?\$?\d+\.?\d*)/);
+                  if(m){
+                    let num = parseFloat(m[1].replace('$','').replace('+',''));
+                    if(num < 0) isLoss = true;
+                    else if(num > 0) isLoss = false;
+                    else continue; // zero
+                  }
+                }
+                
+                // Also check for Quotex specific: RESULT (P/L) -1$
+                if(fullText.includes('RESULT') && fullText.includes('P/L')){
+                  if(fullText.includes('-') && !fullText.match(/\+\s*\d/)){
+                    isLoss = true;
+                  } else if(fullText.includes('+')){
+                    isLoss = false;
+                  }
+                }
+                
+                if(isLoss !== null){
+                  localStorage.setItem('ghost_last_result_full', fullText);
+                  setTimeout(()=>localStorage.removeItem('ghost_last_result_full'), 5000); // clear after 5s
+                  if(isLoss){
+                    register_loss();
+                    return {type:'LOSS', text:fullText};
+                  } else {
+                    register_win();
+                    return {type:'WIN', text:fullText};
+                  }
+                }
+              }
             }
-          }else if(full.includes('+') && full.match(/\+\s*\$?\d/)){
-            localStorage.setItem('ghost_last_result_text', full);
-            register_win();
-            return {type:'WIN'};
+          }
+        }
+      }catch(e){}
+    }
+    
+    // Pattern 2: Scan all visible divs for profit/loss text (fallback)
+    let allDivs = document.querySelectorAll('div');
+    for(let el of allDivs){
+      try{
+        let txt = (el.innerText||'').trim();
+        if(txt.length > 5 && txt.length < 80){
+          // Must be small popup, not whole page
+          if((txt.includes('RESULT') || txt.toLowerCase().includes('profit') || txt.includes('P/L')) && txt.includes('$')){
+            let rect = el.getBoundingClientRect();
+            if(rect.width > 50 && rect.width < 300 && rect.height > 20 && rect.height < 150){
+              let lastResult = localStorage.getItem('ghost_last_result_simple');
+              if(lastResult !== txt){
+                localStorage.setItem('ghost_last_result_simple', txt);
+                if(txt.includes('-') && txt.match(/-\s*\$?\d/)){
+                  // Make sure it's not date like 18:30
+                  if(!txt.match(/\d{1,2}:\d{2}/) || txt.includes('$')){
+                    register_loss();
+                    return {type:'LOSS', text:txt};
+                  }
+                } else if(txt.match(/\+\s*\$?\d+/) || (txt.includes('$') && !txt.includes('-'))){
+                  if(txt.toLowerCase().includes('profit') || txt.includes('+') || txt.match(/\$\s*\d/)){
+                    register_win();
+                    return {type:'WIN', text:txt};
+                  }
+                }
+              }
+            }
+          }
+        }
+      }catch(e){}
+    }
+  }catch(e){console.log('detect error',e);}
+  return null;
+}
+
+// MutationObserver for instant detection
+let resultObserver = null;
+function startResultObserver(){
+  try{
+    if(resultObserver) resultObserver.disconnect();
+    resultObserver = new MutationObserver((mutations)=>{
+      for(let mut of mutations){
+        for(let node of mut.addedNodes){
+          if(node.nodeType === 1){ // Element
+            let txt = (node.innerText||'').toLowerCase();
+            if(txt.includes('result') || txt.includes('profit') || (txt.includes('$') && (txt.includes('+') || txt.includes('-')))){
+              setTimeout(()=>detectResultAdvanced(), 300);
+            }
           }
         }
       }
-    }
-  }catch(e){}
-  return null;
+    });
+    resultObserver.observe(document.body, {childList:true, subtree:true});
+    console.log('✅ Result observer started');
+  }catch(e){console.log('observer fail',e);}
 }
+
+function detectResult(){
+  return detectResultAdvanced();
+}
+
+// Manual test functions for admin - call from console: testLoss(), testWin(), resetLossProtection()
+window.testLoss = ()=>{ register_loss(); console.log('Test loss added:', consecutive_losses); };
+window.testWin = ()=>{ register_win(); console.log('Test win'); };
+window.resetLossProtection = ()=>{ 
+  consecutive_losses=0; loss_count=0; 
+  localStorage.setItem('ghost_loss_count','0');
+  localStorage.setItem('ghost_consecutive_losses','0');
+  localStorage.removeItem('ghost_last_loss_time');
+  localStorage.removeItem('ghost_last_result_full');
+  localStorage.removeItem('ghost_last_result_simple');
+  console.log('✅ Protection reset');
+  showProtectionToast('🔄 Reset', '0/2 losses');
+};
+window.getLossStatus = ()=>{ return {consecutive: consecutive_losses, total: loss_count, last: last_loss_time, protection: check_loss_protection()}; };
+
 
 // ===== SMC FULL =====
 class Candle{constructor(o,h,l,c){this.open=o;this.high=h;this.low=l;this.close=c;this.body=Math.abs(c-o);this.upper=h-Math.max(o,c);this.lower=Math.min(o,c)-l;this.bull=c>o;this.bear=c<o;}}
@@ -299,8 +449,15 @@ function fetchSignal(forcePair){
   let prot = check_loss_protection();
   if(!prot.allowed){
     let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
-    if(sigEl&&txtEl){sigEl.className="gh-sig wait";txtEl.textContent="STOP";if(reasonEl) reasonEl.textContent=`2 Loss - ${prot.remaining} min break`;if(paEl) paEl.textContent=`Protection: ${prot.remaining}min | Loss: ${loss_count}/2`;}
-    let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=`${prot.remaining}m`;
+    if(sigEl&&txtEl){
+      sigEl.className="gh-sig wait"; 
+      txtEl.textContent="STOP"; 
+      if(reasonEl) reasonEl.textContent=`2 Loss - ${prot.remaining} min break - NO TRADE`; 
+      if(paEl) paEl.textContent=`🛑 PROTECTION: ${prot.remaining}min left | Loss: ${consecutive_losses}/2 | Total:${loss_count}`;
+      sigEl.style.background="#330000";
+      sigEl.style.border="1px solid #ff0000";
+    }
+    let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=`${prot.remaining}m STOP`;
     return;
   }
   // 58s LOCK - prevent flip
@@ -392,7 +549,10 @@ setInterval(()=>{
 
 setInterval(()=>autoDetectMarket(),800);
 setInterval(()=>fetchSignal(),3000);
-setInterval(()=>{let r=detectResult(); if(r) console.log('Result',r);},2000);
+setInterval(()=>{let r=detectResult(); if(r) console.log('Result',r);},1000);
+startResultObserver();
+setTimeout(startResultObserver, 2000); // restart after 2s to catch late DOM
+
 
 fetchSignal();
 autoDetectMarket();
