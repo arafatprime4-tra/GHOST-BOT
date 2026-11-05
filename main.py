@@ -219,12 +219,54 @@ WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 """
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    is_admin = (user_id == ADMIN_ID)
     kb=[
         [InlineKeyboardButton("Account Create Link", url=AFFILIATE_LINK)],
         [InlineKeyboardButton("🌐 Website", url=WEBSITE_URL), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
         [InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
+    if is_admin:
+        kb.append([InlineKeyboardButton("🔧 Admin Panel", callback_data="admin_panel")])
+        kb.append([InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")])
+        kb.append([InlineKeyboardButton("📊 Stats / Tokens", callback_data="admin_stats")])
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+
+async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text("❌ Admin only")
+        return
+    kb=[
+        [InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")],
+        [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
+        [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")],
+        [InlineKeyboardButton("📋 List All Tokens", callback_data="list_all_tokens")]
+    ]
+    await update.message.reply_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+
+async def premium_users_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text("❌ Admin only")
+        return
+    users = get_all_premium_users()
+    if not users:
+        await update.message.reply_text("👥 No premium users yet")
+        return
+    text = f"👥 <b>Premium Users ({len(users)})</b>\n\n"
+    kb = []
+    for idx, u in enumerate(users[:15]):
+        trader = u.get("trader_id","N/A")
+        user_id = u.get("user_id","N/A")
+        amount = u.get("amount","0")
+        status = u.get("status","active")
+        token_short = u["token"][:8]
+        text += f"{idx+1}. ID:{trader} | User:{user_id} | ${amount} | {status} | {token_short}...\n"
+        kb.append([
+            InlineKeyboardButton(f"❌ Del {trader}", callback_data=f"delprem_{u['token'][:16]}"),
+            InlineKeyboardButton(f"⏸️ Suspend {trader}" if status=="active" else f"▶️ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
+        ])
+    kb.append([InlineKeyboardButton("🔄 Refresh", callback_data="manage_premium"), InlineKeyboardButton("🗑️ Delete All", callback_data="del_all_premium")])
+    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
@@ -388,6 +430,44 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.edit_message_text(f"✅ Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
+    elif d == "admin_panel":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        kb=[
+            [InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")],
+            [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
+            [InlineKeyboardButton("📋 List Tokens", callback_data="list_all_tokens")],
+            [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")]
+        ]
+        await q.edit_message_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}\n\nUse /admin or /premium to manage", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+
+    elif d == "admin_stats":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        users = get_all_premium_users()
+        active = sum(1 for u in users if u.get("status","active")=="active")
+        suspended = sum(1 for u in users if u.get("status")=="suspended")
+        text = f"📊 <b>STATS</b>\n\nTotal Tokens: {len(approved_tokens)}\nActive: {active}\nSuspended: {suspended}\n\n"
+        for u in users[:10]:
+            text += f"ID:{u.get('trader_id')} | ${u.get('amount')} | {u.get('status')}\n"
+        kb=[
+            [InlineKeyboardButton("👥 Manage Users", callback_data="manage_premium")],
+            [InlineKeyboardButton("🔄 Refresh", callback_data="admin_stats")]
+        ]
+        await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+
+    elif d == "list_all_tokens":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        users = get_all_premium_users()
+        text = f"📋 All Tokens ({len(users)})\n\n"
+        for u in users[:20]:
+            text += f"Trader:{u.get('trader_id')} | Token:{u['token'][:20]}... | User:{u.get('user_id')} | ${u.get('amount')} | {u.get('status')}\n\n"
+        await q.edit_message_text(text)
+
     elif d == "manage_premium":
         if q.from_user.id != ADMIN_ID:
             await q.answer("❌ Admin only", show_alert=True)
@@ -571,6 +651,10 @@ def run_bot():
         return
     app=ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("admin", admin_command))
+    app.add_handler(CommandHandler("premium", premium_users_command))
+    app.add_handler(CommandHandler("users", premium_users_command))
+    app.add_handler(CommandHandler("manage", admin_command))
     app.add_handler(CommandHandler("myid", myid))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(MessageHandler(filters.PHOTO, handle_media))
