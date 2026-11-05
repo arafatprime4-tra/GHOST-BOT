@@ -512,16 +512,15 @@ function fetchSignal(forcePair){
       lockedUntil=Date.now()+999999999; // Block forever until reload with valid token
       return;
     }
-    // Balanced WAIT + SIGNAL logic - accuracy first
-    // If server returns WAIT or low confidence, try local PA for better signal
-    if(j.signal==="WAIT" || !j.signal || j.signal==="OFFLINE" || j.confidence < 50 || (j.status==="WAITING" && j.confidence < 50)){
-      // Try local PA filter for better accuracy
-      if(candleHistory.length>=6 && paEnabled){
+    // If server returns WAIT, use local PA filter instead of WAIT - NEVER SHOW WAIT
+    if(j.signal==="WAIT" || !j.signal || j.signal==="OFFLINE"){
+      // Try PA filter first
+      if(candleHistory.length>=4 && paEnabled){
         try{
           let pa=runPAFilter(candleHistory);
-          if(pa && pa.signal!=="WAIT" && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf >= 60){
+          if(pa && pa.signal!=="WAIT" && (pa.signal==="CALL"||pa.signal==="PUT")){
             let clockSec=60-new Date().getSeconds();
-            let fake={...pa,market:asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2').replace('OTC',' OTC'),pair:asset,confidence:pa.conf,expiry_timestamp:now+clockSec*1000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason, status:"ACTIVE"};
+            let fake={...pa,market:asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2').replace('OTC',' OTC'),pair:asset,confidence:pa.conf,expiry_timestamp:now+clockSec*1000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason};
             if(!lockedSignalId || now>=lockedUntil){
               lockedSignalId=fake.signal_id;
               lockedUntil=now+58000;
@@ -532,50 +531,37 @@ function fetchSignal(forcePair){
           }
         }catch(e){}
       }
-      // If server confidence is 50-59, show SIGNAL not WAIT (fix WAIT jamela)
-      if(j.confidence >= 50 && j.confidence < 60 && (j.signal==="CALL" || j.signal==="PUT")){
-        // Show low confidence signal instead of WAIT to avoid flicker
-        if(!lockedSignalId || now>=lockedUntil){
-          lockedSignalId=j.signal_id|| (asset+"-"+j.signal+"-"+now);
-          lockedUntil=now+58000;
-          currentSignal=j;
-          updateUI(j);
-        }
-        return;
-      }
-      if(j.confidence >= 50 && j.confidence < 60){
-        // Low conf but no CALL/PUT - keep previous signal locked if exists, don't show WAIT
-        if(currentSignal && lockedSignalId && now<lockedUntil){
-          updateUI(currentSignal);
-          return;
-        }
-        // Otherwise try PA, but don't flicker to WAIT
-      }
-      // If truly no signal and no candles, show WAIT only if no locked signal
-      if(candleHistory.length===0 && priceHistory.length<4){
-        if(currentSignal && lockedSignalId && now<lockedUntil){
-          updateUI(currentSignal);
-          return;
-        }
-        let waitSig = {
-          signal: "WAIT",
-          confidence: j.confidence || 0,
-          reason: "Collecting data...",
-          price_action_type: "Loading",
-          market: asset,
-          pair: asset,
-          expiry_timestamp: now + 5000,
-          signal_id: "WAIT-INIT-"+now,
-          status: "WAITING"
-        };
-        updateUI(waitSig);
-        return;
-      }
-      // Otherwise, if we have candles, give forced signal with 58% (better than pure WAIT)
+      // Ultimate fallback - NEVER WAIT - use last candle direction or momentum
       if(candleHistory.length>0){
         let lastC = candleHistory[candleHistory.length-1];
         let dir = lastC.bull ? "CALL" : "PUT";
-        let fake = {signal:dir, confidence:58, reason:"Momentum - Weak but tradable", price_action_type:"Momentum", market:asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2'), pair:asset, expiry_timestamp:now+60000, signal_id:asset+"-MOM-"+now, status:"ACTIVE"};
+        let fake = {signal:dir, confidence:55, reason:"Momentum fallback - No WAIT", price_action_type:"Momentum", market:asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2'), pair:asset, expiry_timestamp:now+60000, signal_id:asset+"-MOM-"+now};
+        if(!lockedSignalId || now>=lockedUntil){
+          lockedSignalId=fake.signal_id;
+          lockedUntil=now+58000;
+          currentSignal=fake;
+          updateUI(fake);
+        }
+        return;
+      } else {
+        // NO CANDLES AT ALL - Force CALL/PUT based on time (never WAIT)
+        let dir = (Date.now() % 2 === 0) ? "CALL" : "PUT";
+        // Use simple trend from priceHistory if available
+        if(priceHistory.length>=2){
+          dir = priceHistory[priceHistory.length-1] > priceHistory[priceHistory.length-2] ? "CALL" : "PUT";
+        }
+        let clockSec=60-new Date().getSeconds();
+        let fake = {
+          signal: dir, 
+          confidence: 58, 
+          reason: "Force Signal - No WAIT", 
+          price_action_type: "Forced", 
+          market: asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2').replace('OTC',' OTC'), 
+          pair: asset, 
+          expiry_timestamp: now + clockSec*1000, 
+          signal_id: asset+"-FORCE-"+now,
+          status: "ACTIVE"
+        };
         if(!lockedSignalId || now>=lockedUntil){
           lockedSignalId=fake.signal_id;
           lockedUntil=now+58000;
