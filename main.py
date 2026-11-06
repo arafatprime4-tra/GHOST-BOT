@@ -124,8 +124,8 @@ def api_signal():
         token = request.args.get('token','') or request.args.get('access','') or request.args.get('premium','') or ''
         token = token.strip()
         
-        # If token is provided, validate it - this blocks deleted/suspended users
-        if token:
+        # If token is provided, validate it - FIXED: Allow free testing if no tokens exist
+        if token and len(approved_tokens) > 0:
             data = approved_tokens.get(token)
             if not data:
                 # Token deleted - BLOCK BOT even if bookmarklet saved
@@ -357,7 +357,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user.id == ADMIN_ID and ADMIN_ID in pending_custom_msg:
         target_uid = pending_custom_msg.pop(ADMIN_ID)
         try:
-            await context.bot.send_message(chat_id=int(target_uid), text=f"📩 <b>Admin:</b>\n\n{text}\n\n- GHOST Team 👻", parse_mode='HTML')
+            await context.bot.send_message(chat_id=int(target_uid), text=f"📩 <b>Admin:</b>\n\n{text}\n\n- GHOST Team 👻", parse_mode='HTML', disable_web_page_preview=True)
             await update.message.reply_text(f"✅ Sent to {target_uid}")
         except Exception as e:
             await update.message.reply_text(f"❌ {e}")
@@ -489,7 +489,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = d.split("_")[1]
         msg = f"📩 Deposit Not Found\nLink theke $10 deposit koren\nLink: {AFFILIATE_LINK}"
         try:
-            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML', disable_web_page_preview=True)
             await q.edit_message_text(f"✅ Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
@@ -497,7 +497,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = d.split("_")[1]
         msg = f"❌ Link theke na\nNew account khulun: {AFFILIATE_LINK}"
         try:
-            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML', disable_web_page_preview=True)
             await q.edit_message_text(f"✅ Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
@@ -505,7 +505,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = d.split("_")[1]
         msg = "📸 Screenshot din Deposit History"
         try:
-            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML', disable_web_page_preview=True)
             await q.edit_message_text(f"✅ Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
@@ -682,7 +682,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
             # Bookmarklet WITH token - so if you delete token, bookmarklet stops working
-            bookmarklet_with_token = f"javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?token={premium_token}&v='+Date.now();document.body.appendChild(s);}})();"
+            bookmarklet_with_token = "javascript:(function(){var s=document.createElement('script');s.src='" + WEBSITE_URL + "/ghost.js?token=" + premium_token + "&v='+Date.now();document.body.appendChild(s);})();"
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
@@ -691,8 +691,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg = f"""🎉 CONGRATULATIONS PREMIUM APPROVED 🎉
 
 Trader ID: <code>{trader_id}</code>
-Deposit: ${amount}
-Status: ✅ ACTIVE
+Total Deposit: ${amount}
+Status: ACTIVE 🟢
 
 🔓 YOUR SPECIAL LINK:
 <code>{premium_link}</code>
@@ -711,7 +711,7 @@ Normal link e sudhu Channel+Admin, ei link e sob Premium.
                     await context.bot.send_photo(chat_id=int(uid), photo=sticker, caption=f"✅ ID {trader_id} ${amount}")
             except:
                 pass
-            await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+            await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML', disable_web_page_preview=True)
             await q.edit_message_text(f"✅ Approved {trader_id} ${amount} -> {uid}\n{premium_link}")
         except Exception as e:
             logging.error(f"dep fail {traceback.format_exc()}")
@@ -764,5 +764,13 @@ def run_bot():
     app.run_polling()
 
 if __name__=="__main__":
-    threading.Thread(target=run_flask, daemon=True).start()
-    run_bot()
+    if BOT_TOKEN:
+        threading.Thread(target=run_flask, daemon=True).start()
+        try:
+            run_bot()
+        except Exception as e:
+            logging.error(f"Bot crashed: {e}")
+            run_flask()
+    else:
+        logging.warning("BOT_TOKEN missing - Flask only")
+        run_flask()
