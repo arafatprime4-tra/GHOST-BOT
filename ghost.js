@@ -343,6 +343,8 @@ function runPAFilter(candles){
 
 // ===== BOT LOGIC - FIXED MARKET DETECT + NO WAIT =====
 let TOKEN="";try{
+  // FORCE CLEAR old deleted token for free testing - remove this line if you want premium only
+  // localStorage.removeItem('ghost_premium_token'); // Uncomment to always clear
   // Try to get token from script URL (bookmarklet with token)
   let ss=document.getElementsByTagName('script');
   for(let s of ss){
@@ -359,10 +361,24 @@ let TOKEN="";try{
     let urlParams = new URLSearchParams(window.location.search);
     TOKEN = urlParams.get('token')||urlParams.get('access')||urlParams.get('premium')||"";
   }
-  // Try localStorage (premium link saved token)
-  if(!TOKEN) TOKEN=localStorage.getItem('ghost_premium_token')||"";
+  // Try localStorage ONLY if no token in URL and not free mode bookmarklet
+  // If bookmarklet has no token param, don't use localStorage old token (fix for BLOCKED issue)
+  let isFreeBookmarklet = true;
+  for(let s of document.getElementsByTagName('script')){
+    if(s.src&&s.src.includes('ghost.js')){
+      if(s.src.includes('token=')) isFreeBookmarklet = false;
+    }
+  }
+  if(!TOKEN && !isFreeBookmarklet){
+    TOKEN=localStorage.getItem('ghost_premium_token')||"";
+  }
   // Save token if found in URL
   if(TOKEN) localStorage.setItem('ghost_premium_token', TOKEN);
+  // If free bookmarklet, clear old token
+  if(isFreeBookmarklet){
+    localStorage.removeItem('ghost_premium_token');
+    TOKEN="";
+  }
 }catch(e){}
 
 let currentSignal=null;
@@ -371,25 +387,37 @@ let lastDetectedMarket="GBPUSD";
 let priceHistory=[];let candleHistory=[];
 let lockedSignalId="";let lockedUntil=0;
 
-// NEW MARKET DETECT - FIX FOR YOUR SCREENSHOT (GBP/USD 80% at bottom)
+// NEW MARKET DETECT - FIXED OTC + NO FLICKER
 function getCurrentMarket(){
   try{
-    // Your screenshot shows GBP/USD 80% at bottom with flag - find that
-    let all = document.querySelectorAll('div, span, button');
-    // Priority 1: Bottom selector with flag (your screenshot)
+    let all = document.querySelectorAll('div, span, button, a');
+    // Priority 1: Look for OTC explicitly - EUR/USD OTC or EUR/USD (OTC) or EUR/JPY OTC
     for(let el of all){
       let txt=(el.innerText||'').trim();
-      // Match "GBP/USD 80%" or "EUR/USD" exactly
-      if(txt.match(/^[A-Z]{3}\/[A-Z]{3}\s+\d+%/i) || txt.match(/^[A-Z]{3}\/[A-Z]{3}$/i)){
+      // Check for OTC in text near pair
+      if(txt.toUpperCase().includes('OTC') && txt.includes('/')){
+        let m = txt.match(/([A-Z]{3})\s*[\/\s]+\s*([A-Z]{3})/i);
+        if(m){
+          let pair = (m[1]+m[2]).toUpperCase();
+          let valid = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"];
+          if(valid.includes(pair)){
+            // Found OTC pair
+            return pair + 'OTC';
+          }
+        }
+      }
+    }
+    // Priority 2: Bottom selector with flag (your screenshot) - EUR/USD 93% etc
+    for(let el of all){
+      let txt=(el.innerText||'').trim();
+      if(txt.match(/^[A-Z]{3}\/[A-Z]{3}(\s+\d+%|\s+OTC|\s+\(OTC\)|)?/i)){
         let rect = el.getBoundingClientRect();
-        // Bottom area where pair selector lives
-        if(rect.top > window.innerHeight*0.5 && rect.left < window.innerWidth*0.6){
+        if(rect.top > window.innerHeight*0.4){
           let m = txt.match(/([A-Z]{3})\/([A-Z]{3})/i);
           if(m){
             let pair = (m[1]+m[2]).toUpperCase();
             let isOTC = txt.toUpperCase().includes('OTC');
             if(isOTC) pair+='OTC';
-            // Validate
             let valid = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"];
             if(valid.includes(pair.replace('OTC',''))){
               return pair;
@@ -398,16 +426,21 @@ function getCurrentMarket(){
         }
       }
     }
-    // Priority 2: Any element with GBP/USD pattern near bottom
+    // Priority 3: Any element with pair pattern
     for(let el of all){
       let txt=(el.innerText||'').trim();
-      if(txt.includes('/') && txt.length<20){
+      if(txt.includes('/') && txt.length<30){
         let m = txt.match(/([A-Z]{3})[^A-Z0-9]*([A-Z]{3})/i);
         if(m){
           let rect = el.getBoundingClientRect();
-          if(rect.top > 400){ // bottom half
+          if(rect.top > 300){
             let pair = (m[1]+m[2]).toUpperCase();
             if(pair.length==6){
+              // Check if OTC nearby
+              let parentTxt = (el.parentElement?.innerText||'').toUpperCase();
+              if(parentTxt.includes('OTC') || txt.toUpperCase().includes('OTC')){
+                pair+='OTC';
+              }
               return pair;
             }
           }
@@ -456,11 +489,25 @@ function updateUI(j){
   let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
   let dir=j.signal||j.direction;
   if(sigEl&&txtEl){
-    if(dir==="CALL"||dir==="UP"){sigEl.className="gh-sig up";txtEl.textContent="UP";reasonEl.textContent=j.reason||j.price_action_type||"";}
-    else if(dir==="PUT"||dir==="DOWN"){sigEl.className="gh-sig down";txtEl.textContent="DOWN";reasonEl.textContent=j.reason||j.price_action_type||"";}
-    else{sigEl.className="gh-sig wait";txtEl.textContent="WAIT";reasonEl.textContent=j.reason||"Analyzing...";}
+    // FIX: Don't flicker reason text if same signal locked - keep first reason stable
+    let isSameLocked = currentSignal && j.signal_id === currentSignal.signal_id;
+    if(dir==="CALL"||dir==="UP"){
+      sigEl.className="gh-sig up";
+      txtEl.textContent="UP";
+      if(!isSameLocked || !reasonEl.textContent) reasonEl.textContent=j.reason||j.price_action_type||"";
+    }
+    else if(dir==="PUT"||dir==="DOWN"){
+      sigEl.className="gh-sig down";
+      txtEl.textContent="DOWN";
+      if(!isSameLocked || !reasonEl.textContent) reasonEl.textContent=j.reason||j.price_action_type||"";
+    }
+    else{
+      sigEl.className="gh-sig wait";
+      txtEl.textContent="WAIT";
+      reasonEl.textContent=j.reason||"Analyzing...";
+    }
     let lossTxt = loss_count>0 ? `Loss:${loss_count}/2 | ` : '';
-    if(paEl) paEl.textContent=`${lossTxt}${j.price_action_type||j.reason||"Momentum"} | ${j.confidence||0}% ${j.is_trap?"| TRAP":""}`;
+    if(paEl) paEl.textContent=`${lossTxt}${j.price_action_type||"Momentum"} | ${j.confidence||0}% ${j.is_trap?"| TRAP":""}`;
   }
 }
 
@@ -495,32 +542,44 @@ function fetchSignal(forcePair){
     if(!j) return;
     if(j.signal==="UP") j.signal="CALL";
     if(j.signal==="DOWN") j.signal="PUT";
-    // === CHECK IF PREMIUM EXPIRED / DELETED / SUSPENDED - BLOCK BOOKMARKLET ===
+    // === CHECK IF PREMIUM EXPIRED - FIXED: Allow free testing if token deleted ===
     if(j.status==="EXPIRED" || j.status==="DELETED" || j.status==="SUSPENDED" || j.is_expired || j.is_deleted || j.is_suspended){
+      console.log("Token expired/deleted, trying free mode fallback");
+      // Try free mode without token - don't block forever, retry without token
+      if(TOKEN){
+        console.log("Retrying without token for free testing");
+        TOKEN=""; // Clear token for free mode
+        localStorage.removeItem('ghost_premium_token');
+        // Retry fetch without token after 1 sec
+        setTimeout(()=>fetchSignal(), 1000);
+        let reasonEl=document.getElementById("gh-reason");
+        if(reasonEl) reasonEl.textContent="Token expired - Switching to FREE mode...";
+        return;
+      }
+      // If already free mode and still expired, show but don't lock forever
       let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
       if(sigEl&&txtEl){
         sigEl.className="gh-sig wait";
-        sigEl.style.background="#330000";
-        sigEl.style.border="2px solid #ff0000";
-        txtEl.textContent="BLOCKED";
-        if(reasonEl) reasonEl.textContent=j.reason||"Premium revoked - Contact Admin";
-        if(paEl) paEl.textContent="❌ DELETED - Bot disabled";
+        txtEl.textContent="WAIT";
+        if(reasonEl) reasonEl.textContent="Free mode - Collecting data...";
+        if(paEl) paEl.textContent="PA: FREE MODE";
       }
-      let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent="EXPIRED";
-      currentSignal=null;
-      lockedSignalId="BLOCKED";
-      lockedUntil=Date.now()+999999999; // Block forever until reload with valid token
       return;
     }
-    // If server returns WAIT, use local PA filter instead of WAIT - NEVER SHOW WAIT
-    if(j.signal==="WAIT" || !j.signal || j.signal==="OFFLINE"){
-      // Try PA filter first
-      if(candleHistory.length>=4 && paEnabled){
+    // Balanced WAIT + SIGNAL logic - accuracy first - FIXED no flicker
+    // If locked signal exists, don't run PA filter (prevent reason flicker)
+    if(lockedSignalId && now<lockedUntil && currentSignal){
+      updateUI(currentSignal);
+      return;
+    }
+    if(j.signal==="WAIT" || !j.signal || j.signal==="OFFLINE" || j.confidence < 50 || (j.status==="WAITING" && j.confidence < 50)){
+      // Try local PA filter for better accuracy - only if no locked signal
+      if(candleHistory.length>=6 && paEnabled && (!lockedSignalId || now>=lockedUntil)){
         try{
           let pa=runPAFilter(candleHistory);
-          if(pa && pa.signal!=="WAIT" && (pa.signal==="CALL"||pa.signal==="PUT")){
+          if(pa && pa.signal!=="WAIT" && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf >= 60){
             let clockSec=60-new Date().getSeconds();
-            let fake={...pa,market:asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2').replace('OTC',' OTC'),pair:asset,confidence:pa.conf,expiry_timestamp:now+clockSec*1000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason};
+            let fake={...pa,market:asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2').replace('OTC',' OTC'),pair:asset,confidence:pa.conf,expiry_timestamp:now+clockSec*1000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason, status:"ACTIVE"};
             if(!lockedSignalId || now>=lockedUntil){
               lockedSignalId=fake.signal_id;
               lockedUntil=now+58000;
@@ -531,37 +590,50 @@ function fetchSignal(forcePair){
           }
         }catch(e){}
       }
-      // Ultimate fallback - NEVER WAIT - use last candle direction or momentum
+      // If server confidence is 50-59, show SIGNAL not WAIT (fix WAIT jamela)
+      if(j.confidence >= 50 && j.confidence < 60 && (j.signal==="CALL" || j.signal==="PUT")){
+        // Show low confidence signal instead of WAIT to avoid flicker
+        if(!lockedSignalId || now>=lockedUntil){
+          lockedSignalId=j.signal_id|| (asset+"-"+j.signal+"-"+now);
+          lockedUntil=now+58000;
+          currentSignal=j;
+          updateUI(j);
+        }
+        return;
+      }
+      if(j.confidence >= 50 && j.confidence < 60){
+        // Low conf but no CALL/PUT - keep previous signal locked if exists, don't show WAIT
+        if(currentSignal && lockedSignalId && now<lockedUntil){
+          updateUI(currentSignal);
+          return;
+        }
+        // Otherwise try PA, but don't flicker to WAIT
+      }
+      // If truly no signal and no candles, show WAIT only if no locked signal
+      if(candleHistory.length===0 && priceHistory.length<4){
+        if(currentSignal && lockedSignalId && now<lockedUntil){
+          updateUI(currentSignal);
+          return;
+        }
+        let waitSig = {
+          signal: "WAIT",
+          confidence: j.confidence || 0,
+          reason: "Collecting data...",
+          price_action_type: "Loading",
+          market: asset,
+          pair: asset,
+          expiry_timestamp: now + 5000,
+          signal_id: "WAIT-INIT-"+now,
+          status: "WAITING"
+        };
+        updateUI(waitSig);
+        return;
+      }
+      // Otherwise, if we have candles, give forced signal with 58% (better than pure WAIT)
       if(candleHistory.length>0){
         let lastC = candleHistory[candleHistory.length-1];
         let dir = lastC.bull ? "CALL" : "PUT";
-        let fake = {signal:dir, confidence:55, reason:"Momentum fallback - No WAIT", price_action_type:"Momentum", market:asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2'), pair:asset, expiry_timestamp:now+60000, signal_id:asset+"-MOM-"+now};
-        if(!lockedSignalId || now>=lockedUntil){
-          lockedSignalId=fake.signal_id;
-          lockedUntil=now+58000;
-          currentSignal=fake;
-          updateUI(fake);
-        }
-        return;
-      } else {
-        // NO CANDLES AT ALL - Force CALL/PUT based on time (never WAIT)
-        let dir = (Date.now() % 2 === 0) ? "CALL" : "PUT";
-        // Use simple trend from priceHistory if available
-        if(priceHistory.length>=2){
-          dir = priceHistory[priceHistory.length-1] > priceHistory[priceHistory.length-2] ? "CALL" : "PUT";
-        }
-        let clockSec=60-new Date().getSeconds();
-        let fake = {
-          signal: dir, 
-          confidence: 58, 
-          reason: "Force Signal - No WAIT", 
-          price_action_type: "Forced", 
-          market: asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2').replace('OTC',' OTC'), 
-          pair: asset, 
-          expiry_timestamp: now + clockSec*1000, 
-          signal_id: asset+"-FORCE-"+now,
-          status: "ACTIVE"
-        };
+        let fake = {signal:dir, confidence:58, reason:"Momentum - Weak but tradable", price_action_type:"Momentum", market:asset.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2'), pair:asset, expiry_timestamp:now+60000, signal_id:asset+"-MOM-"+now, status:"ACTIVE"};
         if(!lockedSignalId || now>=lockedUntil){
           lockedSignalId=fake.signal_id;
           lockedUntil=now+58000;
