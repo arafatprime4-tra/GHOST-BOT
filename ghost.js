@@ -18,7 +18,7 @@
   let style = document.createElement('style');
   style.textContent = `
     *{box-sizing:border-box;margin:0;padding:0}
-    .fab{position:fixed;bottom:88px;right:12px;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#141830,#080a16);border:1px solid rgba(168,85,247,.6);box-shadow:0 0 16px rgba(168,85,247,.35),0 0 26px rgba(0,240,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;z-index:10}
+    .fab:active{cursor:grabbing} .fab{position:fixed;bottom:88px;right:12px;width:54px;height:54px;cursor:grab;touch-action:none;will-change:transform;transition:box-shadow .2s;}border-radius:50%;background:linear-gradient(135deg,#141830,#080a16);border:1px solid rgba(168,85,247,.6);box-shadow:0 0 16px rgba(168,85,247,.35),0 0 26px rgba(0,240,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;z-index:10}
     .fab-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#22c55e;border-radius:50%;border:2px solid #0b0b18;box-shadow:0 0 7px #22c55e;animation:pulse 1.6s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
     .candles{display:flex;align-items:flex-end;gap:4px;height:30px}
@@ -33,9 +33,13 @@
     .candle .wick.bottom{height:4px}
     @keyframes pg{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.12)}}
     @keyframes pr{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.1)}}
-    .panel{position:fixed;bottom:72px;right:8px;width:262px;max-width:calc(100vw - 16px);background:linear-gradient(168deg,#0f1122,#070812);border:1px solid rgba(168,85,247,.35);border-radius:18px;box-shadow:0 0 28px rgba(168,85,247,.22),0 22px 44px rgba(0,0,0,.55);color:#eef2ff;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none}
-    .panel.open{display:block}
-    .head{padding:10px 10px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07)}
+    .panel{position:fixed;bottom:68px;right:8px;width:238px;max-width:calc(100vw - 16px);background:linear-gradient(168deg,#0f1122,#070812);border:1px solid rgba(168,85,247,.35);border-radius:18px;box-shadow:0 0 28px rgba(168,85,247,.22),0 22px 44px rgba(0,0,0,.55);color:#eef2ff;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none}
+    .panel.open{display:block;animation:panelIn .32s cubic-bezier(.16,1,.3,1)}
+    @keyframes panelIn{from{opacity:0;transform:translateY(10px) scale(.88)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a855f7,#22d3ee,transparent);animation:borderFlow 2.4s linear infinite;background-size:200% 100%}
+    @keyframes borderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
+    .panel::after{content:'';position:absolute;top:0;left:0;right:0;height:44px;background:linear-gradient(180deg,rgba(0,240,255,.06),transparent);pointer-events:none}
+    .head{padding:9px 10px 7px;display:flex;cursor:move;touch-action:none;}align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07)}
     .head-left{display:flex;align-items:center;gap:8px}
     .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#a855f7,#6d28d9 55%,#0ea5e9);display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .logo .candles{height:16px;gap:2.5px}
@@ -62,7 +66,7 @@
     .pair{font-size:11px;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1.2;flex:1}
     .pair small{display:block;font-size:6px;letter-spacing:.8px;color:#67e8f9;font-weight:700;margin-top:2px}
     .time{font-size:6.5px;color:#94a3b8;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);padding:4px 7px;border-radius:20px;white-space:nowrap;margin-left:8px}
-    .viz{margin:8px 10px 0;padding:8px 10px 7px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;gap:8px;height:52px}
+    .viz{margin:7px 10px 0;padding:7px 10px 6px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;gap:8px;height:46px}
     .viz .candle{height:44px;width:11px}
     .viz .candle .body{width:11px;border-radius:2px}
     .viz .candle.green .body{height:22px}
@@ -82,7 +86,7 @@
     .result-h{padding:7px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)}
     .result-h span{font-size:6.5px;letter-spacing:1.1px;color:#94a3b8;font-weight:800}
     .result-h b{font-size:6px;padding:3px 6px;border-radius:20px;background:rgba(34,197,94,.14);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
-    .sig{padding:10px 10px 8px;display:flex;align-items:center;gap:10px}
+    .sig{padding:8px 10px 7px;display:flex;align-items:center;gap:10px}
     .sig.call{background:linear-gradient(135deg,rgba(34,197,94,.11),rgba(34,197,94,.02))}
     .sig.put{background:linear-gradient(135deg,rgba(244,63,94,.12),rgba(244,63,94,.02))}
     .sig.wait{background:rgba(255,255,255,.02)}
@@ -102,7 +106,7 @@
     .sig.put .sigtxt b{color:#fb7185}
     .sigtxt p{font-size:6.5px;color:#94a3b8;margin:3px 0 0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
     .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.06)}
-    .stat{background:rgba(10,12,28,.92);padding:8px 10px}
+    .stat{background:rgba(10,12,28,.92);padding:6px 10px}
     .stat label{font-size:6px;letter-spacing:.9px;color:#94a3b8;font-weight:700;display:block}
     .stat b{font-size:10px;color:#fff;display:block;margin-top:2px}
     .stat b.green{color:#4ade80} .stat b.red{color:#fb7185} .stat b.cyan{color:#67e8f9}
@@ -179,10 +183,98 @@
   const API = 'https://giogram-backend.onrender.com/api/signal';
 
   function expand(){ panel.classList.add('open'); fab.style.display='none'; }
+  // ===== DRAG - Mini FAB movable + Panel movable =====
+  let fabDragging=false, fabStartX=0, fabStartY=0, fabOrigLeft=0, fabOrigTop=0, fabMoved=false;
+  function fabDown(e){
+    fabDragging=true; fabMoved=false;
+    let cx = e.touches ? e.touches[0].clientX : e.clientX;
+    let cy = e.touches ? e.touches[0].clientY : e.clientY;
+    fabStartX=cx; fabStartY=cy;
+    let r = fab.getBoundingClientRect();
+    fabOrigLeft=r.left; fabOrigTop=r.top;
+    fab.style.right='auto'; fab.style.bottom='auto';
+    fab.style.left=fabOrigLeft+'px'; fab.style.top=fabOrigTop+'px';
+    e.preventDefault();
+  }
+  function fabMove(e){
+    if(!fabDragging) return;
+    let cx = e.touches ? e.touches[0].clientX : e.clientX;
+    let cy = e.touches ? e.touches[0].clientY : e.clientY;
+    let dx=cx-fabStartX, dy=cy-fabStartY;
+    if(Math.abs(dx)>4 || Math.abs(dy)>4) fabMoved=true;
+    let nx=fabOrigLeft+dx, ny=fabOrigTop+dy;
+    nx=Math.max(6, Math.min(window.innerWidth-60, nx));
+    ny=Math.max(6, Math.min(window.innerHeight-60, ny));
+    fab.style.left=nx+'px'; fab.style.top=ny+'px';
+    e.preventDefault();
+  }
+  function fabUp(e){
+    if(!fabDragging) return;
+    fabDragging=false;
+    // If it was a tap (not drag), expand. If dragged, stay.
+    if(!fabMoved){
+      // Tap - expand will be handled by click, but we already preventDefault, so expand here
+      // Only expand if click not already fired - use timeout to avoid double
+      setTimeout(()=>{ if(!panel.classList.contains('open')) expand(); }, 10);
+    }
+    // Save position for next time
+    try{ localStorage.setItem('ghost_fab_pos', JSON.stringify({left:fab.style.left, top:fab.style.top})); }catch(err){}
+  }
+  fab.addEventListener('mousedown', fabDown);
+  fab.addEventListener('touchstart', fabDown, {passive:false});
+  document.addEventListener('mousemove', fabMove);
+  document.addEventListener('touchmove', fabMove, {passive:false});
+  document.addEventListener('mouseup', fabUp);
+  document.addEventListener('touchend', fabUp);
+  // Restore FAB position
+  try{
+    let saved = localStorage.getItem('ghost_fab_pos');
+    if(saved){
+      let p = JSON.parse(saved);
+      if(p.left && p.top){
+        fab.style.left=p.left; fab.style.top=p.top; fab.style.right='auto'; fab.style.bottom='auto';
+      }
+    }
+  }catch(err){}
+  // Panel drag via header
+  let panelDragging=false, panelSX=0, panelSY=0, panelIL=0, panelIT=0;
+  let headEl = panel.querySelector('.head');
+  function panelDown(e){
+    if(e.target.closest('[data-act]')) return;
+    panelDragging=true;
+    let cx = e.touches ? e.touches[0].clientX : e.clientX;
+    let cy = e.touches ? e.touches[0].clientY : e.clientY;
+    panelSX=cx; panelSY=cy;
+    let r = panel.getBoundingClientRect();
+    panelIL=r.left; panelIT=r.top;
+    panel.style.left=panelIL+'px'; panel.style.right='auto'; panel.style.bottom='auto'; panel.style.top=panelIT+'px';
+    e.preventDefault();
+  }
+  function panelMove(e){
+    if(!panelDragging) return;
+    let cx = e.touches ? e.touches[0].clientX : e.clientX;
+    let cy = e.touches ? e.touches[0].clientY : e.clientY;
+    let nx=panelIL+cx-panelSX, ny=panelIT+cy-panelSY;
+    nx=Math.max(4, Math.min(window.innerWidth-180, nx));
+    ny=Math.max(4, Math.min(window.innerHeight-120, ny));
+    panel.style.left=nx+'px'; panel.style.top=ny+'px';
+    e.preventDefault();
+  }
+  function panelUp(){ panelDragging=false; }
+  if(headEl){
+    headEl.addEventListener('mousedown', panelDown);
+    headEl.addEventListener('touchstart', panelDown, {passive:false});
+  }
+  document.addEventListener('mousemove', panelMove);
+  document.addEventListener('touchmove', panelMove, {passive:false});
+  document.addEventListener('mouseup', panelUp);
+  document.addEventListener('touchend', panelUp);
+
   function minimize(){ panel.classList.remove('open'); fab.style.display='flex'; }
   function closeAll(){ host.remove(); }
 
-  fab.addEventListener('click', expand);
+  // fab click handled in fabUp to distinguish tap vs drag - keep for desktop fallback
+  fab.addEventListener('click', (e)=>{ if(fabMoved) { e.stopPropagation(); return; } expand(); });
   panel.addEventListener('click', e=>{
     let btn = e.target.closest('[data-act]');
     if(!btn) return;
