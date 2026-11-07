@@ -27,10 +27,11 @@ css.innerHTML=`
 .fab-candles .candle{animation:candleMove 2.2s ease-in-out infinite}
 .fab-candles .candle:nth-child(2){animation-delay:.25s}
 .fab-candles .candle:nth-child(3){animation-delay:.5s}
-#ghost-bot{position:fixed;bottom:88px;right:12px;z-index:2147483646;width:290px;max-width:calc(100vw - 24px);background:linear-gradient(168deg,rgba(15,17,34,.97),rgba(7,8,18,.98));border:1px solid rgba(168,85,247,.35);border-radius:18px;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 28px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.10),0 22px 44px rgba(0,0,0,.55);backdrop-filter:blur(18px);font-family:Inter,'Segoe UI',system-ui,sans-serif;color:#eef2ff;user-select:none;overflow:hidden;opacity:0;pointer-events:none;transform-origin:bottom right;transform:translateY(10px) scale(.82);transition:opacity .28s ease,transform .32s cubic-bezier(.16,1,.3,1)}
+#ghost-bot{position:fixed !important;bottom:72px !important;right:8px !important;left:auto !important;top:auto !important;z-index:2147483646 !important;width:262px !important;max-width:calc(100vw - 16px) !important;max-height:calc(100vh - 140px) !important;overflow-y:auto !important;box-sizing:border-box !important;background:linear-gradient(168deg,rgba(15,17,34,.97),rgba(7,8,18,.98));border:1px solid rgba(168,85,247,.35);border-radius:18px;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 28px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.10),0 22px 44px rgba(0,0,0,.55);backdrop-filter:blur(18px);font-family:Inter,'Segoe UI',system-ui,sans-serif;color:#eef2ff;user-select:none;overflow:hidden;opacity:0;pointer-events:none;transform-origin:bottom right;transform:translateY(10px) scale(.82);transition:opacity .28s ease,transform .32s cubic-bezier(.16,1,.3,1)}
 #ghost-bot.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+#ghost-bot *{box-sizing:border-box !important;max-width:100% !important}
 #ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a855f7,#22d3ee,transparent);opacity:.9}
-.gh-h{padding:11px 12px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:move;border-bottom:1px solid rgba(255,255,255,.07)}
+.gh-h{padding:10px 10px 8px !important;display:flex !important;align-items:center;justify-content:space-between;gap:8px;cursor:move;border-bottom:1px solid rgba(255,255,255,.07)}
 .gh-h-left{display:flex;align-items:center;gap:8px}
 .gh-logo-mini{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#a855f7,#6d28d9 55%,#0ea5e9);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(168,85,247,.4)}
 .gh-logo-mini .mini-candles{display:flex;align-items:flex-end;gap:2.5px;height:16px}
@@ -56,10 +57,10 @@ css.innerHTML=`
 .gh-icon-btn .icon-refresh{width:12px;height:12px;border:1.8px solid currentColor;border-radius:50%;border-top-color:transparent;position:relative}
 .gh-icon-btn .icon-refresh::after{content:'';position:absolute;top:-2px;right:-1px;width:0;height:0;border-left:4px solid transparent;border-right:1px solid transparent;border-bottom:5px solid currentColor;transform:rotate(40deg)}
 .gh-pair-wrap{padding:10px 12px 0;display:flex;align-items:center;justify-content:space-between}
-.gh-pair{font-size:12px;font-weight:900;letter-spacing:.7px;color:#fff}
-.gh-pair small{display:block;font-size:6px;letter-spacing:1.1px;color:#67e8f9;font-weight:700;margin-top:2px}
+.gh-pair{font-size:11px !important;font-weight:900 !important;letter-spacing:.5px !important;color:#fff !important;line-height:1.2 !important;flex:1 !important;min-width:0 !important;white-space:normal !important}
+.gh-pair small{display:block !important;font-size:6px !important;letter-spacing:.8px !important;color:#67e8f9 !important;font-weight:700 !important;margin-top:2px !important;white-space:normal !important}
 .gh-time{font-size:6.5px;color:#94a3b8;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);padding:4px 7px;border-radius:20px}
-.gh-candle-viz{margin:10px 12px 0;padding:10px 12px 9px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;gap:10px;height:62px}
+.gh-candle-viz{margin:8px 10px 0 !important;padding:8px 10px 7px !important;border-radius:10px !important;background:rgba(255,255,255,.03) !important;border:1px solid rgba(255,255,255,.06) !important;position:relative !important;overflow:hidden !important;display:flex !important;align-items:flex-end !important;justify-content:center !important;gap:8px !important;height:52px !important}
 .gh-candle-viz .candle{height:44px;width:11px}
 .gh-candle-viz .candle .body{width:11px;border-radius:2px}
 .gh-candle-viz .candle.green .body{height:22px}
@@ -76,7 +77,7 @@ css.innerHTML=`
 .gh-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#a855f7,#22d3ee);border-radius:10px;transition:width .3s ease}
 .gh-status{font-size:7px;color:#94a3b8;text-align:center;margin-top:6px;letter-spacing:.3px}
 .gh-result{margin:10px 12px 0;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01))}
-.gh-result-head{padding:8px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)}
+.gh-result-head{padding:7px 10px !important;display:flex !important;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)}
 .gh-result-head span{font-size:6.5px;letter-spacing:1.1px;color:#94a3b8;font-weight:800}
 .gh-result-head b{font-size:6px;padding:3px 6px;border-radius:20px;background:rgba(34,197,94,.14);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
 .gh-signal-main{padding:10px 10px 8px;display:flex;align-items:center;gap:10px;position:relative}
@@ -98,7 +99,7 @@ css.innerHTML=`
 .gh-signal-main.call .gh-signal-txt b{color:#4ade80}
 .gh-signal-main.put .gh-signal-txt b{color:#fb7185}
 .gh-signal-txt p{font-size:6.5px;color:#94a3b8;margin:3px 0 0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
-.gh-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.06)}
+.gh-stats{display:grid !important;grid-template-columns:1fr 1fr !important;gap:1px !important;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.06)}
 .gh-stat{background:rgba(10,12,28,.92);padding:8px 10px}
 .gh-stat label{font-size:6px;letter-spacing:.9px;color:#94a3b8;font-weight:700;display:block}
 .gh-stat b{font-size:10px;color:#fff;display:block;margin-top:2px}
@@ -181,7 +182,7 @@ box.innerHTML=`
     <button class="gh-btn" id="gh-close2"><span class="icon-x1" style="width:8px"></span><span class="icon-x2" style="width:8px"></span> Close</button>
   </div>
 </div>
-<div class="gh-meta" id="gh-meta"><b>GHOST AI</b> • Backend analysis connected • No fabricated signals • 1% risk</div>
+<div class="gh-meta" id="gh-meta"><b>GHOST AI</b> • Real Backend • 1% Risk</div>
 `;
 document.body.appendChild(box);
 
@@ -763,11 +764,11 @@ function updateUI(j){
     let trendTxt = '—';
     let condTxt = '—';
     let strengthTxt = '—';
-    if(j.filter && j.filter.trend) trendTxt = j.filter.trend;
+    if(j.filter && j.filter.trend && j.filter.trend!=='NA' && j.filter.trend!=='N/A') trendTxt = j.filter.trend;
     else if(j.price_action_type) trendTxt = j.price_action_type.includes('Bull') ? 'BULLISH' : j.price_action_type.includes('Bear') ? 'BEARISH' : j.price_action_type;
     else if(dir==='CALL') trendTxt='BULLISH'; else if(dir==='PUT') trendTxt='BEARISH';
     if(j.is_trap) condTxt='TRAP / REVERSAL';
-    else if(j.price_action_type) condTxt = j.price_action_type;
+    else if(j.price_action_type && j.price_action_type!=='NA' && j.price_action_type!=='N/A') condTxt = j.price_action_type;
     else condTxt = 'RANGING';
     if(conf>=85) strengthTxt='VERY HIGH';
     else if(conf>=75) strengthTxt='HIGH';
@@ -1020,7 +1021,7 @@ setTimeout(startResultObserver, 2000); // restart after 2s to catch late DOM
 
 
 // Init: show FAB only, analyzer minimized by default
-try{ fab.style.display='flex'; box.classList.remove('open'); }catch(e){}
+try{ fab.style.display='flex'; fab.style.opacity='1'; fab.style.pointerEvents='auto'; box.classList.remove('open'); box.style.opacity='0'; }catch(e){}
 fetchSignal();
 autoDetectMarket();
 setTimeout(()=>{if(!currentSignal || document.getElementById('gh-txt').textContent==='WAIT'){fetchSignal();}}, 1500);
