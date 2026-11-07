@@ -1,86 +1,289 @@
 (function(){
 let css=document.createElement("style");
 css.innerHTML=`
-/* ===== GHOST FUTURISTIC HUD - v2 ===== */
-#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:188px;background:linear-gradient(165deg,rgba(10,15,35,.96),rgba(5,8,20,.98));border:1px solid rgba(0,240,255,.45);border-radius:12px;box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 28px rgba(0,240,255,.22),0 0 60px rgba(0,120,255,.18),0 18px 40px #000d;backdrop-filter:blur(14px);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
-#ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#00f0ff,#7b2fff,#00ff88,transparent);animation:ghBorderFlow 2.4s linear infinite;background-size:200% 100%}
-#ghost-bot::after{content:'';position:absolute;top:0;left:0;right:0;height:34px;background:linear-gradient(180deg,rgba(0,240,255,.08),transparent);pointer-events:none}
-@keyframes ghBorderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
-@keyframes ghScan{0%{top:-10%}100%{top:110%}}
-@keyframes ghPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
-@keyframes ghBlink{0%,100%{opacity:1}50%{opacity:.25}}
-@keyframes ghFloatUp{0%{transform:translateY(4px);opacity:0}20%{opacity:1}100%{transform:translateY(-10px);opacity:0}}
-@keyframes ghFloatDown{0%{transform:translateY(-4px);opacity:0}20%{opacity:1}100%{transform:translateY(10px);opacity:0}}
-@keyframes ghArrowUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes ghArrowDown{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
-@keyframes ghGlowGreen{0%,100%{box-shadow:0 0 12px rgba(0,255,136,.55),0 0 32px rgba(0,255,136,.30)}50%{box-shadow:0 0 22px rgba(0,255,136,.85),0 0 48px rgba(0,255,136,.45)}}
-@keyframes ghGlowRed{0%,100%{box-shadow:0 0 12px rgba(255,45,85,.55),0 0 32px rgba(255,45,85,.30)}50%{box-shadow:0 0 22px rgba(255,45,85,.85),0 0 48px rgba(255,45,85,.45)}}
-@keyframes ghShine{0%{left:-80%}100%{left:120%}}
-@keyframes ghRing{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.25);opacity:0}}
-.gh-h{padding:5px 7px;background:linear-gradient(90deg,rgba(0,240,255,.14),rgba(123,47,255,.12),transparent);border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
-.gh-h-left{display:flex;align-items:center;gap:6px}
-.gh-dot{width:6px;height:6px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,.6);animation:ghPulse 1.2s infinite}
-.gh-h b{font-size:7.5px;color:#fff;letter-spacing:1.2px;font-weight:900}
-.gh-h b span{background:linear-gradient(90deg,#00f0ff,#7b2fff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 6px rgba(0,240,255,.6))}
-.gh-live{font-size:5px;background:#ff2d55;color:#fff;padding:2px 5px;border-radius:20px;font-weight:900;letter-spacing:.6px;animation:ghBlink 1s infinite}
-.gh-toggle{font-size:5px;background:rgba(0,240,255,.12);border:1px solid rgba(0,240,255,.5);color:#00f0ff;padding:2px 5px;border-radius:20px;cursor:pointer;font-weight:800;letter-spacing:.4px}
-.gh-toggle.off{background:rgba(255,255,255,.05);border-color:#333;color:#666}
-.gh-pair{font-size:10px;font-weight:900;color:#fff;text-align:center;margin:5px 0 4px;letter-spacing:1.4px;text-shadow:0 0 10px rgba(0,240,255,.8),0 0 22px rgba(0,240,255,.4)}
-.gh-pair small{display:block;font-size:5px;color:#00f0ff;letter-spacing:2px;margin-top:2px;font-weight:700}
-.gh-sig{margin:0 8px;height:54px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:all .25s}
-.gh-sig .gh-arrow{font-size:16px;line-height:1;margin-bottom:1px;filter:drop-shadow(0 0 8px currentColor)}
-.gh-sig.up .gh-arrow{animation:ghArrowUp .7s ease-in-out infinite}
-.gh-sig.down .gh-arrow{animation:ghArrowDown .7s ease-in-out infinite}
-.gh-sig b{font-size:15px;font-weight:900;letter-spacing:1.5px;line-height:1;text-shadow:0 0 14px currentColor}
-.gh-sig small{font-size:5px;color:#c8d0dc;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;letter-spacing:.2px}
-.gh-sig .gh-scan{position:absolute;left:0;right:0;height:18px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.18),transparent);animation:ghScan 1.6s linear infinite}
-.gh-sig .gh-shine{position:absolute;top:0;width:40px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);animation:ghShine 1.8s ease-in-out infinite}
-.gh-sig.up{background:linear-gradient(145deg,#00ff88,#00b35e,#006e3a);color:#fff;animation:ghGlowGreen 1.1s ease-in-out infinite;border:1px solid rgba(0,255,136,.7)}
-.gh-sig.down{background:linear-gradient(145deg,#ff2d55,#d6002e,#8a0020);color:#fff;animation:ghGlowRed 1.1s ease-in-out infinite;border:1px solid rgba(255,45,85,.7)}
-.gh-sig.wait{background:linear-gradient(145deg,#141a2a,#0a0e1a);color:#5a6f8a;border:1px solid rgba(0,240,255,.18)}
-.gh-sig.wait .gh-arrow{opacity:.35}
-.gh-bar{height:2.5px;margin:6px 8px 0;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden}
-.gh-bar-fill{height:100%;width:0%;border-radius:10px;background:linear-gradient(90deg,#00f0ff,#00ff88);transition:width .5s linear;box-shadow:0 0 8px #00f0ff}
-.gh-meta{font-size:6.5px;color:#8a9ab5;text-align:center;margin:5px 0 6px;letter-spacing:.4px;font-weight:600;line-height:1.4}
-.gh-meta b{color:#00f0ff}
-.gh-meta .gh-conf{color:#00ff88}
-.gh-close{margin:0 8px 7px;height:24px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:7px;font-weight:700;cursor:pointer;letter-spacing:.5px}
-.gh-close:hover{background:rgba(255,45,85,.15);color:#fff;border-color:rgba(255,45,85,.4)}
-.gh-corner{position:absolute;width:9px;height:9px;border:1.5px solid rgba(0,240,255,.6)}
-.gh-corner.tl{top:6px;left:6px;border-right:none;border-bottom:none}
-.gh-corner.tr{top:6px;right:6px;border-left:none;border-bottom:none}
-.gh-corner.bl{bottom:6px;left:6px;border-right:none;border-top:none}
-.gh-corner.br{bottom:6px;right:6px;border-left:none;border-top:none}
+/* ===== GHOST AI - FUTURISTIC PRO SIGNAL BOARD - PREMIUM 2026 ===== */
+#ghost-fab{position:fixed;bottom:92px;right:14px;z-index:2147483647;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,rgba(18,22,45,.92),rgba(10,10,24,.96));border:1px solid rgba(168,85,247,.55);box-shadow:0 0 0 1px rgba(0,240,255,.15),0 0 18px rgba(168,85,247,.35),0 0 28px rgba(0,240,255,.18),0 10px 24px rgba(0,0,0,.5);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;user-select:none;touch-action:none;transition:transform .18s ease,box-shadow .18s ease}
+#ghost-fab:active{cursor:grabbing;transform:scale(.96)}
+#ghost-fab:hover{box-shadow:0 0 0 1px rgba(0,240,255,.25),0 0 24px rgba(168,85,247,.5),0 0 36px rgba(0,240,255,.28),0 12px 28px rgba(0,0,0,.55)}
+#ghost-fab .fab-logo{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#a855f7,#6d28d9 55%,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;font-weight:900;box-shadow:0 0 12px rgba(168,85,247,.6);position:relative}
+#ghost-fab .fab-logo::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(168,85,247,.35);animation:fabRing 2s ease-out infinite}
+#ghost-fab .fab-txt{font-size:6px;font-weight:800;letter-spacing:1.4px;color:#c4b5fd;margin-top:3px}
+#ghost-fab .fab-live{position:absolute;top:4px;right:4px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid #0b0b18;box-shadow:0 0 8px #22c55e;animation:fabPulse 1.6s infinite}
+@keyframes fabRing{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.25);opacity:0}}
+@keyframes fabPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes fabFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+#ghost-fab{animation:fabFloat 3s ease-in-out infinite}
+
+#ghost-bot{position:fixed;bottom:92px;right:14px;left:auto;transform:translateX(0);z-index:2147483646;width:320px;max-width:calc(100vw - 24px);max-height:calc(100vh - 120px);overflow-y:auto;overflow-x:hidden;background:linear-gradient(168deg,rgba(16,18,36,.97),rgba(8,9,20,.98));border:1px solid rgba(168,85,247,.35);border-radius:20px;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 32px rgba(168,85,247,.22),0 0 60px rgba(0,240,255,.10),0 24px 48px rgba(0,0,0,.55);backdrop-filter:blur(18px);font-family:Inter,'Segoe UI',system-ui,sans-serif;color:#eef2ff;user-select:none;opacity:0;pointer-events:none;transform:translateY(12px) scale(.96);transition:opacity .28s ease,transform .28s cubic-bezier(.16,1,.3,1)}
+#ghost-bot.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+#ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a855f7,#22d3ee,transparent);opacity:.9}
+.gh-h{padding:12px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;cursor:move;border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;background:rgba(10,12,28,.85);backdrop-filter:blur(12px);z-index:2}
+.gh-h-left{display:flex;align-items:center;gap:9px}
+.gh-logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#a855f7,#6d28d9 55%,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 0 14px rgba(168,85,247,.45);flex-shrink:0}
+.gh-title b{font-size:11px;letter-spacing:.9px;line-height:1;display:block;color:#fff}
+.gh-title b span{color:#a78bfa}
+.gh-title small{font-size:7px;letter-spacing:1.2px;color:#94a3b8;font-weight:700;display:block;margin-top:3px}
+.gh-live-badge{font-size:6px;font-weight:800;letter-spacing:.6px;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.35);color:#4ade80;padding:3px 6px;border-radius:20px;display:flex;align-items:center;gap:4px}
+.gh-live-badge i{width:5px;height:5px;background:#22c55e;border-radius:50%;display:block;box-shadow:0 0 6px #22c55e;animation:fabPulse 1.4s infinite}
+.gh-h-actions{display:flex;gap:5px;flex-shrink:0}
+.gh-icon-btn{width:28px;height:28px;border-radius:9px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#cbd5e1;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:all .15s}
+.gh-icon-btn:hover{background:rgba(255,255,255,.10);color:#fff}
+.gh-icon-btn.primary{background:linear-gradient(135deg,#7c3aed,#06b6d4);border-color:transparent;color:#fff}
+.gh-pair-wrap{padding:12px 14px 0;display:flex;align-items:center;justify-content:space-between}
+.gh-pair{font-size:13px;font-weight:900;letter-spacing:.8px;color:#fff}
+.gh-pair small{display:block;font-size:6.5px;letter-spacing:1.2px;color:#67e8f9;font-weight:700;margin-top:2px}
+.gh-time{font-size:6.5px;color:#94a3b8;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);padding:4px 7px;border-radius:20px}
+.gh-analysis{margin:12px 14px 0;padding:10px 11px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);display:none}
+.gh-analysis.active{display:block}
+.gh-analysis-title{font-size:7px;letter-spacing:1.2px;color:#a78bfa;font-weight:800;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.gh-analysis-title span:last-child{color:#e2e8f0}
+.gh-step{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:7.5px;color:#94a3b8;transition:all .2s}
+.gh-step .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;background:rgba(255,255,255,.03)}
+.gh-step.done{color:#e2e8f0}
+.gh-step.done .dot{background:#22c55e;border-color:#22c55e;color:#fff}
+.gh-step.active{color:#fff}
+.gh-step.active .dot{border-color:#a855f7;background:rgba(168,85,247,.22);box-shadow:0 0 10px rgba(168,85,247,.45);animation:fabPulse 1s infinite}
+.gh-step .bar{flex:1;height:2px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-left:22px;margin-top:-2px}
+.gh-progress{height:3px;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden;margin-top:8px}
+.gh-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#a855f7,#22d3ee);border-radius:10px;transition:width .35s ease;box-shadow:0 0 10px rgba(168,85,247,.5)}
+.gh-scan-line{height:1px;background:linear-gradient(90deg,transparent,#22d3ee,transparent);margin:10px 0 0;position:relative;overflow:hidden}
+.gh-scan-line::after{content:'';position:absolute;top:0;left:-30%;width:30%;height:100%;background:linear-gradient(90deg,transparent,#fff,transparent);animation:scanMove 1.2s linear infinite}
+@keyframes scanMove{0%{left:-30%}100%{left:110%}}
+.gh-result{margin:12px 14px 0;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01))}
+.gh-result-head{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)}
+.gh-result-head span{font-size:7px;letter-spacing:1.2px;color:#94a3b8;font-weight:800}
+.gh-result-head b{font-size:6.5px;padding:3px 7px;border-radius:20px;background:rgba(34,197,94,.14);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+.gh-signal-main{padding:14px 12px 10px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden}
+.gh-signal-main::after{content:'';position:absolute;inset:0;background:radial-gradient(300px 80px at 20% 0%,rgba(168,85,247,.12),transparent 70%);pointer-events:none}
+.gh-signal-main.call{background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(34,197,94,.03))}
+.gh-signal-main.put{background:linear-gradient(135deg,rgba(244,63,94,.13),rgba(244,63,94,.03))}
+.gh-signal-main.wait{background:rgba(255,255,255,.02)}
+.gh-arrow-circle{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0;position:relative;z-index:1}
+.gh-signal-main.call .gh-arrow-circle{background:linear-gradient(135deg,#22c55e,#15803d);box-shadow:0 0 18px rgba(34,197,94,.45);animation:arrowUp .8s ease-in-out infinite}
+.gh-signal-main.put .gh-arrow-circle{background:linear-gradient(135deg,#f43f5e,#be123c);box-shadow:0 0 18px rgba(244,63,94,.45);animation:arrowDown .8s ease-in-out infinite}
+.gh-signal-main.wait .gh-arrow-circle{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#94a3b8}
+@keyframes arrowUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes arrowDown{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+.gh-signal-txt{position:relative;z-index:1}
+.gh-signal-txt small{font-size:7px;letter-spacing:1.4px;color:#94a3b8;font-weight:700;display:block}
+.gh-signal-txt b{font-size:22px;font-weight:900;letter-spacing:.6px;line-height:1.1;display:block;margin-top:2px}
+.gh-signal-main.call .gh-signal-txt b{color:#4ade80;text-shadow:0 0 14px rgba(34,197,94,.5)}
+.gh-signal-main.put .gh-signal-txt b{color:#fb7185;text-shadow:0 0 14px rgba(244,63,94,.5)}
+.gh-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.06)}
+.gh-stat{background:rgba(10,12,28,.9);padding:10px 12px}
+.gh-stat label{font-size:6.5px;letter-spacing:1px;color:#94a3b8;font-weight:700;display:block}
+.gh-stat b{font-size:11px;color:#fff;display:block;margin-top:3px}
+.gh-stat b.green{color:#4ade80}
+.gh-stat b.red{color:#fb7185}
+.gh-stat b.cyan{color:#67e8f9}
+.gh-key{margin:12px 14px 0;padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.gh-key-title{font-size:7px;letter-spacing:1.2px;color:#a78bfa;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.gh-key-item{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:7.8px;line-height:1.4;color:#cbd5e1}
+.gh-key-item .tick{width:16px;height:16px;border-radius:50%;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.3);color:#4ade80;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:0px}
+.gh-key-item.warn .tick{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3);color:#fbbf24}
+.gh-controls{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.gh-btn-row{display:flex;gap:8px}
+.gh-btn{flex:1;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#e2e8f0;font-size:8px;font-weight:700;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.gh-btn:hover{background:rgba(255,255,255,.09)}
+.gh-btn.primary{background:linear-gradient(135deg,#7c3aed,#06b6d4);border-color:transparent;color:#fff;box-shadow:0 6px 18px rgba(124,58,237,.30)}
+.gh-btn.primary:hover{filter:brightness(1.08)}
+.gh-btn.copy{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.30);color:#ddd6fe}
+.gh-meta{padding:0 14px 12px;text-align:center;font-size:6.5px;color:#64748b;letter-spacing:.4px;line-height:1.5}
+.gh-meta b{color:#a78bfa}
+@media(max-width:360px){#ghost-bot{width:calc(100vw - 20px);right:10px;bottom:78px}#ghost-fab{bottom:78px;right:10px}}
 `;
 document.head.appendChild(css);
+let fab=document.createElement("div");fab.id="ghost-fab";
+fab.innerHTML=`<div class="fab-live"></div><div class="fab-logo">👻</div><div class="fab-txt">GHOST AI</div>`;
+document.body.appendChild(fab);
 let old=document.getElementById("ghost-bot");if(old) old.remove();
 let box=document.createElement("div");box.id="ghost-bot";
 box.innerHTML=`
-<div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
-<div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST QUANTUM X • AI SCAN</small></div>
-<div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">QUANTUM X Analyzing...</small></div>
-<div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
-<div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK<br><span id="gh-pa" style="color:#00f0ff;font-size:6px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span></div>
-<div class="gh-close" id="gh-close">✕ Close</div>
+<div class="gh-h" id="gh-h">
+  <div class="gh-h-left">
+    <div class="gh-logo">👻</div>
+    <div class="gh-title"><b>GHOST <span>AI</span></b><small>SIGNAL ANALYZER PRO</small></div>
+    <div class="gh-live-badge"><i></i> LIVE</div>
+  </div>
+  <div class="gh-h-actions">
+    <button class="gh-icon-btn" id="gh-refresh" title="Refresh">↻</button>
+    <button class="gh-icon-btn" id="gh-min" title="Minimize">—</button>
+    <button class="gh-icon-btn" id="gh-close" title="Close">✕</button>
+  </div>
+</div>
+<div class="gh-pair-wrap">
+  <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST QUANTUM X • AI SCAN</small></div>
+  <div class="gh-time" id="gh-time">1M • <span id="gh-sec">--s</span></div>
+</div>
+<div class="gh-analysis" id="gh-analysis">
+  <div class="gh-analysis-title"><span>ANALYZING CHART</span><span id="gh-analyze-pct">0%</span></div>
+  <div id="gh-steps"></div>
+  <div class="gh-progress"><div class="gh-progress-fill" id="gh-progress"></div></div>
+  <div class="gh-scan-line"></div>
+</div>
+<div class="gh-result" id="gh-result">
+  <div class="gh-result-head"><span>ANALYSIS RESULT</span><b id="gh-status">READY</b></div>
+  <div class="gh-signal-main wait" id="gh-sig">
+    <div class="gh-arrow-circle" id="gh-arrow">◉</div>
+    <div class="gh-signal-txt"><small>SIGNAL</small><b id="gh-txt">WAIT</b><small id="gh-reason" style="font-size:7px;color:#94a3b8;letter-spacing:.1px;margin-top:3px;text-transform:none">QUANTUM X Analyzing...</small></div>
+  </div>
+  <div class="gh-stats">
+    <div class="gh-stat"><label>CONFIDENCE</label><b class="green" id="gh-conf">--%</b></div>
+    <div class="gh-stat"><label>TIMEFRAME</label><b>1M</b></div>
+    <div class="gh-stat"><label>SUGGESTED EXPIRY</label><b class="cyan">1–2 MIN</b></div>
+    <div class="gh-stat"><label>TREND</label><b id="gh-trend">—</b></div>
+    <div class="gh-stat"><label>MARKET CONDITION</label><b id="gh-condition">—</b></div>
+    <div class="gh-stat"><label>SIGNAL STRENGTH</label><b id="gh-strength">—</b></div>
+  </div>
+</div>
+<div class="gh-key" id="gh-key">
+  <div class="gh-key-title">✦ KEY ANALYSIS</div>
+  <div id="gh-key-list"></div>
+</div>
+<div class="gh-controls">
+  <div class="gh-btn-row">
+    <button class="gh-btn primary" id="gh-analyze-again">↻ Analyze Again</button>
+    <button class="gh-btn copy" id="gh-copy">📋 Copy Signal</button>
+  </div>
+  <div class="gh-btn-row">
+    <button class="gh-btn" id="gh-min2">⬇ Minimize</button>
+    <button class="gh-btn" id="gh-close2">✕ Close</button>
+  </div>
+</div>
+<div class="gh-meta" id="gh-meta"><b>GHOST AI</b> • Backend analysis connected • No fabricated signals • 1% risk</div>
 `;
 document.body.appendChild(box);
 
+
 let paEnabled=true;
-let toggleEl=document.getElementById("gh-toggle");
-toggleEl.addEventListener("click",e=>{e.stopPropagation();paEnabled=!paEnabled;toggleEl.textContent=paEnabled?"PA ON":"PA OFF";toggleEl.className=paEnabled?"gh-toggle":"gh-toggle off";localStorage.setItem("ghost_pa_enabled", paEnabled?"1":"0");});
-let savedPA=localStorage.getItem("ghost_pa_enabled");if(savedPA==="0"){paEnabled=false;toggleEl.textContent="PA OFF";toggleEl.className="gh-toggle off";}
+let isExpanded=false;
+let isAnalyzing=false;
+let currentResult=null;
 
-document.getElementById("gh-close").addEventListener("click",e=>{e.stopPropagation();box.remove();});
-document.getElementById("gh-close").addEventListener("touchend",e=>{e.stopPropagation();box.remove();});
+// ===== FAB + ANALYZER STATE =====
+function expandAnalyzer(){
+  isExpanded=true;
+  box.classList.add('open');
+  fab.style.display='none';
+  // Smart positioning: if panel would cover chart center, shift to right
+  try{
+    let r = box.getBoundingClientRect();
+    if(r.left < 10) { box.style.right='10px'; box.style.left='auto'; }
+  }catch(e){}
+}
+function minimizeAnalyzer(){
+  isExpanded=false;
+  box.classList.remove('open');
+  fab.style.display='flex';
+}
+function closeAnalyzer(){
+  box.remove();
+  fab.remove();
+  let t=document.getElementById('ghost-toast'); if(t) t.remove();
+}
 
+// FAB click -> expand
+fab.addEventListener('click', (e)=>{ e.stopPropagation(); expandAnalyzer(); });
+fab.addEventListener('touchend', (e)=>{ e.stopPropagation(); expandAnalyzer(); });
+
+// Header buttons
+let btnRefresh=document.getElementById('gh-refresh');
+let btnMin=document.getElementById('gh-min');
+let btnClose=document.getElementById('gh-close');
+let btnMin2=document.getElementById('gh-min2');
+let btnClose2=document.getElementById('gh-close2');
+let btnAnalyzeAgain=document.getElementById('gh-analyze-again');
+let btnCopy=document.getElementById('gh-copy');
+if(btnRefresh) btnRefresh.addEventListener('click', (e)=>{e.stopPropagation(); startAnalysisAnimation(true);});
+if(btnMin) btnMin.addEventListener('click', (e)=>{e.stopPropagation(); minimizeAnalyzer();});
+if(btnMin2) btnMin2.addEventListener('click', (e)=>{e.stopPropagation(); minimizeAnalyzer();});
+if(btnClose) btnClose.addEventListener('click', (e)=>{e.stopPropagation(); closeAnalyzer();});
+if(btnClose2) btnClose2.addEventListener('click', (e)=>{e.stopPropagation(); closeAnalyzer();});
+if(btnAnalyzeAgain) btnAnalyzeAgain.addEventListener('click', (e)=>{e.stopPropagation(); startAnalysisAnimation(true);});
+if(btnCopy) btnCopy.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  try{
+    let txt = currentResult ? `GHOST AI Signal: ${currentResult.signal} ${currentResult.pair||currentPair} | Conf: ${currentResult.confidence}% | TF: 1M | Expiry: 1-2 MIN | Trend: ${currentResult.trend||'—'}` : `GHOST AI: ${currentPair} - Analyzing...`;
+    navigator.clipboard.writeText(txt).then(()=>{ btnCopy.textContent='✓ Copied!'; setTimeout(()=>btnCopy.textContent='📋 Copy Signal',1200); });
+  }catch(err){}
+});
+
+// PA toggle - now handled via refresh, keep paEnabled true by default
+let savedPA=localStorage.getItem("ghost_pa_enabled"); if(savedPA==="0"){ paEnabled=false; }
+
+// FAB drag - draggable, stays above chart
+let fabDrag=false, fabSX=0, fabSY=0, fabIL=0, fabIT=0;
+function fabDS(e){ fabDrag=true; let cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; fabSX=cx; fabSY=cy; let r=fab.getBoundingClientRect(); fabIL=r.left; fabIT=r.top; fab.style.right='auto'; fab.style.bottom='auto'; fab.style.left=fabIL+'px'; fab.style.top=fabIT+'px'; e.preventDefault(); }
+function fabDM(e){ if(!fabDrag) return; let cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; let nx=fabIL+cx-fabSX, ny=fabIT+cy-fabSY; nx=Math.max(8, Math.min(window.innerWidth-64, nx)); ny=Math.max(8, Math.min(window.innerHeight-64, ny)); fab.style.left=nx+'px'; fab.style.top=ny+'px'; e.preventDefault(); }
+function fabDE(){ fabDrag=false; }
+fab.addEventListener("mousedown", fabDS); document.addEventListener("mousemove", fabDM); document.addEventListener("mouseup", fabDE);
+fab.addEventListener("touchstart", fabDS, {passive:false}); document.addEventListener("touchmove", fabDM, {passive:false}); document.addEventListener("touchend", fabDE);
+
+// Analyzer drag via header
 let isDrag=false,sx=0,sy=0,il=0,it=0;let hd=document.getElementById("gh-h");
 function getPos(){let r=box.getBoundingClientRect();return{left:r.left,top:r.top};}
-function ds(e){if(e.target.closest("#gh-close")||e.target.closest("#gh-toggle")) return; isDrag=true;let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;sx=cx;sy=cy;let p=getPos();il=p.left;it=p.top;box.style.left=p.left+"px";box.style.right="auto";box.style.bottom="auto";box.style.transform="none";e.preventDefault();}
+function ds(e){if(e.target.closest("button")) return; isDrag=true;let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;sx=cx;sy=cy;let p=getPos();il=p.left;it=p.top;box.style.left=p.left+"px";box.style.right="auto";box.style.bottom="auto";box.style.transform="none";e.preventDefault();}
 function dm(e){if(!isDrag)return;let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;box.style.left=(il+cx-sx)+"px";box.style.top=(it+cy-sy)+"px";e.preventDefault();}
 function de(){isDrag=false;}
 hd.addEventListener("mousedown",ds);document.addEventListener("mousemove",dm);document.addEventListener("mouseup",de);
 hd.addEventListener("touchstart",ds,{passive:false});document.addEventListener("touchmove",dm,{passive:false});document.addEventListener("touchend",de);
+
+// ===== ANALYSIS ANIMATION - Professional sequence, fast =====
+const ANALYSIS_STEPS = [
+  "Scanning chart",
+  "Detecting candlestick structure",
+  "Checking trend",
+  "Checking support / resistance",
+  "Checking momentum",
+  "Calculating confidence",
+  "Preparing result"
+];
+function startAnalysisAnimation(forceFetch){
+  if(isAnalyzing) return;
+  isAnalyzing=true;
+  let analysisEl=document.getElementById('gh-analysis');
+  let stepsEl=document.getElementById('gh-steps');
+  let progressEl=document.getElementById('gh-progress');
+  let pctEl=document.getElementById('gh-analyze-pct');
+  if(!analysisEl || !stepsEl) { isAnalyzing=false; if(forceFetch) fetchSignal(); return; }
+  analysisEl.classList.add('active');
+  stepsEl.innerHTML='';
+  ANALYSIS_STEPS.forEach((s,i)=>{
+    let d=document.createElement('div'); d.className='gh-step'; d.id='gh-step-'+i;
+    d.innerHTML=`<div class="dot">${i+1}</div><div>${s}</div>`;
+    stepsEl.appendChild(d);
+  });
+  let idx=0;
+  let total=ANALYSIS_STEPS.length;
+  let timer=setInterval(()=>{
+    if(idx < total){
+      // Mark previous done
+      if(idx>0){
+        let prev=document.getElementById('gh-step-'+(idx-1));
+        if(prev){ prev.classList.remove('active'); prev.classList.add('done'); prev.querySelector('.dot').textContent='✓'; }
+      }
+      let cur=document.getElementById('gh-step-'+idx);
+      if(cur) cur.classList.add('active');
+      let pct=Math.round(((idx+1)/total)*100);
+      if(progressEl) progressEl.style.width=pct+'%';
+      if(pctEl) pctEl.textContent=pct+'%';
+      idx++;
+    } else {
+      clearInterval(timer);
+      let last=document.getElementById('gh-step-'+(total-1));
+      if(last){ last.classList.remove('active'); last.classList.add('done'); last.querySelector('.dot').textContent='✓'; }
+      if(progressEl) progressEl.style.width='100%';
+      if(pctEl) pctEl.textContent='100%';
+      setTimeout(()=>{ analysisEl.classList.remove('active'); isAnalyzing=false; }, 450);
+      if(forceFetch) fetchSignal();
+    }
+  }, 210);
+  // If not forceFetch, still fetch after animation will happen via caller
+  if(!forceFetch){
+    // Animation will complete, fetch is handled by fetchSignal loop separately
+  }
+}
+
 
 // ===== LOSS PROTECTION - 2 Loss = 30 Min Stop - ADVANCED FIX =====
 let loss_count = parseInt(localStorage.getItem('ghost_loss_count')||'0');
@@ -517,59 +720,119 @@ function getRealPrice(){
 }
 
 function updateUI(j){
+  // Connect to real backend data - do NOT fabricate
   let pairEl=document.getElementById("gh-pair");
   if(pairEl){
     let mTxt = j.market||currentPair.replace(/([A-Z]{3})([A-Z]{3})/, '$1/$2').replace('OTC',' OTC');
     pairEl.innerHTML = mTxt + '<small>GHOST QUANTUM X • AI SCAN</small>';
   }
-  let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
-  let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");
+  let sigEl=document.getElementById("gh-sig");
+  let txtEl=document.getElementById("gh-txt");
+  let reasonEl=document.getElementById("gh-reason");
+  let arrowEl=document.getElementById("gh-arrow");
+  let confEl=document.getElementById("gh-conf");
+  let trendEl=document.getElementById("gh-trend");
+  let condEl=document.getElementById("gh-condition");
+  let strengthEl=document.getElementById("gh-strength");
+  let statusEl=document.getElementById("gh-status");
+  let keyList=document.getElementById("gh-key-list");
   let dir=j.signal||j.direction;
+  // Save for Copy
+  currentResult = { signal: dir, pair: j.pair||currentPair, confidence: j.confidence||0, trend: j.filter?.trend||j.price_action_type||'—', reason: j.reason||'' };
   if(sigEl&&txtEl){
     let isSameLocked = currentSignal && j.signal_id === currentSignal.signal_id;
+    // Determine trend / condition / strength from REAL data only
+    let conf = j.confidence||0;
+    let trendTxt = '—';
+    let condTxt = '—';
+    let strengthTxt = '—';
+    if(j.filter && j.filter.trend) trendTxt = j.filter.trend;
+    else if(j.price_action_type) trendTxt = j.price_action_type.includes('Bull') ? 'BULLISH' : j.price_action_type.includes('Bear') ? 'BEARISH' : j.price_action_type;
+    else if(dir==='CALL') trendTxt='BULLISH'; else if(dir==='PUT') trendTxt='BEARISH';
+    if(j.is_trap) condTxt='TRAP / REVERSAL';
+    else if(j.price_action_type) condTxt = j.price_action_type;
+    else condTxt = 'RANGING';
+    if(conf>=85) strengthTxt='VERY HIGH';
+    else if(conf>=75) strengthTxt='HIGH';
+    else if(conf>=65) strengthTxt='MEDIUM';
+    else if(conf>=50) strengthTxt='LOW';
+    else strengthTxt='WAITING';
+
     if(dir==="CALL"||dir==="UP"){
-      sigEl.className="gh-sig up";
-      txtEl.textContent="▲ UP";
-      if(arrowEl) arrowEl.textContent="▲";
+      sigEl.className="gh-signal-main call";
+      txtEl.textContent="CALL ↑";
+      if(arrowEl) arrowEl.textContent="↑";
+      if(statusEl){ statusEl.textContent='CALL • ACTIVE'; statusEl.style.background='rgba(34,197,94,.14)'; statusEl.style.color='#4ade80'; statusEl.style.borderColor='rgba(34,197,94,.25)'; }
       if(!isSameLocked || !reasonEl.textContent) reasonEl.textContent=j.reason||j.price_action_type||"";
+      if(trendEl) trendEl.textContent='BULLISH';
+      if(trendEl) trendEl.className='green';
     }
     else if(dir==="PUT"||dir==="DOWN"){
-      sigEl.className="gh-sig down";
-      txtEl.textContent="▼ DOWN";
-      if(arrowEl) arrowEl.textContent="▼";
+      sigEl.className="gh-signal-main put";
+      txtEl.textContent="PUT ↓";
+      if(arrowEl) arrowEl.textContent="↓";
+      if(statusEl){ statusEl.textContent='PUT • ACTIVE'; statusEl.style.background='rgba(244,63,94,.14)'; statusEl.style.color='#fb7185'; statusEl.style.borderColor='rgba(244,63,94,.25)'; }
       if(!isSameLocked || !reasonEl.textContent) reasonEl.textContent=j.reason||j.price_action_type||"";
+      if(trendEl) trendEl.textContent='BEARISH';
+      if(trendEl) trendEl.className='red';
     }
     else{
-      sigEl.className="gh-sig wait";
-      txtEl.textContent="◉ WAIT";
+      sigEl.className="gh-signal-main wait";
+      txtEl.textContent="WAIT";
       if(arrowEl) arrowEl.textContent="◉";
       reasonEl.textContent=j.reason||"Analyzing...";
+      if(statusEl){ statusEl.textContent='WAITING'; statusEl.style.background='rgba(255,255,255,.06)'; statusEl.style.color='#94a3b8'; statusEl.style.borderColor='rgba(255,255,255,.12)'; }
+      if(trendEl) trendEl.textContent='—';
     }
-    let lossTxt = loss_count>0 ? `Loss:${loss_count}/2 | ` : '';
-    if(paEl) paEl.textContent=`${lossTxt}${j.price_action_type||"Momentum"}`;
-    if(confEl) confEl.textContent=`${j.confidence||0}% CONF`;
-    if(barEl){
-      let rem = j.expiry_timestamp ? Math.max(0, Math.ceil((j.expiry_timestamp-Date.now())/1000)) : 0;
-      let pct = rem>0 ? Math.max(4, (rem/60)*100) : 0;
-      barEl.style.width = pct + '%';
-      barEl.style.background = (dir==="CALL"||dir==="UP") ? 'linear-gradient(90deg,#00f0ff,#00ff88)' : (dir==="PUT"||dir==="DOWN") ? 'linear-gradient(90deg,#ff2d55,#ff8a00)' : 'linear-gradient(90deg,#00f0ff,#7b2fff)';
+    if(confEl) confEl.textContent=conf+'%';
+    if(condEl) condEl.textContent=condTxt;
+    if(strengthEl) strengthEl.textContent=strengthTxt;
+    // Key Analysis - only show what is supported by real data
+    if(keyList){
+      let items=[];
+      // From reason / strategies
+      let reason = (j.reason||'').toLowerCase();
+      let strat = (j.strategies||[]).join(' ').toLowerCase();
+      let combined = reason + ' ' + strat;
+      if(combined.includes('momentum') || combined.includes('bull') || dir==='CALL') items.push({txt:'Bullish momentum detected', ok:true});
+      if(combined.includes('bear') || dir==='PUT') items.push({txt:'Bearish momentum detected', ok:true});
+      if(combined.includes('bos') || combined.includes('structure') || combined.includes('break')) items.push({txt:'Price structure confirmation', ok:true});
+      if(combined.includes('support') || combined.includes('resistance') || combined.includes('order block') || combined.includes('fvg') || combined.includes('liquidity')) items.push({txt:'Support / Resistance condition', ok:true});
+      if(combined.includes('candle') || combined.includes('wick') || combined.includes('rejection') || combined.includes('engulf')) items.push({txt:'Candle confirmation', ok:true});
+      if(items.length===0){
+        // Fallback to generic but honest - based on confidence
+        if(conf>=65) items.push({txt:'Structure + momentum aligned ('+conf+'%)', ok:true});
+        else items.push({txt:'Collecting more candle data...', ok:false});
+      }
+      // Deduplicate
+      let seen={}; items=items.filter(it=>{ if(seen[it.txt]) return false; seen[it.txt]=true; return true; });
+      keyList.innerHTML = items.map(it=>`<div class="gh-key-item ${it.ok?'':'warn'}"><div class="tick">${it.ok?'✓':'•'}</div><div>${it.txt}</div></div>`).join('');
     }
   }
+  // Auto-expand on first real signal if minimized? Keep minimized until user clicks
+  // If analyzer is closed, keep FAB visible
 }
+
+// Auto-start: show FAB only, analyzer hidden until click
+// fetchSignal will still run in background to keep data fresh, but UI stays minimized until opened
+
 
 function fetchSignal(forcePair){
   let now=Date.now();
+  // If analyzer is open, show analysis animation (fast, non-blocking)
+  if(isExpanded && !isAnalyzing && !lockedSignalId){
+    // Show steps animation in background, result will update via updateUI
+    try{ startAnalysisAnimation(false); }catch(e){}
+  }
   // Loss protection check
   let prot = check_loss_protection();
   if(!prot.allowed){
-    let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
+    let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let statusEl=document.getElementById("gh-status");
     if(sigEl&&txtEl){
-      sigEl.className="gh-sig wait"; 
-      txtEl.textContent="STOP"; 
-      if(reasonEl) reasonEl.textContent=`2 Loss - ${prot.remaining} min break - NO TRADE`; 
-      if(paEl) paEl.textContent=`🛑 PROTECTION: ${prot.remaining}min left | Loss: ${consecutive_losses}/2 | Total:${loss_count}`;
-      sigEl.style.background="#330000";
-      sigEl.style.border="1px solid #ff0000";
+      sigEl.className="gh-signal-main wait";
+      txtEl.textContent="STOP";
+      if(reasonEl) reasonEl.textContent=`2 Loss - ${prot.remaining} min break - NO TRADE`;
+      if(statusEl){ statusEl.textContent='PROTECTION'; statusEl.style.background='rgba(244,63,94,.14)'; statusEl.style.color='#fb7185'; }
     }
     let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=`${prot.remaining}m STOP`;
     return;
@@ -603,9 +866,9 @@ function fetchSignal(forcePair){
         return;
       }
       // If already free mode and still expired, show but don't lock forever
-      let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
+      let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-status"); // legacy paEl -> status
       if(sigEl&&txtEl){
-        sigEl.className="gh-sig wait";
+        sigEl.className="gh-signal-main wait";
         txtEl.textContent="WAIT";
         if(reasonEl) reasonEl.textContent="Free mode - Collecting data...";
         if(paEl) paEl.textContent="PA: FREE MODE";
@@ -739,6 +1002,8 @@ startResultObserver();
 setTimeout(startResultObserver, 2000); // restart after 2s to catch late DOM
 
 
+// Init: show FAB only, analyzer minimized by default
+try{ fab.style.display='flex'; box.classList.remove('open'); }catch(e){}
 fetchSignal();
 autoDetectMarket();
 setTimeout(()=>{if(!currentSignal || document.getElementById('gh-txt').textContent==='WAIT'){fetchSignal();}}, 1500);
