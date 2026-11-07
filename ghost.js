@@ -2,7 +2,7 @@
 let css=document.createElement("style");
 css.innerHTML=`
 /* ===== GHOST FUTURISTIC HUD - v2 ===== */
-#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:248px;background:linear-gradient(165deg,rgba(10,15,35,.96),rgba(5,8,20,.98));border:1px solid rgba(0,240,255,.45);border-radius:16px;box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 28px rgba(0,240,255,.22),0 0 60px rgba(0,120,255,.18),0 18px 40px #000d;backdrop-filter:blur(14px);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
+#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:188px;background:linear-gradient(165deg,rgba(10,15,35,.96),rgba(5,8,20,.98));border:1px solid rgba(0,240,255,.45);border-radius:12px;box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 28px rgba(0,240,255,.22),0 0 60px rgba(0,120,255,.18),0 18px 40px #000d;backdrop-filter:blur(14px);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
 #ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#00f0ff,#7b2fff,#00ff88,transparent);animation:ghBorderFlow 2.4s linear infinite;background-size:200% 100%}
 #ghost-bot::after{content:'';position:absolute;top:0;left:0;right:0;height:34px;background:linear-gradient(180deg,rgba(0,240,255,.08),transparent);pointer-events:none}
 @keyframes ghBorderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
@@ -17,36 +17,36 @@ css.innerHTML=`
 @keyframes ghGlowRed{0%,100%{box-shadow:0 0 12px rgba(255,45,85,.55),0 0 32px rgba(255,45,85,.30)}50%{box-shadow:0 0 22px rgba(255,45,85,.85),0 0 48px rgba(255,45,85,.45)}}
 @keyframes ghShine{0%{left:-80%}100%{left:120%}}
 @keyframes ghRing{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.25);opacity:0}}
-.gh-h{padding:8px 10px;background:linear-gradient(90deg,rgba(0,240,255,.14),rgba(123,47,255,.12),transparent);border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
+.gh-h{padding:5px 7px;background:linear-gradient(90deg,rgba(0,240,255,.14),rgba(123,47,255,.12),transparent);border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
 .gh-h-left{display:flex;align-items:center;gap:6px}
-.gh-dot{width:7px;height:7px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,.6);animation:ghPulse 1.2s infinite}
-.gh-h b{font-size:9px;color:#fff;letter-spacing:1.2px;font-weight:900}
+.gh-dot{width:6px;height:6px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,.6);animation:ghPulse 1.2s infinite}
+.gh-h b{font-size:7.5px;color:#fff;letter-spacing:1.2px;font-weight:900}
 .gh-h b span{background:linear-gradient(90deg,#00f0ff,#7b2fff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 6px rgba(0,240,255,.6))}
-.gh-live{font-size:6px;background:#ff2d55;color:#fff;padding:2px 5px;border-radius:20px;font-weight:900;letter-spacing:.6px;animation:ghBlink 1s infinite}
-.gh-toggle{font-size:6px;background:rgba(0,240,255,.12);border:1px solid rgba(0,240,255,.5);color:#00f0ff;padding:3px 7px;border-radius:20px;cursor:pointer;font-weight:800;letter-spacing:.4px}
+.gh-live{font-size:5px;background:#ff2d55;color:#fff;padding:2px 5px;border-radius:20px;font-weight:900;letter-spacing:.6px;animation:ghBlink 1s infinite}
+.gh-toggle{font-size:5px;background:rgba(0,240,255,.12);border:1px solid rgba(0,240,255,.5);color:#00f0ff;padding:2px 5px;border-radius:20px;cursor:pointer;font-weight:800;letter-spacing:.4px}
 .gh-toggle.off{background:rgba(255,255,255,.05);border-color:#333;color:#666}
-.gh-pair{font-size:12px;font-weight:900;color:#fff;text-align:center;margin:8px 0 6px;letter-spacing:1.4px;text-shadow:0 0 10px rgba(0,240,255,.8),0 0 22px rgba(0,240,255,.4)}
-.gh-pair small{display:block;font-size:6px;color:#00f0ff;letter-spacing:2px;margin-top:2px;font-weight:700}
-.gh-sig{margin:0 10px;height:72px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:all .25s}
-.gh-sig .gh-arrow{font-size:22px;line-height:1;margin-bottom:1px;filter:drop-shadow(0 0 8px currentColor)}
+.gh-pair{font-size:10px;font-weight:900;color:#fff;text-align:center;margin:5px 0 4px;letter-spacing:1.4px;text-shadow:0 0 10px rgba(0,240,255,.8),0 0 22px rgba(0,240,255,.4)}
+.gh-pair small{display:block;font-size:5px;color:#00f0ff;letter-spacing:2px;margin-top:2px;font-weight:700}
+.gh-sig{margin:0 8px;height:54px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:all .25s}
+.gh-sig .gh-arrow{font-size:16px;line-height:1;margin-bottom:1px;filter:drop-shadow(0 0 8px currentColor)}
 .gh-sig.up .gh-arrow{animation:ghArrowUp .7s ease-in-out infinite}
 .gh-sig.down .gh-arrow{animation:ghArrowDown .7s ease-in-out infinite}
-.gh-sig b{font-size:20px;font-weight:900;letter-spacing:1.5px;line-height:1;text-shadow:0 0 14px currentColor}
-.gh-sig small{font-size:6px;color:#c8d0dc;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;letter-spacing:.2px}
+.gh-sig b{font-size:15px;font-weight:900;letter-spacing:1.5px;line-height:1;text-shadow:0 0 14px currentColor}
+.gh-sig small{font-size:5px;color:#c8d0dc;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;letter-spacing:.2px}
 .gh-sig .gh-scan{position:absolute;left:0;right:0;height:18px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.18),transparent);animation:ghScan 1.6s linear infinite}
 .gh-sig .gh-shine{position:absolute;top:0;width:40px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);animation:ghShine 1.8s ease-in-out infinite}
 .gh-sig.up{background:linear-gradient(145deg,#00ff88,#00b35e,#006e3a);color:#fff;animation:ghGlowGreen 1.1s ease-in-out infinite;border:1px solid rgba(0,255,136,.7)}
 .gh-sig.down{background:linear-gradient(145deg,#ff2d55,#d6002e,#8a0020);color:#fff;animation:ghGlowRed 1.1s ease-in-out infinite;border:1px solid rgba(255,45,85,.7)}
 .gh-sig.wait{background:linear-gradient(145deg,#141a2a,#0a0e1a);color:#5a6f8a;border:1px solid rgba(0,240,255,.18)}
 .gh-sig.wait .gh-arrow{opacity:.35}
-.gh-bar{height:3px;margin:8px 10px 0;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden}
+.gh-bar{height:2.5px;margin:6px 8px 0;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden}
 .gh-bar-fill{height:100%;width:0%;border-radius:10px;background:linear-gradient(90deg,#00f0ff,#00ff88);transition:width .5s linear;box-shadow:0 0 8px #00f0ff}
-.gh-meta{font-size:7.5px;color:#8a9ab5;text-align:center;margin:7px 0 8px;letter-spacing:.4px;font-weight:600;line-height:1.4}
+.gh-meta{font-size:6.5px;color:#8a9ab5;text-align:center;margin:5px 0 6px;letter-spacing:.4px;font-weight:600;line-height:1.4}
 .gh-meta b{color:#00f0ff}
 .gh-meta .gh-conf{color:#00ff88}
-.gh-close{margin:0 10px 10px;height:28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:8px;font-weight:700;cursor:pointer;letter-spacing:.5px}
+.gh-close{margin:0 8px 7px;height:24px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:7px;font-weight:700;cursor:pointer;letter-spacing:.5px}
 .gh-close:hover{background:rgba(255,45,85,.15);color:#fff;border-color:rgba(255,45,85,.4)}
-.gh-corner{position:absolute;width:12px;height:12px;border:1.5px solid rgba(0,240,255,.6)}
+.gh-corner{position:absolute;width:9px;height:9px;border:1.5px solid rgba(0,240,255,.6)}
 .gh-corner.tl{top:6px;left:6px;border-right:none;border-bottom:none}
 .gh-corner.tr{top:6px;right:6px;border-left:none;border-bottom:none}
 .gh-corner.bl{bottom:6px;left:6px;border-right:none;border-top:none}
