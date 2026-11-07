@@ -1,158 +1,190 @@
 (function(){
 let css=document.createElement("style");
 css.innerHTML=`
-/* ===== GHOST AI - FUTURISTIC PRO SIGNAL BOARD - PREMIUM 2026 ===== */
-#ghost-fab{position:fixed;bottom:92px;right:14px;z-index:2147483647;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,rgba(18,22,45,.92),rgba(10,10,24,.96));border:1px solid rgba(168,85,247,.55);box-shadow:0 0 0 1px rgba(0,240,255,.15),0 0 18px rgba(168,85,247,.35),0 0 28px rgba(0,240,255,.18),0 10px 24px rgba(0,0,0,.5);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;user-select:none;touch-action:none;transition:transform .18s ease,box-shadow .18s ease}
-#ghost-fab:active{cursor:grabbing;transform:scale(.96)}
-#ghost-fab:hover{box-shadow:0 0 0 1px rgba(0,240,255,.25),0 0 24px rgba(168,85,247,.5),0 0 36px rgba(0,240,255,.28),0 12px 28px rgba(0,0,0,.55)}
-#ghost-fab .fab-logo{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#a855f7,#6d28d9 55%,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;font-weight:900;box-shadow:0 0 12px rgba(168,85,247,.6);position:relative}
-#ghost-fab .fab-logo::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(168,85,247,.35);animation:fabRing 2s ease-out infinite}
-#ghost-fab .fab-txt{font-size:6px;font-weight:800;letter-spacing:1.4px;color:#c4b5fd;margin-top:3px}
-#ghost-fab .fab-live{position:absolute;top:4px;right:4px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid #0b0b18;box-shadow:0 0 8px #22c55e;animation:fabPulse 1.6s infinite}
-@keyframes fabRing{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.25);opacity:0}}
-@keyframes fabPulse{0%,100%{opacity:1}50%{opacity:.45}}
-@keyframes fabFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+/* ===== GHOST AI - COMPACT FUTURISTIC SIGNAL ANALYZER - NO EMOJI, PURE CSS ===== */
+#ghost-fab{position:fixed;bottom:88px;right:12px;z-index:2147483647;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,rgba(20,24,48,.94),rgba(8,10,22,.97));border:1px solid rgba(168,85,247,.55);box-shadow:0 0 0 1px rgba(0,240,255,.18),0 0 16px rgba(168,85,247,.35),0 0 26px rgba(0,240,255,.18),0 10px 22px rgba(0,0,0,.5);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;touch-action:none;transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s,opacity .22s}
+#ghost-fab:hover{box-shadow:0 0 0 1px rgba(0,240,255,.28),0 0 22px rgba(168,85,247,.5),0 0 34px rgba(0,240,255,.28),0 12px 26px rgba(0,0,0,.55)}
+#ghost-fab:active{transform:scale(.96)}
+#ghost-fab .fab-live-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#22c55e;border-radius:50%;border:2px solid #0b0b18;box-shadow:0 0 7px #22c55e;animation:fabPulse 1.6s infinite;z-index:2}
+@keyframes fabPulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fabFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
 #ghost-fab{animation:fabFloat 3s ease-in-out infinite}
-
-#ghost-bot{position:fixed;bottom:92px;right:14px;left:auto;transform:translateX(0);z-index:2147483646;width:320px;max-width:calc(100vw - 24px);max-height:calc(100vh - 120px);overflow-y:auto;overflow-x:hidden;background:linear-gradient(168deg,rgba(16,18,36,.97),rgba(8,9,20,.98));border:1px solid rgba(168,85,247,.35);border-radius:20px;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 32px rgba(168,85,247,.22),0 0 60px rgba(0,240,255,.10),0 24px 48px rgba(0,0,0,.55);backdrop-filter:blur(18px);font-family:Inter,'Segoe UI',system-ui,sans-serif;color:#eef2ff;user-select:none;opacity:0;pointer-events:none;transform:translateY(12px) scale(.96);transition:opacity .28s ease,transform .28s cubic-bezier(.16,1,.3,1)}
+.fab-candles{display:flex;align-items:flex-end;gap:4px;height:30px}
+.candle{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:28px;width:7px}
+.candle .wick{width:1.2px;background:currentColor;opacity:.9;border-radius:2px}
+.candle .body{width:7px;border-radius:1.5px;box-shadow:0 0 6px currentColor}
+.candle.green{color:#22c55e}
+.candle.red{color:#f43f5e}
+.candle.green .body{background:linear-gradient(180deg,#4ade80,#16a34a);height:14px}
+.candle.red .body{background:linear-gradient(180deg,#fb7185,#be123c);height:11px}
+.candle .wick.top{height:5px}
+.candle .wick.bottom{height:4px}
+.candle.green .body{animation:candlePulseG 1.8s ease-in-out infinite}
+.candle.red .body{animation:candlePulseR 1.8s ease-in-out infinite .3s}
+@keyframes candlePulseG{0%,100%{transform:scaleY(1);filter:brightness(1)}50%{transform:scaleY(1.12);filter:brightness(1.25)}}
+@keyframes candlePulseR{0%,100%{transform:scaleY(1);filter:brightness(1)}50%{transform:scaleY(1.1);filter:brightness(1.2)}}
+@keyframes candleMove{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+.fab-candles .candle{animation:candleMove 2.2s ease-in-out infinite}
+.fab-candles .candle:nth-child(2){animation-delay:.25s}
+.fab-candles .candle:nth-child(3){animation-delay:.5s}
+#ghost-bot{position:fixed;bottom:88px;right:12px;z-index:2147483646;width:290px;max-width:calc(100vw - 24px);background:linear-gradient(168deg,rgba(15,17,34,.97),rgba(7,8,18,.98));border:1px solid rgba(168,85,247,.35);border-radius:18px;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 28px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.10),0 22px 44px rgba(0,0,0,.55);backdrop-filter:blur(18px);font-family:Inter,'Segoe UI',system-ui,sans-serif;color:#eef2ff;user-select:none;overflow:hidden;opacity:0;pointer-events:none;transform-origin:bottom right;transform:translateY(10px) scale(.82);transition:opacity .28s ease,transform .32s cubic-bezier(.16,1,.3,1)}
 #ghost-bot.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
 #ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a855f7,#22d3ee,transparent);opacity:.9}
-.gh-h{padding:12px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;cursor:move;border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;background:rgba(10,12,28,.85);backdrop-filter:blur(12px);z-index:2}
-.gh-h-left{display:flex;align-items:center;gap:9px}
-.gh-logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#a855f7,#6d28d9 55%,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 0 14px rgba(168,85,247,.45);flex-shrink:0}
-.gh-title b{font-size:11px;letter-spacing:.9px;line-height:1;display:block;color:#fff}
+.gh-h{padding:11px 12px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:move;border-bottom:1px solid rgba(255,255,255,.07)}
+.gh-h-left{display:flex;align-items:center;gap:8px}
+.gh-logo-mini{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#a855f7,#6d28d9 55%,#0ea5e9);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(168,85,247,.4)}
+.gh-logo-mini .mini-candles{display:flex;align-items:flex-end;gap:2.5px;height:16px}
+.gh-logo-mini .mini-candles .candle{height:15px;width:4px}
+.gh-logo-mini .mini-candles .candle .body{width:4px}
+.gh-logo-mini .mini-candles .candle.green .body{height:8px}
+.gh-logo-mini .mini-candles .candle.red .body{height:6px}
+.gh-logo-mini .mini-candles .candle .wick.top{height:3px}
+.gh-logo-mini .mini-candles .candle .wick.bottom{height:2px}
+.gh-title b{font-size:10px;letter-spacing:.9px;line-height:1;display:block;color:#fff}
 .gh-title b span{color:#a78bfa}
-.gh-title small{font-size:7px;letter-spacing:1.2px;color:#94a3b8;font-weight:700;display:block;margin-top:3px}
+.gh-title small{font-size:6.5px;letter-spacing:1.1px;color:#94a3b8;font-weight:700;display:block;margin-top:2px}
 .gh-live-badge{font-size:6px;font-weight:800;letter-spacing:.6px;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.35);color:#4ade80;padding:3px 6px;border-radius:20px;display:flex;align-items:center;gap:4px}
 .gh-live-badge i{width:5px;height:5px;background:#22c55e;border-radius:50%;display:block;box-shadow:0 0 6px #22c55e;animation:fabPulse 1.4s infinite}
 .gh-h-actions{display:flex;gap:5px;flex-shrink:0}
-.gh-icon-btn{width:28px;height:28px;border-radius:9px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#cbd5e1;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:all .15s}
+.gh-icon-btn{width:26px;height:26px;border-radius:8px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#cbd5e1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;position:relative}
 .gh-icon-btn:hover{background:rgba(255,255,255,.10);color:#fff}
-.gh-icon-btn.primary{background:linear-gradient(135deg,#7c3aed,#06b6d4);border-color:transparent;color:#fff}
-.gh-pair-wrap{padding:12px 14px 0;display:flex;align-items:center;justify-content:space-between}
-.gh-pair{font-size:13px;font-weight:900;letter-spacing:.8px;color:#fff}
-.gh-pair small{display:block;font-size:6.5px;letter-spacing:1.2px;color:#67e8f9;font-weight:700;margin-top:2px}
+.gh-icon-btn .icon-line{position:absolute;background:currentColor;border-radius:2px}
+.gh-icon-btn .icon-line.h{width:10px;height:1.6px}
+.gh-icon-btn .icon-x1,.gh-icon-btn .icon-x2{width:10px;height:1.6px;background:currentColor;position:absolute;border-radius:2px}
+.gh-icon-btn .icon-x1{transform:rotate(45deg)}
+.gh-icon-btn .icon-x2{transform:rotate(-45deg)}
+.gh-icon-btn .icon-refresh{width:12px;height:12px;border:1.8px solid currentColor;border-radius:50%;border-top-color:transparent;position:relative}
+.gh-icon-btn .icon-refresh::after{content:'';position:absolute;top:-2px;right:-1px;width:0;height:0;border-left:4px solid transparent;border-right:1px solid transparent;border-bottom:5px solid currentColor;transform:rotate(40deg)}
+.gh-pair-wrap{padding:10px 12px 0;display:flex;align-items:center;justify-content:space-between}
+.gh-pair{font-size:12px;font-weight:900;letter-spacing:.7px;color:#fff}
+.gh-pair small{display:block;font-size:6px;letter-spacing:1.1px;color:#67e8f9;font-weight:700;margin-top:2px}
 .gh-time{font-size:6.5px;color:#94a3b8;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);padding:4px 7px;border-radius:20px}
-.gh-analysis{margin:12px 14px 0;padding:10px 11px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);display:none}
+.gh-candle-viz{margin:10px 12px 0;padding:10px 12px 9px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;gap:10px;height:62px}
+.gh-candle-viz .candle{height:44px;width:11px}
+.gh-candle-viz .candle .body{width:11px;border-radius:2px}
+.gh-candle-viz .candle.green .body{height:22px}
+.gh-candle-viz .candle.red .body{height:18px}
+.gh-candle-viz .candle .wick.top{height:9px}
+.gh-candle-viz .candle .wick.bottom{height:7px}
+.gh-candle-viz .scan{position:absolute;top:0;bottom:0;width:42px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.22),transparent);animation:scanMove 1.1s linear infinite;pointer-events:none}
+@keyframes scanMove{0%{left:-20%}100%{left:110%}}
+.gh-candle-viz .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:14px 14px;pointer-events:none}
+.gh-analysis{margin:10px 12px 0;display:none}
 .gh-analysis.active{display:block}
-.gh-analysis-title{font-size:7px;letter-spacing:1.2px;color:#a78bfa;font-weight:800;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.gh-analysis-title span:last-child{color:#e2e8f0}
-.gh-step{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:7.5px;color:#94a3b8;transition:all .2s}
-.gh-step .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;background:rgba(255,255,255,.03)}
-.gh-step.done{color:#e2e8f0}
-.gh-step.done .dot{background:#22c55e;border-color:#22c55e;color:#fff}
-.gh-step.active{color:#fff}
-.gh-step.active .dot{border-color:#a855f7;background:rgba(168,85,247,.22);box-shadow:0 0 10px rgba(168,85,247,.45);animation:fabPulse 1s infinite}
-.gh-step .bar{flex:1;height:2px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-left:22px;margin-top:-2px}
-.gh-progress{height:3px;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden;margin-top:8px}
-.gh-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#a855f7,#22d3ee);border-radius:10px;transition:width .35s ease;box-shadow:0 0 10px rgba(168,85,247,.5)}
-.gh-scan-line{height:1px;background:linear-gradient(90deg,transparent,#22d3ee,transparent);margin:10px 0 0;position:relative;overflow:hidden}
-.gh-scan-line::after{content:'';position:absolute;top:0;left:-30%;width:30%;height:100%;background:linear-gradient(90deg,transparent,#fff,transparent);animation:scanMove 1.2s linear infinite}
-@keyframes scanMove{0%{left:-30%}100%{left:110%}}
-.gh-result{margin:12px 14px 0;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01))}
-.gh-result-head{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)}
-.gh-result-head span{font-size:7px;letter-spacing:1.2px;color:#94a3b8;font-weight:800}
-.gh-result-head b{font-size:6.5px;padding:3px 7px;border-radius:20px;background:rgba(34,197,94,.14);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
-.gh-signal-main{padding:14px 12px 10px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden}
-.gh-signal-main::after{content:'';position:absolute;inset:0;background:radial-gradient(300px 80px at 20% 0%,rgba(168,85,247,.12),transparent 70%);pointer-events:none}
-.gh-signal-main.call{background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(34,197,94,.03))}
-.gh-signal-main.put{background:linear-gradient(135deg,rgba(244,63,94,.13),rgba(244,63,94,.03))}
+.gh-analysis-title{font-size:6.5px;letter-spacing:1.1px;color:#a78bfa;font-weight:800;display:flex;justify-content:space-between;margin-bottom:6px}
+.gh-progress{height:3px;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden}
+.gh-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#a855f7,#22d3ee);border-radius:10px;transition:width .3s ease}
+.gh-status{font-size:7px;color:#94a3b8;text-align:center;margin-top:6px;letter-spacing:.3px}
+.gh-result{margin:10px 12px 0;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01))}
+.gh-result-head{padding:8px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)}
+.gh-result-head span{font-size:6.5px;letter-spacing:1.1px;color:#94a3b8;font-weight:800}
+.gh-result-head b{font-size:6px;padding:3px 6px;border-radius:20px;background:rgba(34,197,94,.14);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+.gh-signal-main{padding:10px 10px 8px;display:flex;align-items:center;gap:10px;position:relative}
+.gh-signal-main.call{background:linear-gradient(135deg,rgba(34,197,94,.11),rgba(34,197,94,.02))}
+.gh-signal-main.put{background:linear-gradient(135deg,rgba(244,63,94,.12),rgba(244,63,94,.02))}
 .gh-signal-main.wait{background:rgba(255,255,255,.02)}
-.gh-arrow-circle{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0;position:relative;z-index:1}
-.gh-signal-main.call .gh-arrow-circle{background:linear-gradient(135deg,#22c55e,#15803d);box-shadow:0 0 18px rgba(34,197,94,.45);animation:arrowUp .8s ease-in-out infinite}
-.gh-signal-main.put .gh-arrow-circle{background:linear-gradient(135deg,#f43f5e,#be123c);box-shadow:0 0 18px rgba(244,63,94,.45);animation:arrowDown .8s ease-in-out infinite}
-.gh-signal-main.wait .gh-arrow-circle{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#94a3b8}
-@keyframes arrowUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@keyframes arrowDown{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
-.gh-signal-txt{position:relative;z-index:1}
-.gh-signal-txt small{font-size:7px;letter-spacing:1.4px;color:#94a3b8;font-weight:700;display:block}
-.gh-signal-txt b{font-size:22px;font-weight:900;letter-spacing:.6px;line-height:1.1;display:block;margin-top:2px}
-.gh-signal-main.call .gh-signal-txt b{color:#4ade80;text-shadow:0 0 14px rgba(34,197,94,.5)}
-.gh-signal-main.put .gh-signal-txt b{color:#fb7185;text-shadow:0 0 14px rgba(244,63,94,.5)}
+.gh-arrow-circle{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.gh-arrow-circle .arrow{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent}
+.gh-arrow-circle.up .arrow{border-bottom:14px solid #fff;animation:arrowUp .8s ease-in-out infinite}
+.gh-arrow-circle.down .arrow{border-top:14px solid #fff;animation:arrowDown .8s ease-in-out infinite}
+.gh-arrow-circle.wait .dot{width:10px;height:10px;border-radius:50%;background:#94a3b8}
+@keyframes arrowUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes arrowDown{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.gh-signal-main.call .gh-arrow-circle{background:linear-gradient(135deg,#22c55e,#15803d);box-shadow:0 0 14px rgba(34,197,94,.45)}
+.gh-signal-main.put .gh-arrow-circle{background:linear-gradient(135deg,#f43f5e,#be123c);box-shadow:0 0 14px rgba(244,63,94,.45)}
+.gh-signal-main.wait .gh-arrow-circle{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.gh-signal-txt small{font-size:6.5px;letter-spacing:1.3px;color:#94a3b8;font-weight:700;display:block}
+.gh-signal-txt b{font-size:19px;font-weight:900;letter-spacing:.5px;line-height:1.1;display:block;margin-top:1px}
+.gh-signal-main.call .gh-signal-txt b{color:#4ade80}
+.gh-signal-main.put .gh-signal-txt b{color:#fb7185}
+.gh-signal-txt p{font-size:6.5px;color:#94a3b8;margin:3px 0 0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
 .gh-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.06)}
-.gh-stat{background:rgba(10,12,28,.9);padding:10px 12px}
-.gh-stat label{font-size:6.5px;letter-spacing:1px;color:#94a3b8;font-weight:700;display:block}
-.gh-stat b{font-size:11px;color:#fff;display:block;margin-top:3px}
+.gh-stat{background:rgba(10,12,28,.92);padding:8px 10px}
+.gh-stat label{font-size:6px;letter-spacing:.9px;color:#94a3b8;font-weight:700;display:block}
+.gh-stat b{font-size:10px;color:#fff;display:block;margin-top:2px}
 .gh-stat b.green{color:#4ade80}
 .gh-stat b.red{color:#fb7185}
 .gh-stat b.cyan{color:#67e8f9}
-.gh-key{margin:12px 14px 0;padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
-.gh-key-title{font-size:7px;letter-spacing:1.2px;color:#a78bfa;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.gh-key-item{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:7.8px;line-height:1.4;color:#cbd5e1}
-.gh-key-item .tick{width:16px;height:16px;border-radius:50%;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.3);color:#4ade80;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:0px}
-.gh-key-item.warn .tick{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3);color:#fbbf24}
-.gh-controls{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
-.gh-btn-row{display:flex;gap:8px}
-.gh-btn{flex:1;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#e2e8f0;font-size:8px;font-weight:700;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.gh-key{margin:10px 12px 0;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.gh-key-title{font-size:6.5px;letter-spacing:1.1px;color:#a78bfa;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.gh-key-title .key-dot{width:6px;height:6px;background:#a855f7;border-radius:50%;box-shadow:0 0 6px #a855f7}
+.gh-key-item{display:flex;gap:7px;align-items:flex-start;padding:3.5px 0;font-size:7.2px;line-height:1.35;color:#cbd5e1}
+.gh-key-item .tick{width:14px;height:14px;border-radius:50%;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.3);color:#4ade80;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0}
+.gh-key-item .tick::after{content:'';width:6px;height:3px;border-left:1.6px solid #4ade80;border-bottom:1.6px solid #4ade80;transform:rotate(-45deg) translateY(-1px);display:block}
+.gh-key-item.warn .tick{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3)}
+.gh-key-item.warn .tick::after{border-color:#fbbf24}
+.gh-controls{padding:10px 12px 12px;display:flex;flex-direction:column;gap:7px}
+.gh-btn-row{display:flex;gap:7px}
+.gh-btn{flex:1;height:32px;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#e2e8f0;font-size:7.5px;font-weight:700;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
 .gh-btn:hover{background:rgba(255,255,255,.09)}
-.gh-btn.primary{background:linear-gradient(135deg,#7c3aed,#06b6d4);border-color:transparent;color:#fff;box-shadow:0 6px 18px rgba(124,58,237,.30)}
-.gh-btn.primary:hover{filter:brightness(1.08)}
+.gh-btn.primary{background:linear-gradient(135deg,#7c3aed,#06b6d4);border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(124,58,237,.28)}
 .gh-btn.copy{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.30);color:#ddd6fe}
-.gh-meta{padding:0 14px 12px;text-align:center;font-size:6.5px;color:#64748b;letter-spacing:.4px;line-height:1.5}
+.gh-btn .btn-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.gh-meta{padding:0 12px 10px;text-align:center;font-size:6px;color:#64748b;letter-spacing:.3px;line-height:1.5}
 .gh-meta b{color:#a78bfa}
 @media(max-width:360px){#ghost-bot{width:calc(100vw - 20px);right:10px;bottom:78px}#ghost-fab{bottom:78px;right:10px}}
 `;
-document.head.appendChild(css);
 let fab=document.createElement("div");fab.id="ghost-fab";
-fab.innerHTML=`<div class="fab-live"></div><div class="fab-logo">👻</div><div class="fab-txt">GHOST AI</div>`;
+fab.innerHTML=`<div class="fab-live-dot"></div><div class="fab-candles"><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle red"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div></div>`;
 document.body.appendChild(fab);
 let old=document.getElementById("ghost-bot");if(old) old.remove();
 let box=document.createElement("div");box.id="ghost-bot";
 box.innerHTML=`
 <div class="gh-h" id="gh-h">
   <div class="gh-h-left">
-    <div class="gh-logo">👻</div>
-    <div class="gh-title"><b>GHOST <span>AI</span></b><small>SIGNAL ANALYZER PRO</small></div>
+    <div class="gh-logo-mini"><div class="mini-candles"><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle red"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div></div></div>
+    <div class="gh-title"><b>GHOST <span>AI</span></b><small>SIGNAL ANALYZER</small></div>
     <div class="gh-live-badge"><i></i> LIVE</div>
   </div>
   <div class="gh-h-actions">
-    <button class="gh-icon-btn" id="gh-refresh" title="Refresh">↻</button>
-    <button class="gh-icon-btn" id="gh-min" title="Minimize">—</button>
-    <button class="gh-icon-btn" id="gh-close" title="Close">✕</button>
+    <button class="gh-icon-btn" id="gh-refresh" title="Refresh"><span class="icon-refresh"></span></button>
+    <button class="gh-icon-btn" id="gh-min" title="Minimize"><span class="icon-line h"></span></button>
+    <button class="gh-icon-btn" id="gh-close" title="Close"><span class="icon-x1"></span><span class="icon-x2"></span></button>
   </div>
 </div>
 <div class="gh-pair-wrap">
   <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST QUANTUM X • AI SCAN</small></div>
   <div class="gh-time" id="gh-time">1M • <span id="gh-sec">--s</span></div>
 </div>
+<div class="gh-candle-viz" id="gh-candle-viz"><div class="grid"></div><div class="scan"></div><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle red"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div></div>
 <div class="gh-analysis" id="gh-analysis">
   <div class="gh-analysis-title"><span>ANALYZING CHART</span><span id="gh-analyze-pct">0%</span></div>
-  <div id="gh-steps"></div>
   <div class="gh-progress"><div class="gh-progress-fill" id="gh-progress"></div></div>
-  <div class="gh-scan-line"></div>
+  <div class="gh-status" id="gh-analyze-status">Scanning chart...</div>
 </div>
 <div class="gh-result" id="gh-result">
   <div class="gh-result-head"><span>ANALYSIS RESULT</span><b id="gh-status">READY</b></div>
   <div class="gh-signal-main wait" id="gh-sig">
-    <div class="gh-arrow-circle" id="gh-arrow">◉</div>
-    <div class="gh-signal-txt"><small>SIGNAL</small><b id="gh-txt">WAIT</b><small id="gh-reason" style="font-size:7px;color:#94a3b8;letter-spacing:.1px;margin-top:3px;text-transform:none">QUANTUM X Analyzing...</small></div>
+    <div class="gh-arrow-circle wait" id="gh-arrow"><span class="dot"></span></div>
+    <div class="gh-signal-txt"><small>SIGNAL</small><b id="gh-txt">WAIT</b><p id="gh-reason">Quantum X Analyzing...</p></div>
   </div>
   <div class="gh-stats">
     <div class="gh-stat"><label>CONFIDENCE</label><b class="green" id="gh-conf">--%</b></div>
     <div class="gh-stat"><label>TIMEFRAME</label><b>1M</b></div>
-    <div class="gh-stat"><label>SUGGESTED EXPIRY</label><b class="cyan">1–2 MIN</b></div>
-    <div class="gh-stat"><label>TREND</label><b id="gh-trend">—</b></div>
-    <div class="gh-stat"><label>MARKET CONDITION</label><b id="gh-condition">—</b></div>
-    <div class="gh-stat"><label>SIGNAL STRENGTH</label><b id="gh-strength">—</b></div>
+    <div class="gh-stat"><label>SUGGESTED EXPIRY</label><b class="cyan">1-2 MIN</b></div>
+    <div class="gh-stat"><label>TREND</label><b id="gh-trend">--</b></div>
+    <div class="gh-stat"><label>MARKET CONDITION</label><b id="gh-condition">--</b></div>
+    <div class="gh-stat"><label>SIGNAL STRENGTH</label><b id="gh-strength">--</b></div>
   </div>
 </div>
 <div class="gh-key" id="gh-key">
-  <div class="gh-key-title">✦ KEY ANALYSIS</div>
+  <div class="gh-key-title"><span class="key-dot"></span> KEY ANALYSIS</div>
   <div id="gh-key-list"></div>
 </div>
 <div class="gh-controls">
   <div class="gh-btn-row">
-    <button class="gh-btn primary" id="gh-analyze-again">↻ Analyze Again</button>
-    <button class="gh-btn copy" id="gh-copy">📋 Copy Signal</button>
+    <button class="gh-btn primary" id="gh-analyze-again"><span class="icon-refresh" style="width:10px;height:10px;border-width:1.6px"></span> Analyze Again</button>
+    <button class="gh-btn copy" id="gh-copy"><span class="btn-dot"></span> Copy Signal</button>
   </div>
   <div class="gh-btn-row">
-    <button class="gh-btn" id="gh-min2">⬇ Minimize</button>
-    <button class="gh-btn" id="gh-close2">✕ Close</button>
+    <button class="gh-btn" id="gh-min2"><span class="icon-line h"></span> Minimize</button>
+    <button class="gh-btn" id="gh-close2"><span class="icon-x1" style="width:8px"></span><span class="icon-x2" style="width:8px"></span> Close</button>
   </div>
 </div>
 <div class="gh-meta" id="gh-meta"><b>GHOST AI</b> • Backend analysis connected • No fabricated signals • 1% risk</div>
 `;
 document.body.appendChild(box);
+
 
 
 let paEnabled=true;
@@ -204,7 +236,7 @@ if(btnCopy) btnCopy.addEventListener('click', (e)=>{
   e.stopPropagation();
   try{
     let txt = currentResult ? `GHOST AI Signal: ${currentResult.signal} ${currentResult.pair||currentPair} | Conf: ${currentResult.confidence}% | TF: 1M | Expiry: 1-2 MIN | Trend: ${currentResult.trend||'—'}` : `GHOST AI: ${currentPair} - Analyzing...`;
-    navigator.clipboard.writeText(txt).then(()=>{ btnCopy.textContent='✓ Copied!'; setTimeout(()=>btnCopy.textContent='📋 Copy Signal',1200); });
+    navigator.clipboard.writeText(txt).then(()=>{ btnCopy.textContent='Copied!'; setTimeout(()=>btnCopy.textContent='Copy Signal',1200); });
   }catch(err){}
 });
 
@@ -242,46 +274,31 @@ function startAnalysisAnimation(forceFetch){
   if(isAnalyzing) return;
   isAnalyzing=true;
   let analysisEl=document.getElementById('gh-analysis');
-  let stepsEl=document.getElementById('gh-steps');
   let progressEl=document.getElementById('gh-progress');
   let pctEl=document.getElementById('gh-analyze-pct');
-  if(!analysisEl || !stepsEl) { isAnalyzing=false; if(forceFetch) fetchSignal(); return; }
+  let statusEl=document.getElementById('gh-analyze-status');
+  if(!analysisEl){ isAnalyzing=false; if(forceFetch) fetchSignal(); return; }
   analysisEl.classList.add('active');
-  stepsEl.innerHTML='';
-  ANALYSIS_STEPS.forEach((s,i)=>{
-    let d=document.createElement('div'); d.className='gh-step'; d.id='gh-step-'+i;
-    d.innerHTML=`<div class="dot">${i+1}</div><div>${s}</div>`;
-    stepsEl.appendChild(d);
-  });
+  let steps = ANALYSIS_STEPS || ["Scanning chart","Detecting candlestick structure","Checking trend","Checking support / resistance","Checking momentum","Calculating confidence","Preparing result"];
   let idx=0;
-  let total=ANALYSIS_STEPS.length;
+  let total=steps.length;
   let timer=setInterval(()=>{
     if(idx < total){
-      // Mark previous done
-      if(idx>0){
-        let prev=document.getElementById('gh-step-'+(idx-1));
-        if(prev){ prev.classList.remove('active'); prev.classList.add('done'); prev.querySelector('.dot').textContent='✓'; }
-      }
-      let cur=document.getElementById('gh-step-'+idx);
-      if(cur) cur.classList.add('active');
+      let curStep = steps[idx];
+      if(statusEl) statusEl.textContent = curStep + '...';
       let pct=Math.round(((idx+1)/total)*100);
       if(progressEl) progressEl.style.width=pct+'%';
       if(pctEl) pctEl.textContent=pct+'%';
       idx++;
     } else {
       clearInterval(timer);
-      let last=document.getElementById('gh-step-'+(total-1));
-      if(last){ last.classList.remove('active'); last.classList.add('done'); last.querySelector('.dot').textContent='✓'; }
       if(progressEl) progressEl.style.width='100%';
       if(pctEl) pctEl.textContent='100%';
+      if(statusEl) statusEl.textContent='Analysis complete';
       setTimeout(()=>{ analysisEl.classList.remove('active'); isAnalyzing=false; }, 450);
       if(forceFetch) fetchSignal();
     }
-  }, 210);
-  // If not forceFetch, still fetch after animation will happen via caller
-  if(!forceFetch){
-    // Animation will complete, fetch is handled by fetchSignal loop separately
-  }
+  }, 160);
 }
 
 
@@ -317,20 +334,20 @@ function register_loss(){
   localStorage.setItem('ghost_loss_count', loss_count.toString());
   localStorage.setItem('ghost_consecutive_losses', consecutive_losses.toString());
   localStorage.setItem('ghost_last_loss_time', last_loss_time.toISOString());
-  console.log(`❌ LOSS registered: ${consecutive_losses}/2 consecutive, total ${loss_count}`);
+  console.log(` LOSS registered: ${consecutive_losses}/2 consecutive, total ${loss_count}`);
   // Vibrate if mobile
   try{ if(navigator.vibrate) navigator.vibrate([100,50,100]); }catch(e){}
   // Show toast
-  showProtectionToast(`❌ LOSS ${consecutive_losses}/2`, consecutive_losses >=2 ? '30 min STOP!' : 'Continue');
+  showProtectionToast(`LOSS ${consecutive_losses}/2`, consecutive_losses >=2 ? '30 min STOP!' : 'Continue');
 }
 
 function register_win(){
-  console.log(`✅ WIN registered - resetting consecutive losses`);
+  console.log(` WIN registered - resetting consecutive losses`);
   if(consecutive_losses>0){
     consecutive_losses = 0;
     localStorage.setItem('ghost_consecutive_losses','0');
   }
-  showProtectionToast(`✅ WIN - Losses reset`, '0/2');
+  showProtectionToast(`WIN - Losses reset`, '0/2');
 }
 
 function showProtectionToast(title, subtitle){
@@ -472,7 +489,7 @@ function startResultObserver(){
       }
     });
     resultObserver.observe(document.body, {childList:true, subtree:true});
-    console.log('✅ Result observer started');
+    console.log(' Result observer started');
   }catch(e){console.log('observer fail',e);}
 }
 
@@ -490,8 +507,8 @@ window.resetLossProtection = ()=>{
   localStorage.removeItem('ghost_last_loss_time');
   localStorage.removeItem('ghost_last_result_full');
   localStorage.removeItem('ghost_last_result_simple');
-  console.log('✅ Protection reset');
-  showProtectionToast('🔄 Reset', '0/2 losses');
+  console.log(' Protection reset');
+  showProtectionToast(' Reset', '0/2 losses');
 };
 window.getLossStatus = ()=>{ return {consecutive: consecutive_losses, total: loss_count, last: last_loss_time, protection: check_loss_protection()}; };
 
@@ -760,8 +777,8 @@ function updateUI(j){
 
     if(dir==="CALL"||dir==="UP"){
       sigEl.className="gh-signal-main call";
-      txtEl.textContent="CALL ↑";
-      if(arrowEl) arrowEl.textContent="↑";
+      txtEl.textContent="CALL";
+      if(arrowEl) arrowEl.className="gh-arrow-circle up"; arrowEl.innerHTML='<span class="arrow"></span>';
       if(statusEl){ statusEl.textContent='CALL • ACTIVE'; statusEl.style.background='rgba(34,197,94,.14)'; statusEl.style.color='#4ade80'; statusEl.style.borderColor='rgba(34,197,94,.25)'; }
       if(!isSameLocked || !reasonEl.textContent) reasonEl.textContent=j.reason||j.price_action_type||"";
       if(trendEl) trendEl.textContent='BULLISH';
@@ -769,8 +786,8 @@ function updateUI(j){
     }
     else if(dir==="PUT"||dir==="DOWN"){
       sigEl.className="gh-signal-main put";
-      txtEl.textContent="PUT ↓";
-      if(arrowEl) arrowEl.textContent="↓";
+      txtEl.textContent="PUT";
+      if(arrowEl) arrowEl.className="gh-arrow-circle down"; arrowEl.innerHTML='<span class="arrow"></span>';
       if(statusEl){ statusEl.textContent='PUT • ACTIVE'; statusEl.style.background='rgba(244,63,94,.14)'; statusEl.style.color='#fb7185'; statusEl.style.borderColor='rgba(244,63,94,.25)'; }
       if(!isSameLocked || !reasonEl.textContent) reasonEl.textContent=j.reason||j.price_action_type||"";
       if(trendEl) trendEl.textContent='BEARISH';
@@ -779,7 +796,7 @@ function updateUI(j){
     else{
       sigEl.className="gh-signal-main wait";
       txtEl.textContent="WAIT";
-      if(arrowEl) arrowEl.textContent="◉";
+      if(arrowEl) arrowEl.className="gh-arrow-circle wait"; arrowEl.innerHTML='<span class="dot"></span>';
       reasonEl.textContent=j.reason||"Analyzing...";
       if(statusEl){ statusEl.textContent='WAITING'; statusEl.style.background='rgba(255,255,255,.06)'; statusEl.style.color='#94a3b8'; statusEl.style.borderColor='rgba(255,255,255,.12)'; }
       if(trendEl) trendEl.textContent='—';
@@ -806,7 +823,7 @@ function updateUI(j){
       }
       // Deduplicate
       let seen={}; items=items.filter(it=>{ if(seen[it.txt]) return false; seen[it.txt]=true; return true; });
-      keyList.innerHTML = items.map(it=>`<div class="gh-key-item ${it.ok?'':'warn'}"><div class="tick">${it.ok?'✓':'•'}</div><div>${it.txt}</div></div>`).join('');
+      keyList.innerHTML = items.map(it=>`<div class="gh-key-item ${it.ok?'':'warn'}"><div class="tick"></div><div>${it.txt}</div></div>`).join('');
     }
   }
   // Auto-expand on first real signal if minimized? Keep minimized until user clicks
