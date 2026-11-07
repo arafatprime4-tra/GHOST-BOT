@@ -18,7 +18,7 @@
   let style = document.createElement('style');
   style.textContent = `
     *{box-sizing:border-box;margin:0;padding:0}
-    .fab:active{cursor:grabbing} .fab{position:fixed;bottom:88px;right:12px;width:54px;height:54px;cursor:grab;touch-action:none;will-change:transform;transition:box-shadow .2s;}border-radius:50%;background:linear-gradient(135deg,#141830,#080a16);border:1px solid rgba(168,85,247,.6);box-shadow:0 0 16px rgba(168,85,247,.35),0 0 26px rgba(0,240,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;z-index:10}
+    .fab:active{cursor:grabbing} .fab{position:fixed;top:32%;right:10px;bottom:auto;width:54px;height:54px;cursor:grab;pointer-events:auto !important;touch-action:none;z-index:9999;touch-action:none;will-change:transform;transition:box-shadow .2s;}border-radius:50%;background:linear-gradient(135deg,#141830,#080a16);border:1px solid rgba(168,85,247,.6);box-shadow:0 0 16px rgba(168,85,247,.35),0 0 26px rgba(0,240,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;z-index:10}
     .fab-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#22c55e;border-radius:50%;border:2px solid #0b0b18;box-shadow:0 0 7px #22c55e;animation:pulse 1.6s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
     .candles{display:flex;align-items:flex-end;gap:4px;height:30px}
@@ -33,7 +33,7 @@
     .candle .wick.bottom{height:4px}
     @keyframes pg{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.12)}}
     @keyframes pr{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.1)}}
-    .panel{position:fixed;bottom:68px;right:8px;width:238px;max-width:calc(100vw - 16px);background:linear-gradient(168deg,#0f1122,#070812);border:1px solid rgba(168,85,247,.35);border-radius:18px;box-shadow:0 0 28px rgba(168,85,247,.22),0 22px 44px rgba(0,0,0,.55);color:#eef2ff;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none}
+    .panel{position:fixed;top:32%;right:8px;bottom:auto;width:238px;max-width:calc(100vw - 16px);background:linear-gradient(168deg,#0f1122,#070812);border:1px solid rgba(168,85,247,.35);border-radius:18px;box-shadow:0 0 28px rgba(168,85,247,.22),0 22px 44px rgba(0,0,0,.55);color:#eef2ff;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none}
     .panel.open{display:block;animation:panelIn .32s cubic-bezier(.16,1,.3,1)}
     @keyframes panelIn{from{opacity:0;transform:translateY(10px) scale(.88)}to{opacity:1;transform:translateY(0) scale(1)}}
     .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a855f7,#22d3ee,transparent);animation:borderFlow 2.4s linear infinite;background-size:200% 100%}
@@ -124,7 +124,7 @@
     .btn.copy{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.30);color:#ddd6fe}
     .meta{padding:0 10px 10px;text-align:center;font-size:6px;color:#64748b;letter-spacing:.3px}
     .meta b{color:#a78bfa}
-    @media(max-width:360px){.panel{width:calc(100vw - 16px);right:8px;bottom:72px}.fab{bottom:78px;right:10px}}
+    @media(max-width:360px){.panel{width:calc(100vw - 16px);right:8px;top:28%;bottom:auto}.fab{top:30%;right:8px;bottom:auto}}
   `;
   shadow.appendChild(style);
 
@@ -183,98 +183,84 @@
   const API = 'https://giogram-backend.onrender.com/api/signal';
 
   function expand(){ panel.classList.add('open'); fab.style.display='none'; }
-  // ===== DRAG - Mini FAB movable + Panel movable =====
+  // ===== DRAG - Mini FAB movable + Panel movable - POINTER EVENTS (mobile fix) =====
   let fabDragging=false, fabStartX=0, fabStartY=0, fabOrigLeft=0, fabOrigTop=0, fabMoved=false;
-  function fabDown(e){
+  // Use Pointer Events - works on mobile + desktop, no preventDefault blocking tap
+  fab.style.touchAction='none';
+  fab.addEventListener('pointerdown', (e)=>{
     fabDragging=true; fabMoved=false;
-    let cx = e.touches ? e.touches[0].clientX : e.clientX;
-    let cy = e.touches ? e.touches[0].clientY : e.clientY;
-    fabStartX=cx; fabStartY=cy;
+    fabStartX=e.clientX; fabStartY=e.clientY;
     let r = fab.getBoundingClientRect();
     fabOrigLeft=r.left; fabOrigTop=r.top;
     fab.style.right='auto'; fab.style.bottom='auto';
     fab.style.left=fabOrigLeft+'px'; fab.style.top=fabOrigTop+'px';
-    e.preventDefault();
-  }
-  function fabMove(e){
+    try{ fab.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  fab.addEventListener('pointermove', (e)=>{
     if(!fabDragging) return;
-    let cx = e.touches ? e.touches[0].clientX : e.clientX;
-    let cy = e.touches ? e.touches[0].clientY : e.clientY;
-    let dx=cx-fabStartX, dy=cy-fabStartY;
-    if(Math.abs(dx)>4 || Math.abs(dy)>4) fabMoved=true;
+    let dx=e.clientX-fabStartX, dy=e.clientY-fabStartY;
+    if(Math.abs(dx)>5 || Math.abs(dy)>5) fabMoved=true;
+    if(!fabMoved) return;
     let nx=fabOrigLeft+dx, ny=fabOrigTop+dy;
     nx=Math.max(6, Math.min(window.innerWidth-60, nx));
     ny=Math.max(6, Math.min(window.innerHeight-60, ny));
     fab.style.left=nx+'px'; fab.style.top=ny+'px';
-    e.preventDefault();
-  }
-  function fabUp(e){
+  });
+  fab.addEventListener('pointerup', (e)=>{
     if(!fabDragging) return;
     fabDragging=false;
-    // If it was a tap (not drag), expand. If dragged, stay.
+    try{ fab.releasePointerCapture(e.pointerId); }catch(err){}
     if(!fabMoved){
-      // Tap - expand will be handled by click, but we already preventDefault, so expand here
-      // Only expand if click not already fired - use timeout to avoid double
-      setTimeout(()=>{ if(!panel.classList.contains('open')) expand(); }, 10);
+      // Tap - expand
+      expand();
+    } else {
+      // Drag ended - save position
+      try{ localStorage.setItem('ghost_fab_pos', JSON.stringify({left:fab.style.left, top:fab.style.top})); }catch(err){}
     }
-    // Save position for next time
-    try{ localStorage.setItem('ghost_fab_pos', JSON.stringify({left:fab.style.left, top:fab.style.top})); }catch(err){}
-  }
-  fab.addEventListener('mousedown', fabDown);
-  fab.addEventListener('touchstart', fabDown, {passive:false});
-  document.addEventListener('mousemove', fabMove);
-  document.addEventListener('touchmove', fabMove, {passive:false});
-  document.addEventListener('mouseup', fabUp);
-  document.addEventListener('touchend', fabUp);
-  // Restore FAB position
+  });
+  fab.addEventListener('pointercancel', ()=>{ fabDragging=false; });
+  // Restore FAB position - only if saved, else use top:32%
   try{
     let saved = localStorage.getItem('ghost_fab_pos');
     if(saved){
       let p = JSON.parse(saved);
       if(p.left && p.top){
-        fab.style.left=p.left; fab.style.top=p.top; fab.style.right='auto'; fab.style.bottom='auto';
+        let l = parseInt(p.left), t = parseInt(p.top);
+        if(l>=0 && l<window.innerWidth-50 && t>=0 && t<window.innerHeight-50){
+          fab.style.left=p.left; fab.style.top=p.top; fab.style.right='auto'; fab.style.bottom='auto';
+        }
       }
     }
   }catch(err){}
-  // Panel drag via header
+  // Panel drag via header - Pointer Events
   let panelDragging=false, panelSX=0, panelSY=0, panelIL=0, panelIT=0;
   let headEl = panel.querySelector('.head');
-  function panelDown(e){
-    if(e.target.closest('[data-act]')) return;
-    panelDragging=true;
-    let cx = e.touches ? e.touches[0].clientX : e.clientX;
-    let cy = e.touches ? e.touches[0].clientY : e.clientY;
-    panelSX=cx; panelSY=cy;
-    let r = panel.getBoundingClientRect();
-    panelIL=r.left; panelIT=r.top;
-    panel.style.left=panelIL+'px'; panel.style.right='auto'; panel.style.bottom='auto'; panel.style.top=panelIT+'px';
-    e.preventDefault();
-  }
-  function panelMove(e){
-    if(!panelDragging) return;
-    let cx = e.touches ? e.touches[0].clientX : e.clientX;
-    let cy = e.touches ? e.touches[0].clientY : e.clientY;
-    let nx=panelIL+cx-panelSX, ny=panelIT+cy-panelSY;
-    nx=Math.max(4, Math.min(window.innerWidth-180, nx));
-    ny=Math.max(4, Math.min(window.innerHeight-120, ny));
-    panel.style.left=nx+'px'; panel.style.top=ny+'px';
-    e.preventDefault();
-  }
-  function panelUp(){ panelDragging=false; }
   if(headEl){
-    headEl.addEventListener('mousedown', panelDown);
-    headEl.addEventListener('touchstart', panelDown, {passive:false});
+    headEl.style.touchAction='none';
+    headEl.addEventListener('pointerdown', (e)=>{
+      if(e.target.closest('[data-act]')) return;
+      panelDragging=true;
+      panelSX=e.clientX; panelSY=e.clientY;
+      let r = panel.getBoundingClientRect();
+      panelIL=r.left; panelIT=r.top;
+      panel.style.left=panelIL+'px'; panel.style.right='auto'; panel.style.bottom='auto'; panel.style.top=panelIT+'px';
+      try{ headEl.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    headEl.addEventListener('pointermove', (e)=>{
+      if(!panelDragging) return;
+      let nx=panelIL+e.clientX-panelSX, ny=panelIT+e.clientY-panelSY;
+      nx=Math.max(4, Math.min(window.innerWidth-180, nx));
+      ny=Math.max(4, Math.min(window.innerHeight-120, ny));
+      panel.style.left=nx+'px'; panel.style.top=ny+'px';
+    });
+    headEl.addEventListener('pointerup', (e)=>{ panelDragging=false; try{ headEl.releasePointerCapture(e.pointerId); }catch(err){} });
+    headEl.addEventListener('pointercancel', ()=>{ panelDragging=false; });
   }
-  document.addEventListener('mousemove', panelMove);
-  document.addEventListener('touchmove', panelMove, {passive:false});
-  document.addEventListener('mouseup', panelUp);
-  document.addEventListener('touchend', panelUp);
 
   function minimize(){ panel.classList.remove('open'); fab.style.display='flex'; }
   function closeAll(){ host.remove(); }
 
-  // fab click handled in fabUp to distinguish tap vs drag - keep for desktop fallback
-  fab.addEventListener('click', (e)=>{ if(fabMoved) { e.stopPropagation(); return; } expand(); });
+  // Click handled in pointerup - no separate click needed (prevents double + pass-through)
   panel.addEventListener('click', e=>{
     let btn = e.target.closest('[data-act]');
     if(!btn) return;
