@@ -43,7 +43,7 @@
     .candles .candle:nth-child(2){animation-delay:.3s}
     .candles .candle:nth-child(3){animation-delay:.6s}
     /* ============ PREMIUM EXPANDED PANEL - Deep Black Glass ============ */
-    .panel{position:fixed;top:10%;right:6px;width:168px;max-width:168px;min-width:168px;background:linear-gradient(170deg,rgba(8,8,14,.99),rgba(4,4,9,.99));background-color:#05050a;border:1px solid transparent;border-radius:16px;background-clip:padding-box;box-sizing:border-box;position:relative;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 26px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.08),0 20px 44px rgba(0,0,0,.62);backdrop-filter:blur(18px);color:#eef2ff;max-height:430px;overflow:hidden;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none;transform-origin:bottom right}
+    .panel{position:fixed;top:10%;right:6px;width:168px;max-width:168px;min-width:168px;background:linear-gradient(170deg,rgba(8,8,14,.99),rgba(4,4,9,.99));background-color:#05050a;border:1px solid transparent;border-radius:16px;background-clip:padding-box;box-sizing:border-box;position:relative;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 26px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.08),0 20px 44px rgba(0,0,0,.62);backdrop-filter:blur(18px);color:#eef2ff;max-height:210px;overflow:hidden;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none;transform-origin:bottom right}
     .panel.open{display:block;animation:panelIn .38s cubic-bezier(.16,1,.3,1)}
     @keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.82) rotateX(4deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}} @keyframes panelOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.82) translateY(10px)}} .panel.closing{animation:panelOut .28s ease forwards !important}
     @keyframes panelGlow{0%{box-shadow:0 0 0 1px rgba(168,85,247,.35),0 0 18px rgba(168,85,247,.30),0 0 32px rgba(0,140,255,.14),0 16px 32px rgba(0,0,0,.65)}25%{box-shadow:0 0 0 1px rgba(0,140,255,.35),0 0 18px rgba(0,140,255,.28),0 0 32px rgba(0,240,255,.16),0 16px 32px rgba(0,0,0,.65)}50%{box-shadow:0 0 0 1px rgba(0,240,255,.35),0 0 20px rgba(0,240,255,.30),0 0 36px rgba(34,197,94,.14),0 16px 32px rgba(0,0,0,.65)}75%{box-shadow:0 0 0 1px rgba(34,197,94,.35),0 0 18px rgba(34,197,94,.26),0 0 32px rgba(168,85,247,.16),0 16px 32px rgba(0,0,0,.65)}100%{box-shadow:0 0 0 1px rgba(168,85,247,.35),0 0 18px rgba(168,85,247,.30),0 0 32px rgba(0,140,255,.14),0 16px 32px rgba(0,0,0,.65)}}
@@ -52,7 +52,7 @@
     .panel::before{content:'';position:absolute;inset:-1px;border-radius:17px;padding:1px;background:linear-gradient(120deg,#a855f7,#3b82f6,#22d3ee,#22c55e,#a855f7);background-size:300% 300%;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rgbBorder 3.5s ease infinite;pointer-events:none;z-index:2}
     @keyframes borderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
     .panel::after{content:'';position:absolute;top:0;left:0;right:0;height:42px;background:linear-gradient(180deg,rgba(0,240,255,.05),transparent);pointer-events:none}
-    .head{padding:6px 7px 5px;overflow:visible;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);cursor:move;touch-action:none;position:relative;z-index:1}
+    .head{padding:4px 6px 3px;overflow:visible;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);cursor:move;touch-action:none;position:relative;z-index:1}
     .head-left{display:flex;align-items:center;gap:6px;min-width:0;flex:1;overflow:hidden}
     .logo{width:22px;height:22px;border-radius:9px;background:linear-gradient(135deg,#13131c,#0a0a10);border:1px solid rgba(168,85,247,.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(168,85,247,.18)}
     .logo .candles{height:17px;gap:2.5px}
@@ -75,14 +75,14 @@
     .ibtn .x1{transform:rotate(45deg)} .ibtn .x2{transform:rotate(-45deg)}
     .ibtn .ref{width:12px;height:12px;border:1.8px solid currentColor;border-radius:50%;border-top-color:transparent;position:relative}
     .ibtn .ref::after{content:'';position:absolute;top:-2px;right:-1px;border-left:4px solid transparent;border-right:1px solid transparent;border-bottom:5px solid currentColor;transform:rotate(40deg)}
-    .pairwrap{padding:5px 7px 0;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+    .pairwrap{padding:3px 6px 0;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
     .pair{font-size:8.5px;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1.2;flex:1;min-width:0}
     .pair small{display:block;font-size:5.5px;letter-spacing:.8px;color:#67e8f9;font-weight:700;margin-top:2px}
     .time{font-size:6.5px;color:#94a3b8;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:4px 7px;border-radius:20px;white-space:nowrap;margin-left:8px}
     /* Candle Viz + Laser + Circular Loading */
-    .vizwrap{margin:5px 7px 0;padding:5px 7px 5px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .viz{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;gap:7px;height:38px;flex:1}
-    .viz .candle{height:34px;width:9px;opacity:0;transform:scaleY(.4) translateY(6px);animation:candlePop .45s cubic-bezier(.16,1,.3,1) forwards}
+    .vizwrap{margin:4px 7px 0;padding:4px 7px 4px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .viz{height:28px;min-height:28px}
+    .viz .candle{height:26px;width:7px;opacity:0;transform:scaleY(.4) translateY(6px);animation:candlePop .45s cubic-bezier(.16,1,.3,1) forwards}
     @keyframes candlePop{from{opacity:0;transform:scaleY(.4) translateY(6px)}to{opacity:1;transform:scaleY(1) translateY(0)}}
     .viz .candle:nth-child(2){animation-delay:.05s} .viz .candle:nth-child(3){animation-delay:.15s} .viz .candle:nth-child(4){animation-delay:.25s} .viz .candle:nth-child(5){animation-delay:.35s} .viz .candle:nth-child(6){animation-delay:.45s} .viz .candle:nth-child(7){animation-delay:.55s} .viz .candle:nth-child(8){animation-delay:.65s}
     .viz .candle .body{width:9px;border-radius:2px}
@@ -107,11 +107,11 @@
     .prog{height:3px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
     .prog-fill{height:100%;width:0%;background:linear-gradient(90deg,#a855f7,#22d3ee);box-shadow:0 0 8px rgba(168,85,247,.5);transition:width .3s ease}
     .status{font-size:7px;color:#94a3b8;text-align:center;margin-top:6px;letter-spacing:.2px}
-    .result{margin:5px 7px 0;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.07);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.008))}
+    .result{margin:3px 6px 0;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.07);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.008))}
     .result-h{padding:5px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.05)}
     .result-h span{font-size:6.5px;letter-spacing:1.1px;color:#94a3b8;font-weight:800}
     .result-h b{font-size:6px;padding:3px 6px;border-radius:20px;background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.22)}
-    .sig{padding:7px 8px 6px;display:flex;align-items:center;gap:8px;min-height:52px;height:52px;overflow:hidden}
+    .sig{padding:7px 8px 6px;display:flex;align-items:center;gap:8px;min-height:38px;height:38px;overflow:hidden}
     .sig.call{background:linear-gradient(135deg,rgba(34,197,94,.10),rgba(34,197,94,.015))}
     .sig.put{background:linear-gradient(135deg,rgba(244,63,94,.11),rgba(244,63,94,.015))}
     .sig.wait{background:rgba(255,255,255,.015)}
@@ -141,11 +141,11 @@
     .sig.put .sigtxt b{color:#fb7185}
     .sigtxt p{font-size:6px;max-width:118px;height:10px;line-height:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;color:#94a3b8;margin:3px 0 0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
     .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.05);border-top:1px solid rgba(255,255,255,.05)}
-    .stat{background:rgba(9,10,18,.92);padding:5px 8px;min-height:32px;height:32px;overflow:hidden}
+    .stat.single{display:flex;align-items:center;justify-content:center;gap:5px;padding:3px 5px} .stat.single b{font-size:7.5px} .stat.single .dot{color:#64748b} .stat{background:rgba(9,10,18,.92);padding:5px 8px;min-height:32px;height:32px;overflow:hidden}
     .stat label{font-size:6px;letter-spacing:.9px;color:#94a3b8;font-weight:700;display:block;height:8px;line-height:8px;white-space:nowrap;overflow:hidden}
     .stat b{font-size:8.5px;color:#fff;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:11px;height:11px}
     .stat b.green{color:#4ade80} .stat b.red{color:#fb7185} .stat b.cyan{color:#67e8f9}
-    .key{margin:5px 7px 0;padding:5px 7px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05)}
+    .key{margin:3px 6px 0;padding:3px 6px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05)}
     .key-t{font-size:6.5px;letter-spacing:1.1px;color:#a78bfa;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px}
     .key-t .kd{width:6px;height:6px;background:#a855f7;border-radius:50%;box-shadow:0 0 6px #a855f7;flex-shrink:0}
     .key-item{display:flex;gap:6px;align-items:center;padding:2px 0;font-size:6.2px;line-height:11px;height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;color:#cbd5e1}
@@ -176,7 +176,7 @@
     <div class="head">
       <div class="head-left">
         <div class="logo"><img src="${GHOST_LOGO}" alt="GHOST" /></div>
-        <div class="title"><b>GHOST <span>AI</span></b><small>SIGNAL ANALYZER PRO</small></div>
+        <div class="title"><b>GHOST <span>AI</span></b></div>
         <div class="live"><i></i> LIVE</div>
       </div>
       <div class="actions">
@@ -184,21 +184,14 @@
         <button class="ibtn" data-act="close" title="Close"><span class="x1"></span><span class="x2"></span></button>
       </div>
     </div>
-    <div class="pairwrap"><div class="pair" id="p-pair">GBP/USD<small>GHOST QUANTUM X • AI SCAN</small></div><div class="time">1M • <span id="p-sec">--s</span></div></div>
-    <div class="vizwrap">
+    <div class="pairwrap"><div class="pair"><span class="pair-dot"></span><span id="p-pair">EUR/JPY</span><span class="otc" id="p-otc" style="display:none">OTC</span></div><div class="timer"><b id="p-timer">--s</b></div></div><div class="vizwrap">
       <div class="viz" id="p-viz"><div class="grid"></div><div class="scanbeam"></div><div class="laser"></div><!-- Market structure candles - pop up one by one, filled by JS --></div>
       <div class="loader" id="p-loader"><div class="ring"></div><div class="center" id="p-loader-txt">0%</div></div>
     </div>
-    <div class="analysis" id="p-analysis"><div class="analysis-t"><span>ANALYZING CHART</span><span id="p-pct">0%</span></div><div class="prog"><div class="prog-fill" id="p-prog"></div></div><div class="status" id="p-status">Scanning chart...</div></div>
-    <div class="result">
-      <div class="result-h"><span>ANALYSIS RESULT</span><b id="p-status2">READY</b></div>
-      <div class="sig wait" id="p-sig"><div class="arrow wait" id="p-arrow"><span class="dot"></span></div><div class="sigtxt"><small>SIGNAL</small><b id="p-txt">WAIT</b><p id="p-reason">Quantum X Analyzing...</p></div></div>
-      <div class="stats">
-        <div class="stat"><label>MARKET</label><b id="p-cond">--</b></div>
-        <div class="stat"><label>STRENGTH</label><b id="p-strength">--</b></div>
-      </div>
+    <div class="analysis" id="p-analysis"><div class="prog"><div class="prog-fill" id="p-prog"></div></div></div>
+    <div class="result"><div class="sig" id="p-sig"><span class="sig-arrow" id="p-arrow">↓</span><span class="sigtxt"><b id="p-sigtxt">PUT ↓ 88%</b></span></div></div><div class="stats"><div class="stat single"><b id="p-cond">--</b><span class="dot">•</span><b id="p-strength">--</b></div></div>
     </div>
-    <div class="key"><div class="key-t"><span class="kd"></span> KEY ANALYSIS</div><div id="p-key"></div></div>
+    <div class="key"><div id="p-key"></div></div>
     <!-- Buttons removed per video - only Close in header stays -->
     <!-- Footer removed per video - only Close button -->
   `;
@@ -488,7 +481,7 @@
       let pairEl = shadow.getElementById('p-pair');
       if(pairEl){
         let mTxt = detected.replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2');
-        pairEl.innerHTML = mTxt + '<small>GHOST QUANTUM X • AI SCAN</small>';
+        pairEl.innerHTML = mTxt;
       }
       return true;
     }
@@ -537,7 +530,7 @@
     let pairEl = shadow.getElementById('p-pair');
     if(pairEl){
       let mTxt = (j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2'); if((j.market||currentPair).includes('OTC') || currentPair.includes('OTC')) mTxt += ' OTC';
-      pairEl.innerHTML = mTxt + '<small>GHOST QUANTUM X • AI SCAN</small>';
+      pairEl.innerHTML = mTxt;
     }
     let sigEl = shadow.getElementById('p-sig');
     let txtEl = shadow.getElementById('p-txt');
