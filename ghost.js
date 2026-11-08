@@ -1,5 +1,16 @@
 (function(){
 console.log('👻 GHOST BOT LOADING...');
+// ===== BOX FIRST - CSS fail korleo Box asbe =====
+try{
+  let _old = document.getElementById('ghost-bot');
+  if(_old) _old.remove();
+  let _box = document.createElement('div');
+  _box.id = 'ghost-bot';
+  _box.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:196px;background:#0a0f23;border:1px solid #00f0ff;border-radius:12px;color:#fff;font-family:sans-serif;text-align:center;padding:8px;box-shadow:0 0 28px rgba(0,240,255,.3)';
+  _box.innerHTML = '<div style="font-size:7px;letter-spacing:1px;color:#00f0ff">GHOST AI</div><div style="font-size:11px;font-weight:900;margin:3px 0">LOADING...</div><div style="font-size:10px;color:#00ff88">Bot Ashtese...</div>';
+  (document.body || document.documentElement).appendChild(_box);
+  console.log('👻 GHOST BOT BOX CREATED - FIRST');
+}catch(_e){ console.error('BOX FIRST FAIL', _e); }
 try{
 let css=document.createElement("style");
 css.innerHTML=`
@@ -56,13 +67,14 @@ css.innerHTML=`
 .gh-corner.bl{bottom:6px;left:6px;border-right:none;border-top:none}
 .gh-corner.br{bottom:6px;right:6px;border-left:none;border-top:none}
 `;
-document.head.appendChild(css);
-let old=document.getElementById("ghost-bot");if(old) old.remove();
-let box=document.createElement("div");box.id="ghost-bot";
+(document.head || document.getElementsByTagName('head')[0] || document.documentElement).appendChild(css);
+let box=document.getElementById("ghost-bot");
+if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
+// Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
 <div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
-<div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI • SCAN</small></div>
+<div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
 <div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK<br><span id="gh-pa" style="color:#00f0ff;font-size:6px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
@@ -70,7 +82,7 @@ box.innerHTML=`
 <div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">✅ WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">❌ LOSS</button></div>
 <div class="gh-close" id="gh-close">✕ Close</div>
 `;
-document.body.appendChild(box);
+if(!box.isConnected){ (document.body || document.documentElement).appendChild(box); }
 
 let paEnabled=true;
 let toggleEl=document.getElementById("gh-toggle");
