@@ -1,4 +1,6 @@
 (function(){
+console.log('👻 GHOST BOT LOADING...');
+try{
 let css=document.createElement("style");
 css.innerHTML=`
 /* ===== GHOST FUTURISTIC HUD - v2 FIXED LOSS ===== */
@@ -60,7 +62,7 @@ let box=document.createElement("div");box.id="ghost-bot";
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
 <div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
-<div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
+<div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI • SCAN</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
 <div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK<br><span id="gh-pa" style="color:#00f0ff;font-size:6px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
@@ -378,7 +380,7 @@ function getRealPrice(){
 }
 function updateUI(j){
   let pairEl=document.getElementById("gh-pair");
-  if(pairEl){ let mTxt=(j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2').replace('OTC',' OTC'); pairEl.innerHTML=mTxt+'<small>GHOST AI • SCAN</small>'; }
+  if(pairEl){ let mTxt=(j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2').replace('OTC',' OTC'); pairEl.innerHTML=mTxt+'<small>GHOST AI</small>'; }
   let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
   let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");
   let dir=j.signal||j.direction;
@@ -461,4 +463,37 @@ setTimeout(startResultObserver,2000);
 updateLossUI();
 fetchSignal();
 autoDetectMarket();
+
+}catch(e){
+  console.error('GHOST BOT ERROR:', e);
+  try{
+    let errBox = document.getElementById('ghost-bot');
+    if(!errBox){
+      errBox = document.createElement('div');
+      errBox.id = 'ghost-bot';
+      errBox.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:196px;background:#111;color:#fff;padding:10px;border-radius:12px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid #00f0ff';
+      errBox.innerHTML = '<b>GHOST AI</b><br>Error: '+e.message+'<br><small>Bookmarklet abar tap koro</small>';
+      document.body.appendChild(errBox);
+    }
+  }catch(e2){}
+}
+// FORCE SHOW - 1 sec por o jodi bot na thake, abar banau
+setTimeout(function(){
+  try{
+    let b = document.getElementById('ghost-bot');
+    if(!b){
+      console.log('GHOST BOT NOT FOUND - FORCE CREATING');
+      let nb = document.createElement('div');
+      nb.id = 'ghost-bot';
+      nb.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:196px;background:#111;color:#fff;padding:10px;border-radius:12px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid #00f0ff';
+      nb.innerHTML = '<b>GHOST AI</b><br>LOADING...<br><small>Render wake up hocche, 10s wait koro</small>';
+      document.body.appendChild(nb);
+    } else {
+      b.style.display = 'block';
+      b.style.visibility = 'visible';
+      b.style.opacity = '1';
+      console.log('👻 GHOST BOT SHOWING ON CHART');
+    }
+  }catch(e){}
+}, 1000);
 })();
