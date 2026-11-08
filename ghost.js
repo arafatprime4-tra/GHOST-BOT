@@ -43,7 +43,7 @@
     .candles .candle:nth-child(3){animation-delay:.6s}
     /* ============ PREMIUM EXPANDED PANEL - Deep Black Glass ============ */
     .panel{position:fixed;top:26%;right:5px;width:208px;max-width:calc(100vw - 10px);background:linear-gradient(170deg,rgba(8,8,14,.99),rgba(4,4,9,.99));background-color:#05050a;border:1px solid transparent;border-radius:16px;background-clip:padding-box;position:relative;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 26px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.08),0 20px 44px rgba(0,0,0,.62);backdrop-filter:blur(18px);color:#eef2ff;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none;transform-origin:bottom right}
-    .panel.open{display:block;animation:panelIn .38s cubic-bezier(.16,1,.3,1),panelGlow 4s ease-in-out infinite}
+    .panel.open{display:block;animation:panelIn .38s cubic-bezier(.16,1,.3,1)}
     @keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.82) rotateX(4deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}} @keyframes panelOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.82) translateY(10px)}} .panel.closing{animation:panelOut .28s ease forwards !important}
     @keyframes panelGlow{0%{box-shadow:0 0 0 1px rgba(168,85,247,.35),0 0 18px rgba(168,85,247,.30),0 0 32px rgba(0,140,255,.14),0 16px 32px rgba(0,0,0,.65)}25%{box-shadow:0 0 0 1px rgba(0,140,255,.35),0 0 18px rgba(0,140,255,.28),0 0 32px rgba(0,240,255,.16),0 16px 32px rgba(0,0,0,.65)}50%{box-shadow:0 0 0 1px rgba(0,240,255,.35),0 0 20px rgba(0,240,255,.30),0 0 36px rgba(34,197,94,.14),0 16px 32px rgba(0,0,0,.65)}75%{box-shadow:0 0 0 1px rgba(34,197,94,.35),0 0 18px rgba(34,197,94,.26),0 0 32px rgba(168,85,247,.16),0 16px 32px rgba(0,0,0,.65)}100%{box-shadow:0 0 0 1px rgba(168,85,247,.35),0 0 18px rgba(168,85,247,.30),0 0 32px rgba(0,140,255,.14),0 16px 32px rgba(0,0,0,.65)}}
     @keyframes rgbBorder{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
@@ -108,7 +108,7 @@
     .result-h{padding:5px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.05)}
     .result-h span{font-size:6.5px;letter-spacing:1.1px;color:#94a3b8;font-weight:800}
     .result-h b{font-size:6px;padding:3px 6px;border-radius:20px;background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.22)}
-    .sig{padding:7px 8px 6px;display:flex;align-items:center;gap:10px;transition:background .3s}
+    .sig{padding:7px 8px 6px;display:flex;align-items:center;gap:8px;min-height:52px;height:52px;overflow:hidden}
     .sig.call{background:linear-gradient(135deg,rgba(34,197,94,.10),rgba(34,197,94,.015))}
     .sig.put{background:linear-gradient(135deg,rgba(244,63,94,.11),rgba(244,63,94,.015))}
     .sig.wait{background:rgba(255,255,255,.015)}
@@ -124,28 +124,28 @@
     .sig.wait .arrow{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10)}
     .sig.call .arrow{background:linear-gradient(135deg,#22c55e,#15803d);box-shadow:0 0 14px rgba(34,197,94,.55),0 0 26px rgba(34,197,94,.28);animation:sigPulseGreen 1.4s ease-in-out infinite}
     .sig.put .arrow{background:linear-gradient(135deg,#f43f5e,#be123c);box-shadow:0 0 14px rgba(244,63,94,.55),0 0 26px rgba(244,63,94,.28);animation:sigPulseRed 1.4s ease-in-out infinite}
-    @keyframes sigPulseGreen{0%,100%{box-shadow:0 0 10px rgba(34,197,94,.45),0 0 20px rgba(34,197,94,.22);transform:scale(1)}50%{box-shadow:0 0 18px rgba(34,197,94,.70),0 0 34px rgba(34,197,94,.38);transform:scale(1.06)}}
-    @keyframes sigPulseRed{0%,100%{box-shadow:0 0 10px rgba(244,63,94,.45),0 0 20px rgba(244,63,94,.22);transform:scale(1)}50%{box-shadow:0 0 18px rgba(244,63,94,.70),0 0 34px rgba(244,63,94,.38);transform:scale(1.06)}}
+    @keyframes sigPulseGreen{0%,100%{box-shadow:0 0 10px rgba(34,197,94,.45)}50%{box-shadow:0 0 16px rgba(34,197,94,.65)}}
+    @keyframes sigPulseRed{0%,100%{box-shadow:0 0 10px rgba(244,63,94,.45)}50%{box-shadow:0 0 16px rgba(244,63,94,.65)}}
     @keyframes up{0%,100%{transform:translateY(0);filter:drop-shadow(0 0 3px rgba(255,255,255,.8))}50%{transform:translateY(-3px);filter:drop-shadow(0 0 6px rgba(255,255,255,1))}}
     @keyframes down{0%,100%{transform:translateY(0);filter:drop-shadow(0 0 3px rgba(255,255,255,.8))}50%{transform:translateY(3px);filter:drop-shadow(0 0 6px rgba(255,255,255,1))}}
-    .sig.call .sigtxt b{color:#4ade80;text-shadow:0 0 10px rgba(34,197,94,.55),0 0 18px rgba(34,197,94,.28);animation:textGlowGreen 1.6s ease-in-out infinite}
-    .sig.put .sigtxt b{color:#fb7185;text-shadow:0 0 10px rgba(244,63,94,.55),0 0 18px rgba(244,63,94,.28);animation:textGlowRed 1.6s ease-in-out infinite}
-    @keyframes textGlowGreen{0%,100%{text-shadow:0 0 8px rgba(34,197,94,.45)}50%{text-shadow:0 0 14px rgba(34,197,94,.75),0 0 22px rgba(34,197,94,.35)}}
-    @keyframes textGlowRed{0%,100%{text-shadow:0 0 8px rgba(244,63,94,.45)}50%{text-shadow:0 0 14px rgba(244,63,94,.75),0 0 22px rgba(244,63,94,.35)}}
-    .sigtxt small{font-size:6.5px;letter-spacing:1.3px;color:#94a3b8;font-weight:700;display:block}
-    .sigtxt b{font-size:15px;font-weight:900;letter-spacing:.5px;line-height:1.1;display:block;margin-top:1px}
+    .sig.call .sigtxt b{color:#4ade80;text-shadow:0 0 8px rgba(34,197,94,.50)}
+    .sig.put .sigtxt b{color:#fb7185;text-shadow:0 0 8px rgba(244,63,94,.50)}
+    /* textGlow removed - causes flicker */
+    
+    .sigtxt{flex:1;min-width:0;overflow:hidden}.sigtxt small{font-size:6.5px;letter-spacing:1.3px;color:#94a3b8;font-weight:700;display:block;height:9px;line-height:9px}
+    .sigtxt b{font-size:15px;font-weight:900;letter-spacing:.5px;line-height:18px;height:18px;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .sig.call .sigtxt b{color:#4ade80}
     .sig.put .sigtxt b{color:#fb7185}
-    .sigtxt p{font-size:6px;max-width:118px;color:#94a3b8;margin:3px 0 0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+    .sigtxt p{font-size:6px;max-width:118px;height:10px;line-height:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;color:#94a3b8;margin:3px 0 0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
     .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.05);border-top:1px solid rgba(255,255,255,.05)}
-    .stat{background:rgba(9,10,18,.92);padding:5px 8px}
-    .stat label{font-size:6px;letter-spacing:.9px;color:#94a3b8;font-weight:700;display:block}
-    .stat b{font-size:9px;color:#fff;display:block;margin-top:2px}
+    .stat{background:rgba(9,10,18,.92);padding:5px 8px;min-height:32px;height:32px;overflow:hidden}
+    .stat label{font-size:6px;letter-spacing:.9px;color:#94a3b8;font-weight:700;display:block;height:8px;line-height:8px;white-space:nowrap;overflow:hidden}
+    .stat b{font-size:8.5px;color:#fff;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:11px;height:11px}
     .stat b.green{color:#4ade80} .stat b.red{color:#fb7185} .stat b.cyan{color:#67e8f9}
     .key{margin:6px 8px 0;padding:6px 8px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05)}
     .key-t{font-size:6.5px;letter-spacing:1.1px;color:#a78bfa;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px}
     .key-t .kd{width:6px;height:6px;background:#a855f7;border-radius:50%;box-shadow:0 0 6px #a855f7;flex-shrink:0}
-    .key-item{display:flex;gap:6px;align-items:flex-start;padding:2.5px 0;font-size:6.8px;line-height:1.35;color:#cbd5e1}
+    .key-item{display:flex;gap:6px;align-items:center;padding:2px 0;font-size:6.8px;line-height:12px;height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;color:#cbd5e1}
     .key-item .tick{width:12px;height:12px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .key-item .tick::after{content:'';width:6px;height:3px;border-left:1.6px solid #4ade80;border-bottom:1.6px solid #4ade80;transform:rotate(-45deg) translateY(-1px);display:block}
     .controls{padding:7px 8px 8px;display:flex;flex-direction:column;gap:7px}
@@ -212,6 +212,12 @@
   let currentPair = 'GBP/USD';
   let currentSignal = null;
   let currentResult = null;
+  // SIGNAL LOCK - 58s: once CALL/PUT appears, it stays - no flicker
+  let lockedSignal = null;
+  let lockedUntil = 0;
+  let lockedReason = '';
+  let lockedConf = 0;
+  let lastRenderedKey = '';
   let isAnalyzing = false;
   const API = 'https://giogram-backend.onrender.com/api/signal';
 
@@ -348,6 +354,34 @@
   }
 
   function updateUI(j){
+    // --- SIGNAL LOCK CHECK ---
+    let now = Date.now();
+    let dirRaw = j.signal || j.direction;
+    // If locked and still within 58s, keep locked signal - ignore new flip
+    if(lockedSignal && now < lockedUntil && (dirRaw === 'CALL' || dirRaw === 'PUT' || dirRaw === 'UP' || dirRaw === 'DOWN')){
+      // Only allow same direction to update confidence slightly, never flip
+      let newDirNorm = (dirRaw === 'UP' ? 'CALL' : dirRaw === 'DOWN' ? 'PUT' : dirRaw);
+      if(newDirNorm !== lockedSignal){
+        // Ignore flip - keep locked
+        return;
+      }
+      // Same direction - keep locked reason/conf to avoid flicker
+      j = {...j, signal: lockedSignal, reason: lockedReason, confidence: lockedConf};
+    } else if((dirRaw === 'CALL' || dirRaw === 'PUT' || dirRaw === 'UP' || dirRaw === 'DOWN') && !lockedSignal){
+      // New signal - LOCK it for 58s
+      let norm = (dirRaw === 'UP' ? 'CALL' : dirRaw === 'DOWN' ? 'PUT' : dirRaw);
+      lockedSignal = norm;
+      lockedUntil = now + 58000;
+      lockedReason = j.reason || j.price_action_type || '';
+      lockedConf = j.confidence || 0;
+    } else if(now >= lockedUntil){
+      // Lock expired - clear
+      lockedSignal = null; lockedReason = ''; lockedConf = 0;
+    }
+    // If WAIT and locked, keep locked display
+    if(lockedSignal && now < lockedUntil && (dirRaw === 'WAIT' || !dirRaw)){
+      j = {...j, signal: lockedSignal, reason: lockedReason, confidence: lockedConf};
+    }
     let pairEl = shadow.getElementById('p-pair');
     if(pairEl){
       let mTxt = (j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2');
@@ -372,26 +406,35 @@
       if(j.filter && j.filter.trend && j.filter.trend!=='NA' && j.filter.trend!=='N/A') trendTxt=j.filter.trend;
       else if(j.price_action_type && j.price_action_type!=='NA' && j.price_action_type!=='N/A') trendTxt = j.price_action_type.includes('Bull') ? 'BULLISH' : j.price_action_type.includes('Bear') ? 'BEARISH' : j.price_action_type;
       else if(dir==='CALL') trendTxt='BULLISH'; else if(dir==='PUT') trendTxt='BEARISH';
-      if(j.is_trap) condTxt='TRAP / REVERSAL';
-      else if(j.price_action_type && j.price_action_type!=='NA' && j.price_action_type!=='N/A') condTxt=j.price_action_type;
+      if(j.is_trap) condTxt='TRAP';
+      else if(j.price_action_type && j.price_action_type!=='NA' && j.price_action_type!=='N/A'){
+        // Shorten long names - FVG Mitigation, Order Block Retest etc would overflow
+        let pt = j.price_action_type;
+        if(pt.includes('FVG')) condTxt='FVG';
+        else if(pt.includes('Order Block')) condTxt='ORDER BLOCK';
+        else if(pt.includes('BOS')) condTxt='BOS';
+        else if(pt.includes('Liquidity')) condTxt='LIQUIDITY';
+        else if(pt.length > 12) condTxt = pt.substring(0,12).toUpperCase();
+        else condTxt = pt;
+      }
       else condTxt='RANGING';
       if(conf>=85) strengthTxt='VERY HIGH'; else if(conf>=75) strengthTxt='HIGH'; else if(conf>=65) strengthTxt='MEDIUM'; else if(conf>=50) strengthTxt='LOW'; else strengthTxt='WAITING';
       if(dir==="CALL"||dir==="UP"){
         sigEl.className="sig call"; txtEl.textContent="CALL \u2191";
         if(arrowEl){ arrowEl.className="arrow up"; arrowEl.innerHTML='<span class="tri"></span>'; }
         if(statusEl) statusEl.textContent='CALL • ACTIVE';
-        if(reasonEl) reasonEl.textContent=j.reason||j.price_action_type||"";
+        if(reasonEl){ let r=j.reason||j.price_action_type||""; if(r.length>28) r=r.substring(0,28)+"..."; reasonEl.textContent=r; }
         if(trendEl){ trendEl.textContent='BULLISH'; trendEl.className='green'; }
       } else if(dir==="PUT"||dir==="DOWN"){
         sigEl.className="sig put"; txtEl.textContent="PUT \u2193";
         if(arrowEl){ arrowEl.className="arrow down"; arrowEl.innerHTML='<span class="tri"></span>'; }
         if(statusEl) statusEl.textContent='PUT • ACTIVE';
-        if(reasonEl) reasonEl.textContent=j.reason||j.price_action_type||"";
+        if(reasonEl){ let r=j.reason||j.price_action_type||""; if(r.length>28) r=r.substring(0,28)+"..."; reasonEl.textContent=r; }
         if(trendEl){ trendEl.textContent='BEARISH'; trendEl.className='red'; }
       } else {
         sigEl.className="sig wait"; txtEl.textContent="WAIT";
         if(arrowEl){ arrowEl.className="arrow wait"; arrowEl.innerHTML='<span class="dot"></span>'; }
-        if(reasonEl) reasonEl.textContent=j.reason||"Analyzing...";
+        if(reasonEl){ let r=j.reason||"Analyzing..."; if(r.length>28) r=r.substring(0,28)+"..."; reasonEl.textContent=r; }
         if(statusEl) statusEl.textContent='WAITING';
         if(trendEl) trendEl.textContent='--';
       }
@@ -401,14 +444,22 @@
       if(keyList){
         let items=[];
         let combined = ((j.reason||'') + ' ' + (j.strategies||[]).join(' ')).toLowerCase();
-        if(combined.includes('momentum') || dir==='CALL') items.push('Bullish momentum detected');
-        if(combined.includes('bear') || dir==='PUT') items.push('Bearish momentum detected');
+        // FIX: Only one direction - never show both Bullish + Bearish together (was causing flicker)
+        if(dir==='CALL' || dir==='UP'){
+          items.push('Bullish momentum detected');
+        } else if(dir==='PUT' || dir==='DOWN'){
+          items.push('Bearish momentum detected');
+        }
         if(combined.includes('bos') || combined.includes('structure') || combined.includes('break')) items.push('Price structure confirmation');
-        if(combined.includes('support') || combined.includes('resistance') || combined.includes('order block') || combined.includes('fvg') || combined.includes('liquidity')) items.push('Support / Resistance condition');
-        if(combined.includes('candle') || combined.includes('wick') || combined.includes('rejection') || combined.includes('engulf')) items.push('Candle confirmation');
+        else if(combined.includes('support') || combined.includes('resistance') || combined.includes('order block') || combined.includes('fvg') || combined.includes('liquidity')) items.push('Support / Resistance condition');
+        else if(combined.includes('candle') || combined.includes('wick') || combined.includes('rejection') || combined.includes('engulf')) items.push('Candle confirmation');
         if(items.length===0){ if(conf>=65) items.push('Structure + momentum aligned ('+conf+'%)'); else items.push('Collecting more candle data...'); }
         let seen={}; items=items.filter(t=>{ if(seen[t]) return false; seen[t]=true; return true; });
-        keyList.innerHTML = items.map(t=>`<div class="key-item"><div class="tick"></div><div>${t}</div></div>`).join('');
+        let newKey = items.join('|') + '|' + dir;
+        if(newKey !== lastRenderedKey){
+          lastRenderedKey = newKey;
+          keyList.innerHTML = items.map(t=>`<div class="key-item"><div class="tick"></div><div>${t}</div></div>`).join('');
+        }
       }
     }
   }
