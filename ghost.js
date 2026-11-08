@@ -42,7 +42,7 @@
     .candles .candle:nth-child(2){animation-delay:.3s}
     .candles .candle:nth-child(3){animation-delay:.6s}
     /* ============ PREMIUM EXPANDED PANEL - Deep Black Glass ============ */
-    .panel{position:fixed;top:16%;right:4px;width:182px;max-width:calc(100vw - 8px);background:linear-gradient(170deg,rgba(8,8,14,.99),rgba(4,4,9,.99));background-color:#05050a;border:1px solid transparent;border-radius:16px;background-clip:padding-box;position:relative;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 26px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.08),0 20px 44px rgba(0,0,0,.62);backdrop-filter:blur(18px);color:#eef2ff;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none;transform-origin:bottom right}
+    .panel{position:fixed;top:10%;right:6px;width:168px;max-width:168px;min-width:168px;background:linear-gradient(170deg,rgba(8,8,14,.99),rgba(4,4,9,.99));background-color:#05050a;border:1px solid transparent;border-radius:16px;background-clip:padding-box;box-sizing:border-box;position:relative;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 26px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.08),0 20px 44px rgba(0,0,0,.62);backdrop-filter:blur(18px);color:#eef2ff;max-height:430px;overflow:hidden;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none;transform-origin:bottom right}
     .panel.open{display:block;animation:panelIn .38s cubic-bezier(.16,1,.3,1)}
     @keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.82) rotateX(4deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}} @keyframes panelOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.82) translateY(10px)}} .panel.closing{animation:panelOut .28s ease forwards !important}
     @keyframes panelGlow{0%{box-shadow:0 0 0 1px rgba(168,85,247,.35),0 0 18px rgba(168,85,247,.30),0 0 32px rgba(0,140,255,.14),0 16px 32px rgba(0,0,0,.65)}25%{box-shadow:0 0 0 1px rgba(0,140,255,.35),0 0 18px rgba(0,140,255,.28),0 0 32px rgba(0,240,255,.16),0 16px 32px rgba(0,0,0,.65)}50%{box-shadow:0 0 0 1px rgba(0,240,255,.35),0 0 20px rgba(0,240,255,.30),0 0 36px rgba(34,197,94,.14),0 16px 32px rgba(0,0,0,.65)}75%{box-shadow:0 0 0 1px rgba(34,197,94,.35),0 0 18px rgba(34,197,94,.26),0 0 32px rgba(168,85,247,.16),0 16px 32px rgba(0,0,0,.65)}100%{box-shadow:0 0 0 1px rgba(168,85,247,.35),0 0 18px rgba(168,85,247,.30),0 0 32px rgba(0,140,255,.14),0 16px 32px rgba(0,0,0,.65)}}
@@ -51,7 +51,7 @@
     .panel::before{content:'';position:absolute;inset:-1px;border-radius:17px;padding:1px;background:linear-gradient(120deg,#a855f7,#3b82f6,#22d3ee,#22c55e,#a855f7);background-size:300% 300%;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rgbBorder 3.5s ease infinite;pointer-events:none;z-index:2}
     @keyframes borderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
     .panel::after{content:'';position:absolute;top:0;left:0;right:0;height:42px;background:linear-gradient(180deg,rgba(0,240,255,.05),transparent);pointer-events:none}
-    .head{padding:6px 7px 5px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);cursor:move;touch-action:none;position:relative;z-index:1}
+    .head{padding:6px 7px 5px;overflow:visible;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);cursor:move;touch-action:none;position:relative;z-index:1}
     .head-left{display:flex;align-items:center;gap:8px;min-width:0}
     .logo{width:22px;height:22px;border-radius:9px;background:linear-gradient(135deg,#13131c,#0a0a10);border:1px solid rgba(168,85,247,.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(168,85,247,.18)}
     .logo .candles{height:17px;gap:2.5px}
@@ -61,13 +61,13 @@
     .logo .candle.red .body{height:6px}
     .logo .candle .wick.top{height:3px}
     .logo .candle .wick.bottom{height:2px}
-    .title b{font-size:8.5px;letter-spacing:.9px;display:block;color:#fff;line-height:1}
+    .title b{font-size:8px;letter-spacing:.9px;display:block;color:#fff;line-height:1}
     .title b span{color:#a78bfa}
     .title small{font-size:5.5px;letter-spacing:1.1px;color:#94a3b8;font-weight:700;display:block;margin-top:2px}
     .live{font-size:6px;font-weight:800;letter-spacing:.6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.30);color:#4ade80;padding:3px 6px;border-radius:20px;display:flex;align-items:center;gap:4px;flex-shrink:0}
     .live i{width:5px;height:5px;background:#22c55e;border-radius:50%;display:block;box-shadow:0 0 6px #22c55e;animation:pulse 1.4s infinite}
     .actions{display:flex;gap:5px;flex-shrink:0}
-    .ibtn{width:22px;height:22px;border-radius:8px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#cbd5e1;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+    .ibtn{width:24px;height:24px;min-width:24px;flex-shrink:0;border-radius:8px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#cbd5e1;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
     .ibtn:hover{background:rgba(255,255,255,.09);color:#fff}
     .ibtn .lh{width:10px;height:1.6px;background:currentColor;border-radius:2px;position:absolute}
     .ibtn .x1,.ibtn .x2{width:10px;height:1.6px;background:currentColor;position:absolute;border-radius:2px}
@@ -75,7 +75,7 @@
     .ibtn .ref{width:12px;height:12px;border:1.8px solid currentColor;border-radius:50%;border-top-color:transparent;position:relative}
     .ibtn .ref::after{content:'';position:absolute;top:-2px;right:-1px;border-left:4px solid transparent;border-right:1px solid transparent;border-bottom:5px solid currentColor;transform:rotate(40deg)}
     .pairwrap{padding:5px 7px 0;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
-    .pair{font-size:9px;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1.2;flex:1;min-width:0}
+    .pair{font-size:8.5px;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1.2;flex:1;min-width:0}
     .pair small{display:block;font-size:5.5px;letter-spacing:.8px;color:#67e8f9;font-weight:700;margin-top:2px}
     .time{font-size:6.5px;color:#94a3b8;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:4px 7px;border-radius:20px;white-space:nowrap;margin-left:8px}
     /* Candle Viz + Laser + Circular Loading */
@@ -135,7 +135,7 @@
     /* textGlow removed - causes flicker */
     
     .sigtxt{flex:1;min-width:0;overflow:hidden}.sigtxt small{font-size:6.5px;letter-spacing:1.3px;color:#94a3b8;font-weight:700;display:block;height:9px;line-height:9px}
-    .sigtxt b{font-size:15px;font-weight:900;letter-spacing:.5px;line-height:18px;height:18px;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sigtxt b{font-size:13px;font-weight:900;letter-spacing:.5px;line-height:18px;height:18px;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .sig.call .sigtxt b{color:#4ade80}
     .sig.put .sigtxt b{color:#fb7185}
     .sigtxt p{font-size:6px;max-width:118px;height:10px;line-height:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;color:#94a3b8;margin:3px 0 0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
@@ -147,7 +147,7 @@
     .key{margin:5px 7px 0;padding:5px 7px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05)}
     .key-t{font-size:6.5px;letter-spacing:1.1px;color:#a78bfa;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px}
     .key-t .kd{width:6px;height:6px;background:#a855f7;border-radius:50%;box-shadow:0 0 6px #a855f7;flex-shrink:0}
-    .key-item{display:flex;gap:6px;align-items:center;padding:2px 0;font-size:6.8px;line-height:12px;height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;color:#cbd5e1}
+    .key-item{display:flex;gap:6px;align-items:center;padding:2px 0;font-size:6.2px;line-height:11px;height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;color:#cbd5e1}
     .key-item .tick{width:12px;height:12px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .key-item .tick::after{content:'';width:6px;height:3px;border-left:1.6px solid #4ade80;border-bottom:1.6px solid #4ade80;transform:rotate(-45deg) translateY(-1px);display:block}
     .controls{padding:7px 8px 8px;display:flex;flex-direction:column;gap:7px}
@@ -174,12 +174,13 @@
   panel.innerHTML = `
     <div class="head">
       <div class="head-left">
-        <div class="logo"><div class="candles"><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle red"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div></div></div>
+        <!-- GHOST LOGO: User logo pathale ekhane bosbe --><div class="logo"><div class="candles"><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle red"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div></div></div>
         <div class="title"><b>GHOST <span>AI</span></b><small>SIGNAL ANALYZER PRO</small></div>
         <div class="live"><i></i> LIVE</div>
       </div>
       <div class="actions">
-        <button class="ibtn" data-act="close"><span class="x1"></span><span class="x2"></span></button>
+        <button class="ibtn" data-act="min" title="Minimize"><span class="lh"></span></button>
+        <button class="ibtn" data-act="close" title="Close"><span class="x1"></span><span class="x2"></span></button>
       </div>
     </div>
     <div class="pairwrap"><div class="pair" id="p-pair">GBP/USD<small>GHOST QUANTUM X • AI SCAN</small></div><div class="time">1M • <span id="p-sec">--s</span></div></div>
@@ -298,12 +299,41 @@
     if(act==='copy'){
       try{
         let txt = currentResult ? `GHOST AI Signal: ${currentResult.signal} ${currentResult.pair} | Conf: ${currentResult.confidence}% | TF: 1M | Expiry: 1-2 MIN` : `GHOST AI: ${currentPair} - Analyzing...`;
-        navigator.clipboard.writeText(txt).then(()=>{ btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy Signal',1200); });
+        navigator.clipboard.writeText(txt).then(()=>{ btn.textContent='Copied!'; setTimeout(()=>btn.textContent='',1200); });
       }catch(err){}
     }
   });
 
   const STEPS = ["Scanning chart","Detecting candlestick structure","Checking trend","Checking support / resistance","Checking momentum","Calculating confidence","Preparing result"];
+  // VIDEO FIX: Viz e Market er asol structure - LIVE price theke candle banabo
+  // Quotex chart er price (193.242) track kore candle banai - static pattern na
+  let priceHistory = [];
+  function getLivePrice(){
+    try{
+      // Quotex price is like 193.242 / 1.27340 - find element with price near chart
+      let els = document.querySelectorAll('div, span');
+      for(let el of els){
+        let t = (el.innerText||'').trim();
+        // Price pattern: 193.242 (3 digits . 3 digits) or 1.27340
+        if(/^\d{2,3}\.\d{2,3}$/.test(t)){
+          let r = el.getBoundingClientRect();
+          if(r.width < 120 && r.height < 30 && r.top > 50 && r.top < window.innerHeight - 100){
+            let v = parseFloat(t);
+            if(v > 0) return v;
+          }
+        }
+      }
+    }catch(e){}
+    return null;
+  }
+  function updatePriceHistory(){
+    let p = getLivePrice();
+    if(p){
+      priceHistory.push(p);
+      if(priceHistory.length > 20) priceHistory.shift();
+    }
+  }
+  setInterval(updatePriceHistory, 1000);
   // Build market structure - 7 candles pop up one by one, then analysis
   function buildStructure(dir){
     let viz = shadow.getElementById('p-viz');
@@ -312,10 +342,17 @@
     let keeps = viz.querySelectorAll('.grid, .scanbeam, .laser');
     viz.innerHTML = '';
     keeps.forEach(k=> viz.appendChild(k));
-    // Structure pattern based on real signal direction - not random
-    // CALL = more green at end (uptrend), PUT = more red at end (downtrend)
+    // VIDEO: Market structure from LIVE price history - jodi price history thake, oita diye candle
+    // Na thakle signal direction diye fallback
     let pattern = [];
-    if(dir === 'CALL' || dir === 'UP'){
+    if(priceHistory.length >= 7){
+      // Last 7 price moves -> candle color
+      for(let i = priceHistory.length - 7; i < priceHistory.length; i++){
+        if(i <= 0) { pattern.push('green'); continue; }
+        let diff = priceHistory[i] - priceHistory[i-1];
+        pattern.push(diff >= 0 ? 'green' : 'red');
+      }
+    } else if(dir === 'CALL' || dir === 'UP'){
       pattern = ['red','red','green','green','green','green','green'];
     } else if(dir === 'PUT' || dir === 'DOWN'){
       pattern = ['green','green','red','red','red','red','red'];
@@ -366,43 +403,33 @@
 
   function getMarket(){
     try{
-      // METHOD 1: Quotex top bar - "CHF/JPY 82%" / "AUD/CAD 79%" / "GBP/USD OTC" - most reliable
-      // Search all elements for PAIR + PAYOUT pattern
-      let all = document.querySelectorAll('div, span, button, a');
-      let best = null;
-      for(let el of all){
-        // Only leaf-ish elements with short text to avoid whole page text
-        let t = (el.innerText||'').trim();
-        if(!t || t.length > 30) continue;
-        // Match: CHF/JPY 82%  OR  CHF/JPY OTC 82%  OR  GBP/USD
-        let m = t.match(/([A-Z]{3}\/[A-Z]{3})\s*(OTC)?\s*(\d{2,3}%)?/);
-        if(m){
-          // Must have payout % or be in header area to be real pair, not random text
-          let hasPayout = m[3] ? true : false;
-          let r = el.getBoundingClientRect();
-          let isTop = r.top < 180; // Quotex pair selector is at top
-          if(hasPayout || isTop){
-            let pair = m[1].replace('/','') + (m[2] ? 'OTC' : '');
-            // Prefer element near top + with payout
-            if(hasPayout && isTop) return pair;
-            if(!best) best = pair;
-          }
-        }
-      }
-      if(best) return best;
-      // METHOD 2: Search body text for "XXX/YYY  NN%" pattern (fallback)
+      // VIDEO FIX: Quotex mobile e Pair Niche thake (Buy/Sell er upore CHF/JPY 77%)
+      // Age sudhu top:180 check kortam, tai niche er pair miss hoye EUR/JPY atke thakto
+      // Ekhon body text theke LAST pair+payout nibo - active pair sobar niche thake
       try{
-        let bodyTxt = document.body.innerText || '';
-        let mm = bodyTxt.match(/([A-Z]{3}\/[A-Z]{3})\s*(OTC)?\s*\d{2,3}%/);
-        if(mm) return mm[1].replace('/','') + (mm[2] ? 'OTC' : '');
+        let bodyTxt = document.body ? (document.body.innerText || '') : '';
+        // Find ALL pairs with payout: CHF/JPY 77%, EUR/JPY 82%, etc
+        let allMatches = [...bodyTxt.matchAll(/([A-Z]{3}\/[A-Z]{3})\s*(OTC)?\s*(\d{2,3}%)/g)];
+        if(allMatches.length > 0){
+          // Last match = active pair (niche Buy/Sell er kache)
+          let last = allMatches[allMatches.length - 1];
+          let pair = last[1].replace('/','') + (last[2] ? 'OTC' : '');
+          // Validate: pair must be real Quotex pair
+          let valid = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"];
+          let base = pair.replace('OTC','');
+          if(valid.includes(base)) return pair;
+        }
       }catch(e){}
-      // METHOD 3: Old selectors
-      let els = document.querySelectorAll('[class*="asset"], [class*="pair"], [class*="symbol"]');
-      for(let el of els){
-        let t=(el.innerText||'').trim();
-        if(/^[A-Z]{3}\/[A-Z]{3}/.test(t)){
-          let m=t.match(/([A-Z]{3}\/[A-Z]{3})/);
-          if(m) return m[1].replace('/','');
+      // Fallback: Search elements for pair + payout, ANY position (top or bottom)
+      let all = document.querySelectorAll('div, span, button, a');
+      for(let el of all){
+        let t = (el.innerText||'').trim();
+        if(!t || t.length > 50) continue;
+        let mm = t.match(/([A-Z]{3}\/[A-Z]{3})\s*(OTC)?\s*(\d{2,3}%)/);
+        if(mm){
+          let pair = mm[1].replace('/','') + (mm[2] ? 'OTC' : '');
+          // Exclude our own panel text (ghost-host is Shadow DOM, not in document, so safe)
+          return pair;
         }
       }
     }catch(e){}
@@ -500,7 +527,7 @@
         else if(pt.includes('Order Block')) condTxt='ORDER BLOCK';
         else if(pt.includes('BOS')) condTxt='BOS';
         else if(pt.includes('Liquidity')) condTxt='LIQUIDITY';
-        else if(pt.length > 12) condTxt = pt.substring(0,12).toUpperCase();
+        else if(pt.length > 13) condTxt = pt.substring(0,13).toUpperCase();
         else condTxt = pt;
         if(lockedStrength) strengthTxt = lockedStrength;
       } else if(j.is_trap) condTxt='TRAP';
@@ -511,7 +538,7 @@
         else if(pt.includes('Order Block')) condTxt='ORDER BLOCK';
         else if(pt.includes('BOS')) condTxt='BOS';
         else if(pt.includes('Liquidity')) condTxt='LIQUIDITY';
-        else if(pt.length > 12) condTxt = pt.substring(0,12).toUpperCase();
+        else if(pt.length > 13) condTxt = pt.substring(0,13).toUpperCase();
         else condTxt = pt;
       }
       else condTxt='RANGING';
@@ -519,13 +546,13 @@
       if(dir==="CALL"||dir==="UP"){
         sigEl.className="sig call"; txtEl.textContent="CALL \u2191 " + (j.confidence||lockedConf||0) + "%";
         if(arrowEl){ arrowEl.className="arrow up"; arrowEl.innerHTML='<span class="tri"></span>'; }
-        if(statusEl) statusEl.textContent='CALL • ACTIVE';
+        if(statusEl) statusEl.textContent='CALL • UP';
         if(reasonEl){ let r=j.reason||j.price_action_type||""; if(r.length>28) r=r.substring(0,28)+"..."; reasonEl.textContent=r; }
         if(trendEl){ trendEl.textContent='BULLISH'; trendEl.className='green'; }
       } else if(dir==="PUT"||dir==="DOWN"){
         sigEl.className="sig put"; txtEl.textContent="PUT \u2193 " + (j.confidence||lockedConf||0) + "%";
         if(arrowEl){ arrowEl.className="arrow down"; arrowEl.innerHTML='<span class="tri"></span>'; }
-        if(statusEl) statusEl.textContent='PUT • ACTIVE';
+        if(statusEl) statusEl.textContent='PUT • DOWN';
         if(reasonEl){ let r=j.reason||j.price_action_type||""; if(r.length>28) r=r.substring(0,28)+"..."; reasonEl.textContent=r; }
         if(trendEl){ trendEl.textContent='BEARISH'; trendEl.className='red'; }
       } else {
