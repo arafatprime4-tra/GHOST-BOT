@@ -58,8 +58,8 @@ let box=document.createElement("div");box.id="ghost-bot";
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
 <div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
-<div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST QUANTUM X • AI SCAN</small></div>
-<div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">QUANTUM X Analyzing...</small></div>
+<div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI SCAN</small></div>
+<div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
 <div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK<br><span id="gh-pa" style="color:#00f0ff;font-size:6px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span></div>
 <div class="gh-close" id="gh-close">✕ Close</div>
