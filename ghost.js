@@ -15,14 +15,14 @@
   style.textContent = `
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     /* ============ ROUND FLOATING BUTTON - Deep Black Premium ============ */
-    .fab{position:fixed;top:62%;right:8px;width:52px;height:52px;border-radius:50%;background:linear-gradient(145deg,#0c0c12,#111114 45%,#08080c);background-color:#0a0a0f;border:1px solid rgba(168,85,247,.45);box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 14px rgba(168,85,247,.28),0 0 28px rgba(0,240,255,.12),0 8px 20px rgba(0,0,0,.65);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;cursor:grab;pointer-events:auto;touch-action:none;z-index:9999;will-change:transform;transition:transform .18s ease}
+    .fab{position:fixed;top:62%;right:8px;width:52px;height:52px;overflow:hidden;padding:0;border-radius:50%;background:linear-gradient(145deg,#0c0c12,#111114 45%,#08080c);background-color:#0a0a0f;border:1px solid rgba(168,85,247,.45);box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 14px rgba(168,85,247,.28),0 0 28px rgba(0,240,255,.12),0 8px 20px rgba(0,0,0,.65);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;cursor:grab;pointer-events:auto;touch-action:none;z-index:9999;will-change:transform;transition:transform .18s ease}
     .fab:active{cursor:grabbing;transform:scale(.96)}
     .fab::before{content:'';position:absolute;inset:-1px;border-radius:50%;padding:1px;background:linear-gradient(135deg,rgba(168,85,247,.6),rgba(0,240,255,.45),rgba(168,85,247,.15));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
     .fab::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:1px solid rgba(168,85,247,.22);animation:fabRing 2.4s ease-out infinite;pointer-events:none}
     @keyframes fabRing{0%{transform:scale(.82);opacity:.8}100%{transform:scale(1.2);opacity:0}}
     @keyframes fabGlow{0%{box-shadow:0 0 0 1px rgba(168,85,247,.30),0 0 14px rgba(168,85,247,.35),0 0 28px rgba(59,130,246,.18),0 8px 20px rgba(0,0,0,.65)}25%{box-shadow:0 0 0 1px rgba(59,130,246,.30),0 0 14px rgba(59,130,246,.32),0 0 28px rgba(0,240,255,.18),0 8px 20px rgba(0,0,0,.65)}50%{box-shadow:0 0 0 1px rgba(0,240,255,.32),0 0 16px rgba(0,240,255,.35),0 0 30px rgba(34,197,94,.16),0 8px 20px rgba(0,0,0,.65)}75%{box-shadow:0 0 0 1px rgba(34,197,94,.30),0 0 14px rgba(34,197,94,.30),0 0 28px rgba(168,85,247,.18),0 8px 20px rgba(0,0,0,.65)}100%{box-shadow:0 0 0 1px rgba(168,85,247,.30),0 0 14px rgba(168,85,247,.35),0 0 28px rgba(59,130,246,.18),0 8px 20px rgba(0,0,0,.65)}} @keyframes fabIn{from{opacity:0;transform:scale(.6) rotate(-10deg)}to{opacity:1;transform:scale(1) rotate(0)}} .fab.show{animation:fabGlow 4s ease-in-out infinite,fabIn .35s cubic-bezier(.16,1,.3,1)}
     .fab{animation:fabGlow 2.8s ease-in-out infinite}
-    .fab-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#22c55e;border-radius:50%;border:2px solid #0a0a0f;box-shadow:0 0 7px #22c55e;animation:pulse 1.6s infinite;z-index:2}
+    .fab img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block} .fab-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#22c55e;border-radius:50%;border:2px solid #0a0a0f;box-shadow:0 0 7px #22c55e;animation:pulse 1.6s infinite;z-index:2}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
     /* 3 Candles - Pure CSS */
     .candles{display:flex;align-items:flex-end;gap:4px;height:30px}
@@ -165,7 +165,7 @@
   // FAB - Deep Black
   let fab = document.createElement('div');
   fab.className = 'fab show';
-  fab.innerHTML = `<div class="fab-dot"></div><div class="candles"><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle red"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div></div>`;
+  fab.innerHTML = `<div class="fab-dot"></div><img src="${GHOST_LOGO}" alt="GHOST" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />`;
   shadow.appendChild(fab);
 
   // Panel
@@ -174,7 +174,7 @@
   panel.innerHTML = `
     <div class="head">
       <div class="head-left">
-        <!-- GHOST LOGO: User logo pathale ekhane bosbe --><div class="logo"><div class="candles"><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle red"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div><div class="candle green"><div class="wick top"></div><div class="body"></div><div class="wick bottom"></div></div></div></div>
+        <div class="logo"><img src="${GHOST_LOGO}" alt="GHOST" /></div>
         <div class="title"><b>GHOST <span>AI</span></b><small>SIGNAL ANALYZER PRO</small></div>
         <div class="live"><i></i> LIVE</div>
       </div>
