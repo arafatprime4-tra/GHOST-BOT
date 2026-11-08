@@ -53,7 +53,7 @@
     @keyframes borderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
     .panel::after{content:'';position:absolute;top:0;left:0;right:0;height:42px;background:linear-gradient(180deg,rgba(0,240,255,.05),transparent);pointer-events:none}
     .head{padding:6px 7px 5px;overflow:visible;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);cursor:move;touch-action:none;position:relative;z-index:1}
-    .head-left{display:flex;align-items:center;gap:8px;min-width:0}
+    .head-left{display:flex;align-items:center;gap:6px;min-width:0;flex:1;overflow:hidden}
     .logo{width:22px;height:22px;border-radius:9px;background:linear-gradient(135deg,#13131c,#0a0a10);border:1px solid rgba(168,85,247,.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(168,85,247,.18)}
     .logo .candles{height:17px;gap:2.5px}
     .logo .candle{height:15px;width:4px}
@@ -62,10 +62,10 @@
     .logo .candle.red .body{height:6px}
     .logo .candle .wick.top{height:3px}
     .logo .candle .wick.bottom{height:2px}
-    .title b{font-size:8px;letter-spacing:.9px;display:block;color:#fff;line-height:1}
+    .title b{font-size:8px;letter-spacing:.6px;display:block;color:#fff;line-height:1;white-space:nowrap;overflow:hidden}
     .title b span{color:#a78bfa}
-    .title small{font-size:5.5px;letter-spacing:1.1px;color:#94a3b8;font-weight:700;display:block;margin-top:2px}
-    .live{font-size:6px;font-weight:800;letter-spacing:.6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.30);color:#4ade80;padding:3px 6px;border-radius:20px;display:flex;align-items:center;gap:4px;flex-shrink:0}
+    .title small{font-size:5px;letter-spacing:.6px;color:#94a3b8;font-weight:700;display:block;margin-top:1px;white-space:nowrap;overflow:hidden}
+    .live{font-size:5.5px;font-weight:800;letter-spacing:.6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.30);color:#4ade80;padding:3px 6px;border-radius:20px;display:flex;align-items:center;gap:4px;flex-shrink:0}
     .live i{width:5px;height:5px;background:#22c55e;border-radius:50%;display:block;box-shadow:0 0 6px #22c55e;animation:pulse 1.4s infinite}
     .actions{display:flex;gap:5px;flex-shrink:0}
     .ibtn{width:24px;height:24px;min-width:24px;flex-shrink:0;border-radius:8px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#cbd5e1;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
@@ -194,8 +194,8 @@
       <div class="result-h"><span>ANALYSIS RESULT</span><b id="p-status2">READY</b></div>
       <div class="sig wait" id="p-sig"><div class="arrow wait" id="p-arrow"><span class="dot"></span></div><div class="sigtxt"><small>SIGNAL</small><b id="p-txt">WAIT</b><p id="p-reason">Quantum X Analyzing...</p></div></div>
       <div class="stats">
-        <div class="stat"><label>MARKET CONDITION</label><b id="p-cond">--</b></div>
-        <div class="stat"><label>SIGNAL STRENGTH</label><b id="p-strength">--</b></div>
+        <div class="stat"><label>MARKET</label><b id="p-cond">--</b></div>
+        <div class="stat"><label>STRENGTH</label><b id="p-strength">--</b></div>
       </div>
     </div>
     <div class="key"><div class="key-t"><span class="kd"></span> KEY ANALYSIS</div><div id="p-key"></div></div>
@@ -404,35 +404,72 @@
 
   function getMarket(){
     try{
-      // VIDEO FIX: Quotex mobile e Pair Niche thake (Buy/Sell er upore CHF/JPY 77%)
-      // Age sudhu top:180 check kortam, tai niche er pair miss hoye EUR/JPY atke thakto
-      // Ekhon body text theke LAST pair+payout nibo - active pair sobar niche thake
+      const VALID = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD","AUDNZD","USDMXN","EURMXN","USDTRY","USDZAR","USDBRL","USDINR","USDPKR","EURTRY"];
+      // STRATEGY 1: Visible pair selector button - Quotex er asset button e shudhu pair thake, e.g. "CHF/JPY" or "AUD/USD OTC"
+      // Asset list er moddhe onek pair thake, kintu active pair er button ta main chart area te thake, list er bahire
+      let candidates = [];
+      let els = document.querySelectorAll('div, span, button, a');
+      for(let el of els){
+        try{
+          let t = (el.innerText||'').trim();
+          // Must be EXACTLY pair (or pair + OTC + payout) and short - not a list item with many pairs
+          if(!t || t.length > 22) continue;
+          // Must be visible
+          let r = el.getBoundingClientRect();
+          if(r.width < 30 || r.width > 220 || r.height < 12 || r.height > 50) continue;
+          if(r.top < 0 || r.left < 0 || r.top > window.innerHeight || r.left > window.innerWidth) continue;
+          // Must be in main view, not in hidden modal (modal has display:none, getBoundingClientRect = 0)
+          if(r.width === 0) continue;
+          let mm = t.match(/^([A-Z]{3}\/[A-Z]{3})\s*(OTC)?\s*(\d{2,3}%|OTC)?/);
+          if(!mm) continue;
+          let base = mm[1].replace('/','');
+          if(!VALID.includes(base)) continue;
+          // Exclude elements that contain many children (list containers)
+          if(el.children.length > 3) continue;
+          // Score: button-like elements higher, top/bottom area higher, small width higher
+          let score = 0;
+          if(el.tagName === 'BUTTON') score += 10;
+          if(el.className && /asset|pair|symbol|instrument|ticker/i.test(el.className)) score += 8;
+          // Active pair is usually near top (desktop) OR near bottom Buy/Sell (mobile) - middle is chart, not pair
+          if(r.top < 180) score += 5;
+          if(r.top > window.innerHeight - 220) score += 5;
+          // Exact pair only (no extra text) = higher
+          if(t.length <= 12) score += 4;
+          candidates.push({pair: base + (mm[2] || mm[3] === 'OTC' ? 'OTC' : ''), score, top: r.top, text: t});
+        }catch(e){}
+      }
+      if(candidates.length > 0){
+        candidates.sort((a,b)=> b.score - a.score);
+        // If top candidate has clear lead, use it
+        if(candidates[0].score >= 8){
+          return candidates[0].pair;
+        }
+        // Otherwise, prefer candidate closest to top (header pair)
+        candidates.sort((a,b)=> a.top - b.top);
+        return candidates[0].pair;
+      }
+      // STRATEGY 2: Body text - FIRST pair+payout (active pair is usually first in header, not last in list)
       try{
         let bodyTxt = document.body ? (document.body.innerText || '') : '';
-        // Find ALL pairs with payout: CHF/JPY 77%, EUR/JPY 82%, etc
-        let allMatches = [...bodyTxt.matchAll(/([A-Z]{3}\/[A-Z]{3})\s*(OTC)?\s*(\d{2,3}%)/g)];
-        if(allMatches.length > 0){
-          // Last match = active pair (niche Buy/Sell er kache)
-          let last = allMatches[allMatches.length - 1];
-          let pair = last[1].replace('/','') + (last[2] ? 'OTC' : '');
-          // Validate: pair must be real Quotex pair
-          let valid = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"];
-          let base = pair.replace('OTC','');
-          if(valid.includes(base)) return pair;
+        let all = [...bodyTxt.matchAll(/([A-Z]{3}\/[A-Z]{3})\s*(OTC)?\s*(\d{2,3}%)/g)];
+        if(all.length > 0){
+          // Take FIRST valid, not LAST - last was asset list bug
+          for(let mt of all){
+            let base = mt[1].replace('/','');
+            if(VALID.includes(base)) return base + (mt[2] ? 'OTC' : '');
+          }
         }
       }catch(e){}
-      // Fallback: Search elements for pair + payout, ANY position (top or bottom)
-      let all = document.querySelectorAll('div, span, button, a');
-      for(let el of all){
-        let t = (el.innerText||'').trim();
-        if(!t || t.length > 50) continue;
-        let mm = t.match(/([A-Z]{3}\/[A-Z]{3})\s*(OTC)?\s*(\d{2,3}%)/);
-        if(mm){
-          let pair = mm[1].replace('/','') + (mm[2] ? 'OTC' : '');
-          // Exclude our own panel text (ghost-host is Shadow DOM, not in document, so safe)
-          return pair;
+      // STRATEGY 3: Quotex localStorage - last asset
+      try{
+        for(let k of Object.keys(localStorage)){
+          let v = localStorage.getItem(k) || '';
+          if(/^[A-Z]{3}\/[A-Z]{3}$/.test(v.trim())){
+            let base = v.trim().replace('/','');
+            if(VALID.includes(base)) return base;
+          }
         }
-      }
+      }catch(e){}
     }catch(e){}
     return currentPair.replace('/','');
   }
