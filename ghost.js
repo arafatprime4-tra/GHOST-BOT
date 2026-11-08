@@ -28,7 +28,7 @@
     /* 3 Candles - Pure CSS */
     .candles{display:flex;align-items:flex-end;gap:4px;height:30px}
     .candle{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:28px;width:7px;position:relative}
-    .candle .wick{width:1.2px;background:currentColor;border-radius:2px;opacity:.95}
+    .candle .wick{width:1.4px;background:currentColor;border-radius:2px;opacity:.95}
     .candle .body{width:7px;border-radius:1.5px;box-shadow:0 0 7px currentColor}
     .candle.green{color:#22c55e}
     .candle.red{color:#f43f5e}
@@ -43,7 +43,7 @@
     .candles .candle:nth-child(2){animation-delay:.3s}
     .candles .candle:nth-child(3){animation-delay:.6s}
     /* ============ PREMIUM EXPANDED PANEL - Deep Black Glass ============ */
-    .panel{position:fixed;top:10%;right:6px;width:235px;max-width:calc(100vw - 10px);min-width:235px;background:linear-gradient(170deg,rgba(8,8,14,.99),rgba(4,4,9,.99));background-color:#05050a;border:1px solid transparent;border-radius:16px;background-clip:padding-box;box-sizing:border-box;position:relative;box-shadow:0 0 0 1px rgba(0,240,255,.10),0 0 26px rgba(168,85,247,.22),0 0 52px rgba(0,240,255,.08),0 20px 44px rgba(0,0,0,.62);backdrop-filter:blur(18px);color:#eef2ff;max-height:460px;overflow:hidden;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none;transform-origin:bottom right}
+    .panel{position:fixed;top:8%;right:6px;width:268px;max-width:calc(100vw - 8px);min-width:268px;background:linear-gradient(180deg,#1e0f3a 0%,#150a2e 45%,#0a0620 100%);background-color:#140a2e;border:1px solid transparent;border-radius:16px;background-clip:padding-box;box-sizing:border-box;position:relative;box-shadow:0 0 0 1px rgba(168,85,247,.45),0 0 28px rgba(139,92,246,.35),0 0 52px rgba(168,85,247,.18),0 20px 44px rgba(0,0,0,.65);backdrop-filter:blur(18px);color:#eef2ff;max-height:460px;overflow:hidden;font-family:Inter,'Segoe UI',system-ui,sans-serif;overflow:hidden;pointer-events:auto;display:none;transform-origin:bottom right}
     .panel.open{display:block;animation:panelIn .38s cubic-bezier(.16,1,.3,1),panelGlow 4s ease-in-out infinite}
     @keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.82) rotateX(4deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}} @keyframes panelOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.82) translateY(10px)}} .panel.closing{animation:panelOut .28s ease forwards !important}
     @keyframes panelGlow{0%{box-shadow:0 0 0 1px rgba(168,85,247,.35),0 0 18px rgba(168,85,247,.30),0 0 32px rgba(0,140,255,.14),0 16px 32px rgba(0,0,0,.65)}25%{box-shadow:0 0 0 1px rgba(0,140,255,.35),0 0 18px rgba(0,140,255,.28),0 0 32px rgba(0,240,255,.16),0 16px 32px rgba(0,0,0,.65)}50%{box-shadow:0 0 0 1px rgba(0,240,255,.35),0 0 20px rgba(0,240,255,.30),0 0 36px rgba(34,197,94,.14),0 16px 32px rgba(0,0,0,.65)}75%{box-shadow:0 0 0 1px rgba(34,197,94,.35),0 0 18px rgba(34,197,94,.26),0 0 32px rgba(168,85,247,.16),0 16px 32px rgba(0,0,0,.65)}100%{box-shadow:0 0 0 1px rgba(168,85,247,.35),0 0 18px rgba(168,85,247,.30),0 0 32px rgba(0,140,255,.14),0 16px 32px rgba(0,0,0,.65)}}
@@ -81,7 +81,7 @@
     .time{font-size:6.5px;color:#94a3b8;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:4px 7px;border-radius:20px;white-space:nowrap;margin-left:8px}
     /* Candle Viz + Laser + Circular Loading */
     .vizwrap{margin:4px 7px 0;padding:4px 7px 4px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .viz{height:52px;min-height:52px}
+    .viz{background:rgba(10,6,32,.85);height:52px;min-height:52px}
     .viz .candle{height:26px;width:7px;opacity:0;transform:scaleY(.4) translateY(6px);animation:candlePop .45s cubic-bezier(.16,1,.3,1) forwards}
     @keyframes candlePop{from{opacity:0;transform:scaleY(.4) translateY(6px)}to{opacity:1;transform:scaleY(1) translateY(0)}}
     .viz .candle:nth-child(2){animation-delay:.05s} .viz .candle:nth-child(3){animation-delay:.15s} .viz .candle:nth-child(4){animation-delay:.25s} .viz .candle:nth-child(5){animation-delay:.35s} .viz .candle:nth-child(6){animation-delay:.45s} .viz .candle:nth-child(7){animation-delay:.55s} .viz .candle:nth-child(8){animation-delay:.65s}
@@ -151,6 +151,42 @@
     .key-item{display:flex;gap:6px;align-items:center;padding:2px 0;font-size:8.5px;line-height:14px;height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;color:#cbd5e1}
     .key-item .tick{width:12px;height:12px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .key-item .tick::after{content:'';width:6px;height:3px;border-left:1.6px solid #4ade80;border-bottom:1.6px solid #4ade80;transform:rotate(-45deg) translateY(-1px);display:block}
+
+    /* ===== GHOST MATRIX DESIGN - Video 2 ===== */
+    .matrix-head{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px}
+    .matrix-ready{font-size:6px;font-weight:800;letter-spacing:.6px;color:#4ade80;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);padding:3px 7px;border-radius:20px;display:flex;align-items:center;gap:4px}
+    .matrix-ready i{width:6px;height:6px;background:#22c55e;border-radius:50%;box-shadow:0 0 6px #22c55e;animation:pulse 1.4s infinite}
+    .pair-big{font-size:21px;font-weight:900;letter-spacing:.3px;color:#fff;line-height:1.1;padding:0 10px}
+    .pair-big span{color:#a78bfa;font-size:13px;font-weight:700}
+    .badges{display:flex;gap:5px;padding:6px 10px 0;flex-wrap:wrap}
+    .badge{font-size:6.5px;font-weight:800;letter-spacing:.5px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#e2e8f0}
+    .badge.otc{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.35);color:#fbbf24}
+    .badge.real{background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.35);color:#4ade80}
+    .badge.entry{background:rgba(168,85,247,.14);border-color:rgba(168,85,247,.35);color:#c4b5fd}
+    .matrix-signal{text-align:center;padding:10px 10px 4px}
+    .matrix-arrow{width:52px;height:52px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff;box-shadow:0 0 22px rgba(34,197,94,.55)}
+    .matrix-signal.call .matrix-arrow{background:linear-gradient(135deg,#22c55e,#15803d)}
+    .matrix-signal.put .matrix-arrow{background:linear-gradient(135deg,#f43f5e,#be123c);box-shadow:0 0 22px rgba(244,63,94,.55)}
+    .matrix-signal.wait .matrix-arrow{background:rgba(255,255,255,.08)}
+    .matrix-call{font-size:28px;font-weight:900;letter-spacing:1px;line-height:1;margin-top:6px}
+    .matrix-call.call{color:#4ade80;text-shadow:0 0 14px rgba(34,197,94,.6)}
+    .matrix-call.put{color:#fb7185;text-shadow:0 0 14px rgba(244,63,94,.6)}
+    .matrix-sub{font-size:7px;font-weight:700;letter-spacing:1.2px;color:#94a3b8;margin-top:3px}
+    .conf-wrap{display:flex;gap:10px;align-items:center;padding:8px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;margin:8px 10px 0}
+    .conf-circle{width:48px;height:48px;min-width:48px;border-radius:50%;background:conic-gradient(#22c55e 0deg, #22c55e 295deg, rgba(255,255,255,.08) 295deg);display:flex;align-items:center;justify-content:center;position:relative}
+    .conf-circle::before{content:'';position:absolute;inset:5px;background:#140a2e;border-radius:50%}
+    .conf-circle b{position:relative;z-index:1;font-size:11px;font-weight:900;color:#fff}
+    .conf-circle small{position:relative;z-index:1;font-size:5px;color:#94a3b8;display:block;text-align:center}
+    .conf-bar{flex:1}
+    .conf-bar label{font-size:6.5px;letter-spacing:1px;color:#94a3b8;font-weight:700;display:flex;justify-content:space-between}
+    .conf-bar .bar{height:6px;background:rgba(255,255,255,.08);border-radius:10px;margin-top:4px;overflow:hidden}
+    .conf-bar .fill{height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:10px;transition:width .5s}
+    .conf-note{font-size:6px;color:#64748b;margin-top:3px}
+    .chips{display:flex;gap:5px;padding:7px 10px 0}
+    .chip{font-size:7px;font-weight:800;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#94a3b8}
+    .chip.on{background:rgba(168,85,247,.18);border-color:rgba(168,85,247,.5);color:#ddd6fe;box-shadow:0 0 8px rgba(168,85,247,.3)}
+    .matrix-trend{padding:7px 10px 0;font-size:7.5px;color:#cbd5e1;line-height:1.4}
+    .matrix-foot{padding:7px 10px 9px;font-size:5.5px;color:#64748b;letter-spacing:.3px;line-height:1.6;border-top:1px solid rgba(255,255,255,.06);margin-top:8px}
     .controls{padding:7px 8px 8px;display:flex;flex-direction:column;gap:7px}
     .row{display:flex;gap:7px}
     .btn{flex:1;height:26px;font-size:7px;border-radius:10px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#e2e8f0;font-size:7.5px;font-weight:700;letter-spacing:.2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s}
@@ -173,32 +209,29 @@
   let panel = document.createElement('div');
   panel.className = 'panel';
   panel.innerHTML = `
-    <div class="head">
-      <div class="head-left">
-        <div class="logo"><img src="${GHOST_LOGO}" alt="GHOST" /></div>
-        <div class="title"><b>GHOST <span>AI</span></b><small>SIGNAL ANALYZER PRO</small></div>
-        <div class="live"><i></i> LIVE</div>
-      </div>
-      <div class="actions">
-        <button class="ibtn" data-act="min" title="Minimize"><span class="lh"></span></button>
-        <button class="ibtn" data-act="close" title="Close"><span class="x1"></span><span class="x2"></span></button>
-      </div>
+    <div class="matrix-head">
+      <div class="head-left"><div class="logo"><img src="${GHOST_LOGO}" alt="GHOST" /></div><div class="title"><b>GHOST <span>AI</span></b></div></div>
+      <div class="matrix-ready"><i></i> AI SIGNAL READY</div>
+      <div class="actions"><button class="ibtn" data-act="min" title="Minimize"><span class="lh"></span></button><button class="ibtn" data-act="close" title="Close"><span class="x1"></span><span class="x2"></span></button></div>
     </div>
-    <div class="pairwrap"><div class="pair"><span class="pair-dot"></span><span id="p-pair">EUR/JPY</span><span class="otc" id="p-otc" style="display:none">OTC</span></div><div class="timer"><b id="p-sec">--s</b></div></div>
-    <div class="vizwrap">
-      <div class="viz" id="p-viz"><div class="grid"></div><div class="scanbeam"></div><div class="laser"></div></div>
-      <div class="loader" id="p-loader"><div class="ring"></div><div class="center" id="p-loader-txt">0%</div></div>
-    </div>
+    <div class="pair-big"><span id="p-pair">EUR/USD</span> <span id="p-pair-otc">(OTC)</span></div>
+    <div class="badges"><span class="badge">1 MIN</span><span class="badge real" id="p-market-type">REAL</span><span class="badge entry">ENTRY <span id="p-sec">00:01</span></span></div>
+    <div class="vizwrap"><div class="viz" id="p-viz"><div class="grid"></div><div class="scanbeam"></div><div class="laser"></div></div><div class="loader" id="p-loader"><div class="ring"></div><div class="center" id="p-loader-txt">0%</div></div></div>
     <div class="analysis" id="p-analysis"><div class="analysis-t"><span>ANALYZING CHART</span><span id="p-pct">0%</span></div><div class="prog"><div class="prog-fill" id="p-prog"></div></div><div class="status" id="p-status">Scanning chart...</div></div>
-    <div class="result">
-      <div class="result-h"><span>ANALYSIS RESULT</span><b id="p-status2">READY</b></div>
-      <div class="sig wait" id="p-sig"><div class="arrow wait" id="p-arrow"><span class="dot"></span></div><div class="sigtxt"><small>SIGNAL</small><b id="p-txt">WAIT</b><p id="p-reason">Quantum X Analyzing...</p></div></div>
-      <div class="stats">
-        <div class="stat"><label>MARKET CONDITION</label><b id="p-cond">--</b></div>
-        <div class="stat"><label>SIGNAL STRENGTH</label><b id="p-strength">--</b></div>
-      </div>
+    <div class="matrix-signal wait" id="p-sig">
+      <div class="matrix-arrow" id="p-arrow"><span>↑</span></div>
+      <div class="matrix-call call" id="p-txt">CALL</div>
+      <div class="matrix-sub"><span id="p-status2">UP • 1 MIN</span></div>
+      <p id="p-reason" style="display:none">--</p>
     </div>
-    <div class="key"><div class="key-t"><span class="kd"></span> KEY ANALYSIS</div><div id="p-key"></div></div>
+    <div class="conf-wrap">
+      <div class="conf-circle" id="p-conf-circle"><b id="p-conf">82%</b></div>
+      <div class="conf-bar"><label><span>CONFIDENCE</span><span id="p-conf2">82%</span></label><div class="bar"><div class="fill" id="p-conf-bar" style="width:82%"></div></div><div class="conf-note">Confidence = setup quality, not win probability.</div></div>
+    </div>
+    <div class="chips"><span class="chip" id="chip-bos">BOS</span><span class="chip" id="chip-ob">OB</span><span class="chip" id="chip-fvg">FVG</span><span class="chip" id="chip-liq">LIQUIDITY</span></div>
+    <div class="matrix-trend"><b id="p-cond">BOS</b> • <span id="p-strength">VERY HIGH</span> — Trend + structure confirmation from live feed.</div>
+    <div class="key"><div id="p-key"></div></div>
+    <div class="matrix-foot">BROKER: Quotex &nbsp;•&nbsp; IMAGE QUALITY: 88/100<br/>VERIFIED ACCURACY: Calculating from WIN / LOSS<br/>ANALYSIS COMPLETE</div>
   `;
   shadow.appendChild(panel);
 
@@ -360,9 +393,11 @@
     }
     // Heights vary like real market structure
     let heights = [10, 14, 11, 16, 13, 18, 15];
+    // VIDEO 1 FIX: Candle NEVER white - market er sathe milbe, green = up, red = down
+    // Pattern: last candles match signal direction (CALL = green end, PUT = red end)
     pattern.forEach((c, i)=>{
       let d = document.createElement('div');
-      d.className = 'candle ' + c;
+      d.className = 'candle ' + (c === 'green' ? 'green' : 'red');
       d.style.setProperty('--i', i);
       d.innerHTML = '<div class="wick top"></div><div class="body" style="height:'+heights[i]+'px"></div><div class="wick bottom"></div>';
       // Stagger pop-up
@@ -534,8 +569,15 @@
     }
     let pairEl = shadow.getElementById('p-pair');
     if(pairEl){
-      let mTxt = (j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2'); if((j.market||currentPair).includes('OTC') || currentPair.includes('OTC')) mTxt += ' OTC';
-      pairEl.innerHTML = mTxt;
+      let raw = (j.market||currentPair);
+      let isOTC = raw.includes('OTC') || currentPair.includes('OTC');
+      let mTxt = raw.replace('OTC','').replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2');
+      pairEl.textContent = mTxt;
+      // VIDEO 1 FIX: OTC te acho kintu REAL dekhay - ekhon OTC/REAL badge auto change hobe
+      let otcEl = shadow.getElementById('p-pair-otc');
+      if(otcEl) otcEl.textContent = isOTC ? '(OTC)' : '';
+      let mType = shadow.getElementById('p-market-type');
+      if(mType){ mType.textContent = isOTC ? 'OTC' : 'REAL'; mType.className = isOTC ? 'badge otc' : 'badge real'; }
     }
     let sigEl = shadow.getElementById('p-sig');
     let txtEl = shadow.getElementById('p-txt');
@@ -580,25 +622,34 @@
       else condTxt='RANGING';
       if(conf>=85) strengthTxt='VERY HIGH'; else if(conf>=75) strengthTxt='HIGH'; else if(conf>=65) strengthTxt='MEDIUM'; else if(conf>=50) strengthTxt='LOW'; else strengthTxt='WAITING';
       if(dir==="CALL"||dir==="UP"){
-        sigEl.className="sig call"; txtEl.textContent="CALL \u2191 " + (j.confidence||lockedConf||0) + "%";
-        if(arrowEl){ arrowEl.className="arrow up"; arrowEl.innerHTML='<span class="tri"></span>'; }
-        if(statusEl) statusEl.textContent='CALL • UP';
+        sigEl.className="matrix-signal call"; txtEl.textContent="CALL";
+        if(arrowEl){ arrowEl.className="matrix-arrow"; arrowEl.innerHTML='<span>\u2191</span>'; }
+        if(statusEl) statusEl.textContent='UP • 1 MIN';
         if(reasonEl){ let r=j.reason||j.price_action_type||""; if(r.length>28) r=r.substring(0,28)+"..."; reasonEl.textContent=r; }
         if(trendEl){ trendEl.textContent='BULLISH'; trendEl.className='green'; }
       } else if(dir==="PUT"||dir==="DOWN"){
-        sigEl.className="sig put"; txtEl.textContent="PUT \u2193 " + (j.confidence||lockedConf||0) + "%";
-        if(arrowEl){ arrowEl.className="arrow down"; arrowEl.innerHTML='<span class="tri"></span>'; }
-        if(statusEl) statusEl.textContent='PUT • DOWN';
+        sigEl.className="matrix-signal put"; txtEl.textContent="PUT";
+        if(arrowEl){ arrowEl.className="matrix-arrow"; arrowEl.innerHTML='<span>\u2193</span>'; }
+        if(statusEl) statusEl.textContent='DOWN • 1 MIN';
         if(reasonEl){ let r=j.reason||j.price_action_type||""; if(r.length>28) r=r.substring(0,28)+"..."; reasonEl.textContent=r; }
         if(trendEl){ trendEl.textContent='BEARISH'; trendEl.className='red'; }
       } else {
-        sigEl.className="sig wait"; txtEl.textContent="WAIT";
-        if(arrowEl){ arrowEl.className="arrow wait"; arrowEl.innerHTML='<span class="dot"></span>'; }
+        sigEl.className="matrix-signal wait"; txtEl.textContent="WAIT";
+        if(arrowEl){ arrowEl.className="matrix-arrow"; arrowEl.innerHTML='<span>•</span>'; }
         if(reasonEl){ let r=j.reason||"Analyzing..."; if(r.length>28) r=r.substring(0,28)+"..."; reasonEl.textContent=r; }
-        if(statusEl) statusEl.textContent='WAITING';
+        if(statusEl) statusEl.textContent='WAITING • 1 MIN';
         if(trendEl) trendEl.textContent='--';
       }
       if(confEl) confEl.textContent=conf+'%';
+      let conf2 = shadow.getElementById('p-conf2'); if(conf2) conf2.textContent = conf + '%';
+      let confBar = shadow.getElementById('p-conf-bar'); if(confBar) confBar.style.width = conf + '%';
+      let confCircle = shadow.getElementById('p-conf-circle'); if(confCircle){ let deg = Math.round(conf * 3.6); let col = conf>=75 ? '#22c55e' : conf>=60 ? '#facc15' : '#f43f5e'; confCircle.style.background = `conic-gradient(${col} 0deg, ${col} ${deg}deg, rgba(255,255,255,.08) ${deg}deg)`; }
+      // Chips: BOS / OB / FVG / LIQUIDITY - backend price_action_type theke active chip highlight
+      let pt = (j.price_action_type||'').toLowerCase();
+      let chipBOS = shadow.getElementById('chip-bos'); if(chipBOS) chipBOS.className = pt.includes('bos') ? 'chip on' : 'chip';
+      let chipOB = shadow.getElementById('chip-ob'); if(chipOB) chipOB.className = (pt.includes('order block') || pt.includes('ob')) ? 'chip on' : 'chip';
+      let chipFVG = shadow.getElementById('chip-fvg'); if(chipFVG) chipFVG.className = pt.includes('fvg') ? 'chip on' : 'chip';
+      let chipLiq = shadow.getElementById('chip-liq'); if(chipLiq) chipLiq.className = pt.includes('liquidity') ? 'chip on' : 'chip';
       if(condEl) condEl.textContent=condTxt;
       if(strengthEl) strengthEl.textContent=strengthTxt;
       if(keyList){
@@ -648,7 +699,7 @@
         let secEl = shadow.getElementById('p-sec');
         if(secEl && j.expiry_timestamp){
           let rem = Math.max(0, Math.ceil((j.expiry_timestamp - Date.now())/1000));
-          secEl.textContent = rem + 's';
+          secEl.textContent = '00:' + String(rem).padStart(2,'0');
         }
       }
     }catch(e){ console.log('GHOST fetch error', e); }
@@ -659,10 +710,10 @@
     if(secEl){
       if(currentSignal && currentSignal.expiry_timestamp){
         let rem = Math.max(0, Math.ceil((currentSignal.expiry_timestamp - Date.now())/1000));
-        secEl.textContent = rem + 's';
+        secEl.textContent = '00:' + String(rem).padStart(2,'0');
         if(rem<=0) currentSignal=null;
       } else {
-        let sec=60-new Date().getSeconds(); if(sec===60) sec=0; secEl.textContent=sec+'s';
+        let sec=60-new Date().getSeconds(); if(sec===60) sec=0; secEl.textContent='00:'+String(sec).padStart(2,'0');
       }
     }
   }, 500);
