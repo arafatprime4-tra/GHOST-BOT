@@ -1,5 +1,13 @@
 (function(){
-if(window.__GHOST_LOADED__){ try{ let o=document.getElementById('ghost-bot'); if(o) o.remove(); }catch(e){} console.log('👻 GHOST already running - ignoring 2nd tap'); return; }
+if(window.__GHOST_LOADED__){
+  // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
+  try{
+    let o=document.getElementById('ghost-bot');
+    if(o){ o.style.display='block'; o.style.visibility='visible'; o.style.opacity='1'; console.log('👻 GHOST already running - showing existing box'); return; }
+    // Box nai (Close kora) - abar banate dao
+    window.__GHOST_LOADED__ = false;
+  }catch(e){ window.__GHOST_LOADED__ = false; }
+}
 window.__GHOST_LOADED__ = true;
 console.log('👻 GHOST BOT LOADING...');
 // ===== BOX FIRST - CSS fail korleo Box asbe =====
@@ -90,7 +98,7 @@ let paEnabled=true;
 let toggleEl=document.getElementById("gh-toggle");
 toggleEl.addEventListener("click",e=>{e.stopPropagation();paEnabled=!paEnabled;toggleEl.textContent=paEnabled?"PA ON":"PA OFF";toggleEl.className=paEnabled?"gh-toggle":"gh-toggle off";localStorage.setItem("ghost_pa_enabled", paEnabled?"1":"0");});
 let savedPA=localStorage.getItem("ghost_pa_enabled");if(savedPA==="0"){paEnabled=false;toggleEl.textContent="PA OFF";toggleEl.className="gh-toggle off";}
-document.getElementById("gh-close").addEventListener("click",e=>{e.stopPropagation();box.remove();});
+document.getElementById("gh-close").addEventListener("click",e=>{e.stopPropagation();box.remove(); window.__GHOST_LOADED__=false;});
 let isDrag=false,sx=0,sy=0,il=0,it=0;let hd=document.getElementById("gh-h");
 function getPos(){let r=box.getBoundingClientRect();return{left:r.left,top:r.top};}
 function ds(e){if(e.target.closest("#gh-close")||e.target.closest("#gh-toggle")||e.target.closest(".gh-loss-btn")) return; isDrag=true;let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;sx=cx;sy=cy;let p=getPos();il=p.left;it=p.top;box.style.left=p.left+"px";box.style.right="auto";box.style.bottom="auto";box.style.transform="none";e.preventDefault();}
