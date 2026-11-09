@@ -8,7 +8,7 @@ try{
   if(_old) _old.remove();
   let _box = document.createElement('div');
   _box.id = 'ghost-bot';
-  _box.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:142px;background:#0a0f23;border:1px solid #00f0ff;border-radius:12px;color:#fff;font-family:sans-serif;text-align:center;padding:6px;box-shadow:0 0 28px rgba(0,240,255,.3)';
+  _box.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:#0a0f23;border:1px solid #00f0ff;border-radius:12px;color:#fff;font-family:sans-serif;text-align:center;padding:5px;box-shadow:0 0 28px rgba(0,240,255,.3)';
   _box.innerHTML = '<div style="font-size:6px;letter-spacing:1px;color:#00f0ff">GHOST AI</div><div style="font-size:9px;font-weight:900;margin:2px 0">LOADING...</div><div style="font-size:8px;color:#00ff88">Bot Ashtese...</div>';
   (document.body || document.documentElement).appendChild(_box);
   console.log('👻 GHOST BOT BOX CREATED - FIRST');
@@ -17,7 +17,7 @@ try{
 let css=document.createElement("style");
 css.innerHTML=`
 /* ===== GHOST FUTURISTIC HUD - v2 FIXED LOSS ===== */
-#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:142px;background:linear-gradient(165deg,rgba(10,15,35,.96),rgba(5,8,20,.98));border:1px solid rgba(0,240,255,.45);border-radius:10px;box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 28px rgba(0,240,255,.22),0 0 60px rgba(0,120,255,.18),0 18px 40px #000d;backdrop-filter:blur(14px);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
+#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:linear-gradient(165deg,rgba(10,15,35,.96),rgba(5,8,20,.98));border:1px solid rgba(0,240,255,.45);border-radius:10px;box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 28px rgba(0,240,255,.22),0 0 60px rgba(0,120,255,.18),0 18px 40px #000d;backdrop-filter:blur(14px);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
 #ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#00f0ff,#7b2fff,#00ff88,transparent);animation:ghBorderFlow 2.4s linear infinite;background-size:200% 100%}
 @keyframes ghBorderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
 @keyframes ghPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
@@ -28,7 +28,7 @@ css.innerHTML=`
 @keyframes ghGlowRed{0%,100%{box-shadow:0 0 12px rgba(255,45,85,.55),0 0 32px rgba(255,45,85,.30)}50%{box-shadow:0 0 22px rgba(255,45,85,.85),0 0 48px rgba(255,45,85,.45)}}
 @keyframes ghScan{0%{top:-10%}100%{top:110%}}
 @keyframes ghShine{0%{left:-80%}100%{left:120%}}
-.gh-h{padding:3px 5px;background:linear-gradient(90deg,rgba(0,240,255,.14),rgba(123,47,255,.12),transparent);border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
+.gh-h{padding:2px 5px;background:linear-gradient(90deg,rgba(0,240,255,.14),rgba(123,47,255,.12),transparent);border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
 .gh-h-left{display:flex;align-items:center;gap:6px}
 .gh-dot{width:6px;height:6px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,.6);animation:ghPulse 1.2s infinite}
 .gh-h b{font-size:6.5px;color:#fff;letter-spacing:1.2px;font-weight:900}
@@ -36,32 +36,32 @@ css.innerHTML=`
 .gh-live{font-size:4.5px;background:#ff2d55;color:#fff;padding:2px 5px;border-radius:20px;font-weight:900;letter-spacing:.6px;animation:ghBlink 1s infinite}
 .gh-toggle{font-size:4.5px;background:rgba(0,240,255,.12);border:1px solid rgba(0,240,255,.5);color:#00f0ff;padding:2px 5px;border-radius:20px;cursor:pointer;font-weight:800}
 .gh-toggle.off{background:rgba(255,255,255,.05);border-color:#333;color:#666}
-.gh-pair{font-size:9px;font-weight:900;color:#fff;text-align:center;margin:5px 0 4px;letter-spacing:1.4px;text-shadow:0 0 10px rgba(0,240,255,.8)}
+.gh-pair{font-size:8px;font-weight:900;color:#fff;text-align:center;margin:2px 0 1px;letter-spacing:1.4px;text-shadow:0 0 10px rgba(0,240,255,.8)}
 .gh-pair small{display:block;font-size:4.5px;color:#00f0ff;letter-spacing:2px;margin-top:2px;font-weight:700}
-.gh-sig{margin:0 6px;height:36px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.gh-sig .gh-arrow{font-size:12px;line-height:1;margin-bottom:1px}
+.gh-sig{margin:0 6px;height:30px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.gh-sig .gh-arrow{font-size:11px;line-height:1;margin-bottom:1px}
 .gh-sig.up .gh-arrow{animation:ghArrowUp .7s ease-in-out infinite}
 .gh-sig.down .gh-arrow{animation:ghArrowDown .7s ease-in-out infinite}
-.gh-sig b{font-size:12px;font-weight:900;letter-spacing:1.5px;line-height:1;text-shadow:0 0 14px currentColor}
+.gh-sig b{font-size:11px;font-weight:900;letter-spacing:1.5px;line-height:1;text-shadow:0 0 14px currentColor}
 .gh-sig small{font-size:4.5px;color:#c8d0dc;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
 .gh-sig .gh-scan{position:absolute;left:0;right:0;height:18px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.18),transparent);animation:ghScan 1.6s linear infinite}
 .gh-sig .gh-shine{position:absolute;top:0;width:40px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);animation:ghShine 1.8s ease-in-out infinite}
 .gh-sig.up{background:linear-gradient(145deg,#00ff88,#00b35e,#006e3a);color:#fff;animation:ghGlowGreen 1.1s ease-in-out infinite;border:1px solid rgba(0,255,136,.7)}
 .gh-sig.down{background:linear-gradient(145deg,#ff2d55,#d6002e,#8a0020);color:#fff;animation:ghGlowRed 1.1s ease-in-out infinite;border:1px solid rgba(255,45,85,.7)}
 .gh-sig.wait{background:linear-gradient(145deg,#141a2a,#0a0e1a);color:#5a6f8a;border:1px solid rgba(0,240,255,.18)}
-.gh-bar{height:2px;margin:3px 6px 0;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden}
+.gh-bar{height:2px;margin:2px 6px 0;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden}
 .gh-bar-fill{height:100%;width:0%;border-radius:10px;background:linear-gradient(90deg,#00f0ff,#00ff88);transition:width .5s linear}
 .gh-meta{font-size:5.5px;color:#8a9ab5;text-align:center;margin:5px 0 6px;letter-spacing:.4px;font-weight:600;line-height:1.4}
 .gh-meta b{color:#00f0ff}
 .gh-meta .gh-conf{color:#00ff88}
-.gh-loss-row{display:flex;gap:4px;margin:0 6px 3px}
+.gh-loss-row{display:flex;gap:4px;margin:0 6px 2px}
 .gh-loss-btn{flex:1;height:18px;border-radius:6px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e2e8f0;font-size:6px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px}
 .gh-loss-btn.win{border-color:rgba(0,255,136,.4);color:#00ff88}
 .gh-loss-btn.loss{border-color:rgba(255,45,85,.4);color:#ff5a7a}
 .gh-loss-btn:active{transform:scale(.96)}
-.gh-protect{margin:0 6px 3px;padding:3px 5px;border-radius:6px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.4);color:#ffb3c2;font-size:6px;font-weight:700;text-align:center;display:none}
+.gh-protect{margin:0 6px 2px;padding:2px 5px;border-radius:6px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.4);color:#ffb3c2;font-size:6px;font-weight:700;text-align:center;display:none}
 .gh-protect.on{display:block;animation:ghBlink 1s infinite}
-.gh-close{margin:0 6px 5px;height:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:6px;font-weight:700;cursor:pointer}
+.gh-close{margin:0 6px 3px;height:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:6px;font-weight:700;cursor:pointer}
 .gh-close:hover{background:rgba(255,45,85,.15);color:#fff}
 .gh-corner{position:absolute;width:7px;height:7px;border:1.5px solid rgba(0,240,255,.6)}
 .gh-corner.tl{top:6px;left:6px;border-right:none;border-bottom:none}
@@ -79,7 +79,7 @@ box.innerHTML=`
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
-<div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK<br><span id="gh-pa" style="color:#00f0ff;font-size:6px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
+<div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK • <span id="gh-pa" style="color:#00f0ff;font-size:5.5px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
 <div class="gh-protect" id="gh-protect">🛑 2 LOSS - 30 MIN OFF - NO SIGNAL</div>
 <div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">✅ WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">❌ LOSS</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
 <div class="gh-close" id="gh-close">✕ Close</div>
@@ -371,23 +371,57 @@ let TOKEN="";try{
 let currentSignal=null;let currentPair="GBPUSD";let priceHistory=[];let candleHistory=[];let lockedSignalId="";let lockedUntil=0;
 function getCurrentMarket(){
   try{
+    // FIX: Pair list khola thakle switch koro na - user list browse kortese
+    if((document.body.innerText||"").includes("Select trade pair")) return currentPair;
+    let valid=["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"];
     let all=document.querySelectorAll('div, span, button, a');
+    // PASS 1: Selected pair button - bottom-left, Pair + % (e.g. GBP/JPY 66%) - eitai REAL selected pair
+    // Video te: niche GBP/JPY 66% chilo, bot EUR/JPY OTC dekhaisilo karon nijer UI kei market vabse
+    let best=null; let bestScore=-1;
     for(let el of all){
-      let txt=(el.innerText||'').trim();
-      if(txt.toUpperCase().includes('OTC') && txt.includes('/')){
-        let m=txt.match(/([A-Z]{3})\s*[\/\s]+\s*([A-Z]{3})/i);
-        if(m){ let pair=(m[1]+m[2]).toUpperCase(); let valid=["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]; if(valid.includes(pair)) return pair+'OTC'; }
-      }
-    }
-    for(let el of all){
-      let txt=(el.innerText||'').trim();
-      if(txt.match(/^[A-Z]{3}\/[A-Z]{3}/i)){
+      try{
+        // FIX: Nijer bot er UI skip - nahole bot nijer EUR/JPY OTC kei market vabe lock hoye jay (SELF-LOCK bug)
+        if(el.closest && el.closest('#ghost-bot')) continue;
+        let txt=(el.innerText||'').trim();
+        if(!txt || txt.length>30 || txt.toUpperCase().includes('GHOST')) continue;
+        // Container div (long text) skip - shudhu choto pair element
+        if(el.children && el.children.length>4) continue;
+        let m=txt.match(/^([A-Z]{3})\s*\/\s*([A-Z]{3})/);
+        if(!m) continue;
+        let pair=(m[1]+m[2]).toUpperCase();
+        if(!valid.includes(pair)) continue;
         let rect=el.getBoundingClientRect();
-        if(rect.top>window.innerHeight*0.4){
-          let m=txt.match(/([A-Z]{3})\/([A-Z]{3})/i);
-          if(m){ let pair=(m[1]+m[2]).toUpperCase(); let isOTC=txt.toUpperCase().includes('OTC'); if(isOTC) pair+='OTC'; return pair; }
+        if(rect.width===0 || rect.height===0 || rect.width>220) continue;
+        let isOTC=txt.toUpperCase().includes('OTC');
+        let hasPct=txt.includes('%');
+        let score=0;
+        // Selected pair button: niche (60-88% height), bam dik, % thake
+        if(rect.top>window.innerHeight*0.60 && rect.top<window.innerHeight*0.88) score+=20;
+        if(rect.left<window.innerWidth*0.45) score+=10;
+        if(hasPct) score+=15;
+        // Pair list er item gulo top e thake / popup e - tader score kom
+        if(rect.top<window.innerHeight*0.40) score-=10;
+        // Exact pair + % + OTC/Real - sobcheye choto, exact element ke bonus
+        if(txt.length<20) score+=5;
+        if(score>bestScore){ bestScore=score; best={pair: pair+(isOTC?'OTC':''), score: score}; }
+      }catch(e){}
+    }
+    if(best && bestScore>=20) return best.pair;
+    // PASS 2: Fallback - kono visible choto pair element (ghost-bot chara)
+    for(let el of all){
+      try{
+        if(el.closest && el.closest('#ghost-bot')) continue;
+        let txt=(el.innerText||'').trim();
+        if(!txt || txt.length>20 || txt.toUpperCase().includes('GHOST')) continue;
+        if(txt.match(/^[A-Z]{3}\/[A-Z]{3}/)){
+          let rect=el.getBoundingClientRect();
+          if(rect.width===0 || rect.height===0) continue;
+          if(rect.top>window.innerHeight*0.4){
+            let m2=txt.match(/([A-Z]{3})\/([A-Z]{3})/);
+            if(m2){ let pair=(m2[1]+m2[2]).toUpperCase(); if(!valid.includes(pair)) continue; let isOTC=txt.toUpperCase().includes('OTC'); if(isOTC) pair+='OTC'; return pair; }
+          }
         }
-      }
+      }catch(e){}
     }
   }catch(e){}
   return currentPair;
@@ -519,7 +553,7 @@ autoDetectMarket();
     if(!errBox){
       errBox = document.createElement('div');
       errBox.id = 'ghost-bot';
-      errBox.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:142px;background:#111;color:#fff;padding:10px;border-radius:12px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid #00f0ff';
+      errBox.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:#111;color:#fff;padding:10px;border-radius:12px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid #00f0ff';
       errBox.innerHTML = '<b>GHOST AI</b><br>Error: '+e.message+'<br><small>Bookmarklet abar tap koro</small>';
       document.body.appendChild(errBox);
     }
@@ -533,7 +567,7 @@ setTimeout(function(){
       console.log('GHOST BOT NOT FOUND - FORCE CREATING');
       let nb = document.createElement('div');
       nb.id = 'ghost-bot';
-      nb.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:142px;background:#111;color:#fff;padding:10px;border-radius:12px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid #00f0ff';
+      nb.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:#111;color:#fff;padding:10px;border-radius:12px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid #00f0ff';
       nb.innerHTML = '<b>GHOST AI</b><br>LOADING...<br><small>Render wake up hocche, 10s wait koro</small>';
       document.body.appendChild(nb);
     } else {
