@@ -174,7 +174,7 @@ function getBalance(){
       let t = (el.innerText||'').trim();
       // Balance pattern: 1,234.56 $ or $ 1,234.56, short text, top area
       if(t.length < 25 && t.includes('$')){
-        let m = t.match(/([0-9]{1,3}(?:,[0-9]{3})*(?:\\.[0-9]{2})|\\d+\\.\\d{2})/);
+        let m = t.match(/([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})|\d+\.\d{2})/);
         if(m){
           let r = el.getBoundingClientRect();
           if(r.top < 120 && r.width < 220 && r.height < 40 && el.children.length <= 2){
@@ -222,7 +222,7 @@ function detectResultAdvanced(){
         let r = el.getBoundingClientRect();
         if(r.width===0 || r.height===0 || r.width>400) continue;
         // Must have number with $ or number
-        if(!txt.match(/\\d+\\.\\d{2}/) && !txt.match(/\\$\\s*\\d/)) continue;
+        if(!txt.match(/\d+\.\d{2}/) && !txt.match(/\$\s*\d/)) continue;
         // Debounce: same text within 10s ignore
         if(txt === last_result_key && (now - last_result_ts) < 10000) continue;
         last_result_key = txt; last_result_ts = now;
@@ -237,13 +237,13 @@ function detectResultAdvanced(){
         let isGreen = col.includes('0, 255') || col.includes('34, 197') || col.includes('green');
         if(hasLossWord) isLoss = true;
         else if(isRed) isLoss = true;
-        else if(txt.includes('-$') || txt.match(/-\\s*\\$?\\s*\\d+\\.\\d{2}/)) isLoss = true;
+        else if(txt.includes('-$') || txt.match(/-\s*\$?\s*\d+\.\d{2}/)) isLoss = true;
         else if(hasProfitWord && !txt.includes('-')) isLoss = false;
         else if(isGreen) isLoss = false;
-        else if(txt.match(/\\+\\s*\\$?\\s*\\d/)) isLoss = false;
+        else if(txt.match(/\+\s*\$?\s*\d/)) isLoss = false;
         else {
           // Number sign check: -1.00 = loss, +1.00 = win
-          let m = txt.match(/([+-])\\s*\\$?\\s*(\\d+\\.\\d{2})/);
+          let m = txt.match(/([+-])\s*\$?\s*(\d+\.\d{2})/);
           if(m) isLoss = (m[1] === '-');
           else continue; // ambiguous, skip
         }
@@ -382,7 +382,7 @@ function getRealPrice(){
   try{
     for(let el of document.querySelectorAll('div, span')){
       let txt=(el.innerText||"").trim();
-      if(!/^\\d+\\.\\d{3,5}$/.test(txt)) continue;
+      if(!/^\d+\.\d{3,5}$/.test(txt)) continue;
       let v=parseFloat(txt);if(v<0.3||v>250) continue;
       let r=el.getBoundingClientRect();
       if(r.width<20||r.width>80) continue;
