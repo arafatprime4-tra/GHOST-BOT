@@ -25,7 +25,7 @@ except:
     ADMIN_ID = int(digits) if digits else 0
 
 AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
-WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com")
+WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com").rstrip("/")  # FIX: strip trailing / so //ghost.js never happens
 CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
 ACADEMY_LINK = os.getenv("ACADEMY_LINK","https://t.me/premierghos")
 APP_LINK = os.getenv("APP_LINK","https://giogram-backend.onrender.com")
@@ -42,13 +42,27 @@ try:
     if os.path.exists(TOKEN_FILE):
         with open(TOKEN_FILE, 'r', encoding='utf-8') as tf:
             approved_tokens = json.load(tf)
+    elif os.path.exists("approved_tokens_backup.json"):
+        # Render restart e main file muche gele backup theke restore
+        with open("approved_tokens_backup.json", 'r', encoding='utf-8') as tf:
+            approved_tokens = json.load(tf)
+        logging.info(f"Restored {len(approved_tokens)} tokens from backup")
 except:
     approved_tokens = {}
 
 def save_tokens():
+    # FIX: atomic write + keep backup - Render restart e file haraleo log thakbe
     try:
-        with open(TOKEN_FILE, 'w', encoding='utf-8') as tf:
+        tmp = TOKEN_FILE + ".tmp"
+        with open(tmp, 'w', encoding='utf-8') as tf:
             json.dump(approved_tokens, tf)
+        os.replace(tmp, TOKEN_FILE)
+        # backup copy for recovery
+        try:
+            with open("approved_tokens_backup.json", 'w', encoding='utf-8') as bf:
+                json.dump(approved_tokens, bf)
+        except: pass
+        logging.info(f"Tokens saved: {len(approved_tokens)}")
     except Exception as e:
         logging.error(f"Token save fail {e}")
 
@@ -98,7 +112,12 @@ def get_all_premium_users():
     users = []
     for token, data in approved_tokens.items():
         if data.get("status") != "deleted":
+            # Ensure last_seen exists for admin display
+            if "last_seen" not in data:
+                data["last_seen"] = data.get("created", 0)
             users.append({"token": token, **data})
+    # Sort by last_seen - active user upore
+    users.sort(key=lambda x: x.get("last_seen", 0), reverse=True)
     return users
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
@@ -111,8 +130,22 @@ def after_request(r):
 def home(): 
     return send_from_directory('.', 'index.html')
 
+# FIX: Explicit /ghost.js route - bypasses generic catch-all, handles //ghost.js, correct JS MIME, no redirect
+@flask_app.route('/ghost.js')
+@flask_app.route('//ghost.js')
+def serve_ghost_js():
+    resp = send_from_directory('.', 'ghost.js')
+    resp.headers['Content-Type'] = 'application/javascript; charset=utf-8'
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return resp
+
 @flask_app.route('/<path:path>')
-def serve_static(path): 
+def serve_static(path):
+    # FIX: Normalize double slash / leading slash - //ghost.js -> ghost.js
+    path = path.lstrip('/')
+    # FIX: If path is empty after strip, serve index
+    if not path:
+        return send_from_directory('.', 'index.html')
     return send_from_directory('.', path)
 
 @flask_app.route('/api/signal')
@@ -181,23 +214,28 @@ def api_signal():
                     "is_deleted": True
                 })
         else:
-            # No token provided - check if we should require token (to block deleted users who clear localStorage)
-            # For now, allow free usage but log it - if you want to force premium only, uncomment below
-            # If you want to block all free usage (only premium can use bot), enable this:
-            # return jsonify({
-            #     "signal_id": f"NO-TOKEN-{int(time.time())}",
-            #     "signal": "WAIT",
-            #     "status": "NO_TOKEN",
-            #     "market": raw_pair,
-            #     "pair": raw_pair.replace("/","").replace("OTC",""),
-            #     "direction": "WAIT",
-            #     "reason": "🔒 Premium token required - Open your premium link first",
-            #     "price_action_type": "NO TOKEN",
-            #     "confidence": 0,
-            #     "remainingSeconds": 0,
-            #     "time_left": 0
-            # })
-            pass  # Allow free usage for now
+            # FIX: Jodi kono premium user thake, tahole token chara bot cholbe na
+            # Age eta 'pass' chilo - tai premium user token chara FREE hisebe bot chalato,
+            # admin e dekha jeto na, suspend/delete kora jeto na
+            if len(approved_tokens) > 0:
+                logging.info(f"FREE attempt blocked - no token - pair={raw_pair} ip={request.remote_addr}")
+                return jsonify({
+                    "signal_id": f"NO-TOKEN-{int(time.time())}",
+                    "signal": "WAIT",
+                    "status": "NO_TOKEN",
+                    "market": raw_pair,
+                    "pair": raw_pair.replace("/","").replace("OTC",""),
+                    "direction": "WAIT",
+                    "reason": "🔒 Premium token required - Open your premium link first",
+                    "price_action_type": "NO TOKEN - Contact Admin",
+                    "confidence": 0,
+                    "risk_percent": 0,
+                    "expiry_timestamp": int((time.time()+60)*1000),
+                    "remainingSeconds": 0,
+                    "time_left": 0,
+                    "is_expired": True
+                })
+            pass  # No premium user yet - allow free testing
         
         # OTC ALLOWED - real off থাকলে OTC দিবে
         is_otc = "OTC" in raw_pair.upper()
@@ -242,6 +280,11 @@ def api_verify():
         return jsonify({"valid": False, "reason": "no token"})
     data = approved_tokens.get(token)
     if data:
+        # Track active user for admin panel
+        data["last_seen"] = int(time.time())
+        data["last_seen_human"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        data["last_ip"] = request.remote_addr
+        save_tokens()
         status = data.get("status", "active")
         if status == "suspended":
             return jsonify({"valid": False, "reason": "suspended", "data": data})
@@ -682,7 +725,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
             # Bookmarklet WITH token - so if you delete token, bookmarklet stops working
-            bookmarklet_with_token = "javascript:(function(){var s=document.createElement('script');s.src='" + WEBSITE_URL + "/ghost.js?token=" + premium_token + "&v='+Date.now();document.body.appendChild(s);})();"
+            # FIX: Use fetch+eval loader (bypasses Quotex CSP script-src which blocks <script src=external>). Single slash, token via window.GHOST_TOKEN
+            bookmarklet_with_token = "javascript:(function(){window.GHOST_TOKEN='" + premium_token + "';fetch('" + WEBSITE_URL + "/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{eval(c)}).catch(e=>alert('Load Fail: '+e.message))})();"
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
@@ -731,10 +775,10 @@ Normal link e sudhu Channel+Admin, ei link e sob Premium.
 3️⃣ Jodi admin token delete kore, bot e BLOCKED dekhabe - Bookmarklet thakleo kaj korbe na!
 
 <b>Normal Bookmarklet (No token - Free):</b>
-<code>javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?v='+Date.now();document.body.appendChild(s);}})();</code>
+<code>javascript:(function(){{fetch('{WEBSITE_URL}/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{{eval(c)}}).catch(e=>alert('Load Fail: '+e.message))}})();</code>
 
 <b>Premium Bookmarklet (With token - Blockable):</b>
-<code>javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?token=YOUR_TOKEN&v='+Date.now();document.body.appendChild(s);}})();</code>
+<code>javascript:(function(){{window.GHOST_TOKEN='YOUR_TOKEN';fetch('{WEBSITE_URL}/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{{eval(c)}}).catch(e=>alert('Load Fail: '+e.message))}})();</code>
 
 Delete korle token invalid hoye jay, tai bookmarklet thakleo BLOCKED dekhabe!
 """
