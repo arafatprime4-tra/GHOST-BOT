@@ -42,27 +42,13 @@ try:
     if os.path.exists(TOKEN_FILE):
         with open(TOKEN_FILE, 'r', encoding='utf-8') as tf:
             approved_tokens = json.load(tf)
-    elif os.path.exists("approved_tokens_backup.json"):
-        # Render restart e main file muche gele backup theke restore
-        with open("approved_tokens_backup.json", 'r', encoding='utf-8') as tf:
-            approved_tokens = json.load(tf)
-        logging.info(f"Restored {len(approved_tokens)} tokens from backup")
 except:
     approved_tokens = {}
 
 def save_tokens():
-    # FIX: atomic write + keep backup - Render restart e file haraleo log thakbe
     try:
-        tmp = TOKEN_FILE + ".tmp"
-        with open(tmp, 'w', encoding='utf-8') as tf:
+        with open(TOKEN_FILE, 'w', encoding='utf-8') as tf:
             json.dump(approved_tokens, tf)
-        os.replace(tmp, TOKEN_FILE)
-        # backup copy for recovery
-        try:
-            with open("approved_tokens_backup.json", 'w', encoding='utf-8') as bf:
-                json.dump(approved_tokens, bf)
-        except: pass
-        logging.info(f"Tokens saved: {len(approved_tokens)}")
     except Exception as e:
         logging.error(f"Token save fail {e}")
 
@@ -112,12 +98,7 @@ def get_all_premium_users():
     users = []
     for token, data in approved_tokens.items():
         if data.get("status") != "deleted":
-            # Ensure last_seen exists for admin display
-            if "last_seen" not in data:
-                data["last_seen"] = data.get("created", 0)
             users.append({"token": token, **data})
-    # Sort by last_seen - active user upore
-    users.sort(key=lambda x: x.get("last_seen", 0), reverse=True)
     return users
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
@@ -200,28 +181,23 @@ def api_signal():
                     "is_deleted": True
                 })
         else:
-            # FIX: Jodi kono premium user thake, tahole token chara bot cholbe na
-            # Age eta 'pass' chilo - tai premium user token chara FREE hisebe bot chalato,
-            # admin e dekha jeto na, suspend/delete kora jeto na
-            if len(approved_tokens) > 0:
-                logging.info(f"FREE attempt blocked - no token - pair={raw_pair} ip={request.remote_addr}")
-                return jsonify({
-                    "signal_id": f"NO-TOKEN-{int(time.time())}",
-                    "signal": "WAIT",
-                    "status": "NO_TOKEN",
-                    "market": raw_pair,
-                    "pair": raw_pair.replace("/","").replace("OTC",""),
-                    "direction": "WAIT",
-                    "reason": "🔒 Premium token required - Open your premium link first",
-                    "price_action_type": "NO TOKEN - Contact Admin",
-                    "confidence": 0,
-                    "risk_percent": 0,
-                    "expiry_timestamp": int((time.time()+60)*1000),
-                    "remainingSeconds": 0,
-                    "time_left": 0,
-                    "is_expired": True
-                })
-            pass  # No premium user yet - allow free testing
+            # No token provided - check if we should require token (to block deleted users who clear localStorage)
+            # For now, allow free usage but log it - if you want to force premium only, uncomment below
+            # If you want to block all free usage (only premium can use bot), enable this:
+            # return jsonify({
+            #     "signal_id": f"NO-TOKEN-{int(time.time())}",
+            #     "signal": "WAIT",
+            #     "status": "NO_TOKEN",
+            #     "market": raw_pair,
+            #     "pair": raw_pair.replace("/","").replace("OTC",""),
+            #     "direction": "WAIT",
+            #     "reason": "🔒 Premium token required - Open your premium link first",
+            #     "price_action_type": "NO TOKEN",
+            #     "confidence": 0,
+            #     "remainingSeconds": 0,
+            #     "time_left": 0
+            # })
+            pass  # Allow free usage for now
         
         # OTC ALLOWED - real off থাকলে OTC দিবে
         is_otc = "OTC" in raw_pair.upper()
@@ -266,11 +242,6 @@ def api_verify():
         return jsonify({"valid": False, "reason": "no token"})
     data = approved_tokens.get(token)
     if data:
-        # Track active user for admin panel
-        data["last_seen"] = int(time.time())
-        data["last_seen_human"] = time.strftime("%Y-%m-%d %H:%M:%S")
-        data["last_ip"] = request.remote_addr
-        save_tokens()
         status = data.get("status", "active")
         if status == "suspended":
             return jsonify({"valid": False, "reason": "suspended", "data": data})
