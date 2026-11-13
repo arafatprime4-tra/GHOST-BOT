@@ -181,24 +181,44 @@ function fetchSignalLyra(){
   }).catch(function(){});
   if(session.active) setTimeout(fetchSignalLyra, 4000);
 }
-// --- Orb Click = Expand / Collapse (Screenshot moto choto) ---
+// --- Orb Tap = Expand / Collapse - FIX: Mobile e click ase na karon Drag preventDefault click ke block kore ---
+// Tai Tap Detection: Move na korle Tap dhore Panel khulbe, Move korle Drag dhore Panel khulbe na
 var card=document.getElementById('gh-card');
 var orb=document.getElementById('gh-orb');
-orb.addEventListener('click',function(){
-  var isHidden = card.style.display==='none';
+function toggleCard(){
+  var isHidden = card.style.display==='none' || card.style.display==='';
   card.style.display = isHidden ? 'block' : 'none';
   if(isHidden) render();
+}
+// Desktop click - Tap hisebe kaj korbe
+orb.addEventListener('click',function(e){
+  if(window.__gh_moved) { window.__gh_moved=false; return; }
+  toggleCard();
 });
-// Drag
-var isDrag=false,sx=0,sy=0,il=0,it=0;
+// Drag + Tap
+var isDrag=false,sx=0,sy=0,il=0,it=0,moved=false;
 function getPos(){ var r=box.getBoundingClientRect(); return {left:r.left,top:r.top}; }
-function ds(e){ if(e.target.closest('#gh-lyra-close')||e.target.closest('#gh-close-bar')||e.target.closest('#gh-voice-btn')) return; isDrag=true; var cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; sx=cx; sy=cy; var p=getPos(); il=p.left; it=p.top; box.style.left=p.left+"px"; box.style.right="auto"; box.style.bottom="auto"; box.style.transform="none"; e.preventDefault(); }
-function dm(e){ if(!isDrag) return; var cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; box.style.left=(il+cx-sx)+"px"; box.style.top=(it+cy-sy)+"px"; e.preventDefault(); }
-function de(){ isDrag=false; }
+function ds(e){ if(e.target.closest('#gh-lyra-close')||e.target.closest('#gh-close-bar')||e.target.closest('#gh-voice-btn')) return; isDrag=true; moved=false; window.__gh_moved=false; var cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; sx=cx; sy=cy; var p=getPos(); il=p.left; it=p.top; box.style.left=p.left+"px"; box.style.right="auto"; box.style.bottom="auto"; box.style.transform="none"; }
+function dm(e){ if(!isDrag) return; var cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; var dx=cx-sx, dy=cy-sy; if(Math.abs(dx)>8 || Math.abs(dy)>8){ moved=true; window.__gh_moved=true; } box.style.left=(il+dx)+"px"; box.style.top=(it+dy)+"px"; if(moved) e.preventDefault(); }
+function de(e){
+  var wasMoved=moved;
+  isDrag=false; moved=false;
+  // Mobile Tap: touchend e jodi move na hoy, tahole Toggle koro - karon click event mobile e block hoy
+  if(e && e.type==='touchend' && !wasMoved){
+    // Orb te touch holei toggle - Header e touch hole toggle na
+    var t=e.target;
+    var isOrb = t && (t.closest && t.closest('#gh-orb'));
+    if(isOrb){
+      setTimeout(function(){ toggleCard(); }, 10);
+      window.__gh_moved=true;
+      setTimeout(function(){ window.__gh_moved=false; }, 300);
+    }
+  }
+}
 var hd=document.getElementById('gh-h');
 hd.addEventListener('mousedown',ds); document.addEventListener('mousemove',dm); document.addEventListener('mouseup',de);
-hd.addEventListener('touchstart',ds,{passive:false}); document.addEventListener('touchmove',dm,{passive:false}); document.addEventListener('touchend',de);
-orb.addEventListener('mousedown',ds); orb.addEventListener('touchstart',ds,{passive:false});
+hd.addEventListener('touchstart',ds,{passive:true}); document.addEventListener('touchmove',dm,{passive:false}); document.addEventListener('touchend',de,{passive:true});
+orb.addEventListener('mousedown',ds); orb.addEventListener('touchstart',ds,{passive:true});
 document.getElementById('gh-lyra-close').addEventListener('click',function(){ box.remove(); });
 document.getElementById('gh-close-bar').addEventListener('click',function(){ box.remove(); });
 // Voice button
