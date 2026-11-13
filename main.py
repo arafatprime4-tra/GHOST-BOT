@@ -16,7 +16,6 @@ except:
 
 logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN","").strip()
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN","").strip()  # Admin er nijer token - Render ENV e set koro
 
 _admin_raw = os.getenv("ADMIN_ID","0").strip()
 try:
@@ -102,28 +101,6 @@ def get_tokens_backup_json():
     except:
         return "{}"
 
-@app.route("/api/backup-tokens", methods=["GET"])
-def backup_tokens():
-    # STABLE: Update er age ei URL theke backup JSON download koro - user kokhono harabe na
-    # Usage: https://giogram-backend.onrender.com/api/backup-tokens
-    try:
-        return app.response_class(get_tokens_backup_json(), mimetype="application/json", headers={"Content-Disposition": "attachment; filename=approved_tokens_backup.json"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/api/restore-tokens", methods=["POST"])
-def restore_tokens():
-    # STABLE: Backup JSON diye restore - jodi kokhono user muche jay
-    try:
-        data = request.get_json(force=True)
-        if isinstance(data, dict) and len(data) > 0:
-            approved_tokens.update(data)
-            save_tokens()
-            return jsonify({"success": True, "total": len(approved_tokens), "message": f"Restored {len(data)} tokens, total now {len(approved_tokens)}"})
-        return jsonify({"success": False, "message": "Empty or invalid backup"}), 400
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
 def create_premium_token(trader_id, user_id, amount):
     token = secrets.token_urlsafe(32)
     approved_tokens[token] = {
@@ -174,6 +151,30 @@ def get_all_premium_users():
     return users
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
+
+# STABLE: Backup / Restore endpoints - flask_app er PORE define korte hobe, nahole NameError: app is not defined
+@flask_app.route("/api/backup-tokens", methods=["GET"])
+def backup_tokens():
+    # Update er age ei URL theke backup JSON download koro - user kokhono harabe na
+    # Usage: https://giogram-backend.onrender.com/api/backup-tokens
+    try:
+        return flask_app.response_class(get_tokens_backup_json(), mimetype="application/json", headers={"Content-Disposition": "attachment; filename=approved_tokens_backup.json"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@flask_app.route("/api/restore-tokens", methods=["POST"])
+def restore_tokens():
+    # Backup JSON diye restore - jodi kokhono user muche jay
+    try:
+        data = request.get_json(force=True)
+        if isinstance(data, dict) and len(data) > 0:
+            approved_tokens.update(data)
+            save_tokens()
+            return jsonify({"success": True, "total": len(approved_tokens), "message": f"Restored {len(data)} tokens, total now {len(approved_tokens)}"})
+        return jsonify({"success": False, "message": "Empty or invalid backup"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @flask_app.after_request
 def after_request(r): 
     r.headers.add('Access-Control-Allow-Origin','*')
@@ -190,21 +191,6 @@ def serve_static(path):
 @flask_app.route('/api/signal')
 def api_signal():
     try:
-        # STABLE FIX: BLOCKED logic - Token check na korle Suspend korleo user signal paito (age /api/signal token check korto na)
-        # Ekhon: Valid token chara BLOCKED dekhabe, ager user (token wipe hoye geche) BLOCKED dekhbe
-        req_token = (request.args.get('token','') or '').strip()
-        admin_token = os.getenv("ADMIN_TOKEN","").strip()
-        # Admin er nijer token thakle allow - Admin Dashboard e ADMIN_TOKEN set korle admin er bot cholbe
-        is_admin = bool(admin_token and req_token and req_token == admin_token)
-        # Admin er token na thakle, approved_tokens e check
-        if not is_admin:
-            # Jodi kono premium user e na thake (No premium user), tahole FREE na - BLOCKED, nahole ager user free te use korto
-            # Admin nijeo token chara BLOCKED dekhbe - Admin ke nijer jonno token banate hobe (niche dekhun)
-            if req_token not in approved_tokens:
-                return jsonify({"signal_id": f"BLOCKED-{int(time.time())}","signal":"WAIT","status":"BLOCKED","market":request.args.get('pair','EURUSD'),"pair":request.args.get('pair','EURUSD'),"direction":"WAIT","reason":"⛔ BLOCKED - No Valid Token - Contact Admin","risk_percent":1,"expiry_timestamp":int((time.time()+60)*1000),"remainingSeconds":60,"time_left":60,"blocked":True})
-            _tdata = approved_tokens.get(req_token, {})
-            if _tdata.get("status") != "active":
-                return jsonify({"signal_id": f"BLOCKED-{int(time.time())}","signal":"WAIT","status":"BLOCKED","market":request.args.get('pair','EURUSD'),"pair":request.args.get('pair','EURUSD'),"direction":"WAIT","reason":"⛔ BLOCKED - Suspended / Deleted - Contact Admin","risk_percent":1,"expiry_timestamp":int((time.time()+60)*1000),"remainingSeconds":60,"time_left":60,"blocked":True})
         mode=request.args.get('mode','SAFE')
         raw_pair=request.args.get('pair','EURUSD')
         # OTC ALLOWED - real off থাকলে OTC দিবে
@@ -609,10 +595,10 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "amount": str(amount), "created": int(time.time())}
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
-            kb=[
+            kb=
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
-                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK)]
+                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK) ]
             ]
             msg = f"""🎉 CONGRATULATIONS PREMIUM APPROVED 🎉
 
