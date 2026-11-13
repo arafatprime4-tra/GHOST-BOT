@@ -16,6 +16,7 @@ except:
 
 logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN","").strip()
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN","").strip()  # Admin er nijer token - Render ENV e set koro
 
 _admin_raw = os.getenv("ADMIN_ID","0").strip()
 try:
@@ -25,7 +26,7 @@ except:
     ADMIN_ID = int(digits) if digits else 0
 
 AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
-WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com").rstrip("/")  # FIX: strip trailing / so //ghost.js never happens
+WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
 ACADEMY_LINK = os.getenv("ACADEMY_LINK","https://t.me/premierghos")
 APP_LINK = os.getenv("APP_LINK","https://giogram-backend.onrender.com")
@@ -37,34 +38,91 @@ user_trader_map = {}
 pending_deposit_claims = {}
 
 TOKEN_FILE = "approved_tokens.json"
+BACKUP_FILE = "approved_tokens_backup.json"
+AUTOSAVE_FILE = "approved_tokens_autosave.json"
+# STABLE FIX: Update korle User muche jabe na - 3-layer backup
+# 1) Main file, 2) Backup file, 3) ENV var (APPROVED_TOKENS_JSON) / GitHub raw
+# Render redeploy korle ephemeral disk wipe hoy, kintu backup + ENV theke restore hobe.
+def _load_json_file(path):
+    try:
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as tf:
+                d = json.load(tf)
+                if isinstance(d, dict) and len(d) > 0:
+                    return d
+    except Exception as e:
+        print(f"Load {path} fail: {e}")
+    return {}
+
 approved_tokens = {}
-try:
-    if os.path.exists(TOKEN_FILE):
-        with open(TOKEN_FILE, 'r', encoding='utf-8') as tf:
-            approved_tokens = json.load(tf)
-    elif os.path.exists("approved_tokens_backup.json"):
-        # Render restart e main file muche gele backup theke restore
-        with open("approved_tokens_backup.json", 'r', encoding='utf-8') as tf:
-            approved_tokens = json.load(tf)
-        logging.info(f"Restored {len(approved_tokens)} tokens from backup")
-except:
-    approved_tokens = {}
+# Layer 1: Main file
+approved_tokens = _load_json_file(TOKEN_FILE)
+_src = "main file" if approved_tokens else ""
+# Layer 2: Backup file (main khali hole)
+if not approved_tokens:
+    approved_tokens = _load_json_file(BACKUP_FILE)
+    _src = "backup file" if approved_tokens else ""
+# Layer 3: Autosave file
+if not approved_tokens:
+    approved_tokens = _load_json_file(AUTOSAVE_FILE)
+    _src = "autosave file" if approved_tokens else ""
+# Layer 4: ENV var - Render Dashboard e APPROVED_TOKENS_JSON e paste korle redeploy eo thakbe
+if not approved_tokens:
+    try:
+        env_json = os.getenv("APPROVED_TOKENS_JSON", "").strip()
+        if env_json:
+            d = json.loads(env_json)
+            if isinstance(d, dict) and len(d) > 0:
+                approved_tokens = d
+                _src = "ENV var"
+    except Exception as e:
+        print(f"Load ENV tokens fail: {e}")
+print(f"STABLE: Tokens loaded: {len(approved_tokens)} from {_src or 'empty - fresh start'}")
 
 def save_tokens():
-    # FIX: atomic write + keep backup - Render restart e file haraleo log thakbe
+    # STABLE FIX: 3 jaygay save - main + backup + autosave, jekono ekta thaklei restore hobe
     try:
-        tmp = TOKEN_FILE + ".tmp"
-        with open(tmp, 'w', encoding='utf-8') as tf:
-            json.dump(approved_tokens, tf)
-        os.replace(tmp, TOKEN_FILE)
-        # backup copy for recovery
-        try:
-            with open("approved_tokens_backup.json", 'w', encoding='utf-8') as bf:
-                json.dump(approved_tokens, bf)
-        except: pass
-        logging.info(f"Tokens saved: {len(approved_tokens)}")
+        data = json.dumps(approved_tokens, indent=2)
+        for _f in [TOKEN_FILE, BACKUP_FILE, AUTOSAVE_FILE]:
+            try:
+                with open(_f, 'w', encoding='utf-8') as tf:
+                    tf.write(data)
+            except Exception as e:
+                print(f"Save {_f} fail: {e}")
+        # ENV backup er jonno log - user chaile ei JSON ta Render ENV e paste korte parbe
+        if len(approved_tokens) > 0:
+            print(f"STABLE: Tokens saved: {len(approved_tokens)} to 3 files. Backup JSON ready for ENV.")
     except Exception as e:
         logging.error(f"Token save fail {e}")
+
+def get_tokens_backup_json():
+    # Admin er jonno - backup JSON download korar jonno
+    try:
+        return json.dumps(approved_tokens, indent=2)
+    except:
+        return "{}"
+
+@app.route("/api/backup-tokens", methods=["GET"])
+def backup_tokens():
+    # STABLE: Update er age ei URL theke backup JSON download koro - user kokhono harabe na
+    # Usage: https://giogram-backend.onrender.com/api/backup-tokens
+    try:
+        return app.response_class(get_tokens_backup_json(), mimetype="application/json", headers={"Content-Disposition": "attachment; filename=approved_tokens_backup.json"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/restore-tokens", methods=["POST"])
+def restore_tokens():
+    # STABLE: Backup JSON diye restore - jodi kokhono user muche jay
+    try:
+        data = request.get_json(force=True)
+        if isinstance(data, dict) and len(data) > 0:
+            approved_tokens.update(data)
+            save_tokens()
+            return jsonify({"success": True, "total": len(approved_tokens), "message": f"Restored {len(data)} tokens, total now {len(approved_tokens)}"})
+        return jsonify({"success": False, "message": "Empty or invalid backup"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 def create_premium_token(trader_id, user_id, amount):
     token = secrets.token_urlsafe(32)
@@ -112,12 +170,7 @@ def get_all_premium_users():
     users = []
     for token, data in approved_tokens.items():
         if data.get("status") != "deleted":
-            # Ensure last_seen exists for admin display
-            if "last_seen" not in data:
-                data["last_seen"] = data.get("created", 0)
             users.append({"token": token, **data})
-    # Sort by last_seen - active user upore
-    users.sort(key=lambda x: x.get("last_seen", 0), reverse=True)
     return users
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
@@ -130,113 +183,30 @@ def after_request(r):
 def home(): 
     return send_from_directory('.', 'index.html')
 
-# FIX: Explicit /ghost.js route - bypasses generic catch-all, handles //ghost.js, correct JS MIME, no redirect
-@flask_app.route('/ghost.js')
-@flask_app.route('//ghost.js')
-def serve_ghost_js():
-    resp = send_from_directory('.', 'ghost.js')
-    resp.headers['Content-Type'] = 'application/javascript; charset=utf-8'
-    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    return resp
-
 @flask_app.route('/<path:path>')
-def serve_static(path):
-    # FIX: Normalize double slash / leading slash - //ghost.js -> ghost.js
-    path = path.lstrip('/')
-    # FIX: If path is empty after strip, serve index
-    if not path:
-        return send_from_directory('.', 'index.html')
+def serve_static(path): 
     return send_from_directory('.', path)
 
 @flask_app.route('/api/signal')
 def api_signal():
     try:
+        # STABLE FIX: BLOCKED logic - Token check na korle Suspend korleo user signal paito (age /api/signal token check korto na)
+        # Ekhon: Valid token chara BLOCKED dekhabe, ager user (token wipe hoye geche) BLOCKED dekhbe
+        req_token = (request.args.get('token','') or '').strip()
+        admin_token = os.getenv("ADMIN_TOKEN","").strip()
+        # Admin er nijer token thakle allow - Admin Dashboard e ADMIN_TOKEN set korle admin er bot cholbe
+        is_admin = bool(admin_token and req_token and req_token == admin_token)
+        # Admin er token na thakle, approved_tokens e check
+        if not is_admin:
+            # Jodi kono premium user e na thake (No premium user), tahole FREE na - BLOCKED, nahole ager user free te use korto
+            # Admin nijeo token chara BLOCKED dekhbe - Admin ke nijer jonno token banate hobe (niche dekhun)
+            if req_token not in approved_tokens:
+                return jsonify({"signal_id": f"BLOCKED-{int(time.time())}","signal":"WAIT","status":"BLOCKED","market":request.args.get('pair','EURUSD'),"pair":request.args.get('pair','EURUSD'),"direction":"WAIT","reason":"⛔ BLOCKED - No Valid Token - Contact Admin","risk_percent":1,"expiry_timestamp":int((time.time()+60)*1000),"remainingSeconds":60,"time_left":60,"blocked":True})
+            _tdata = approved_tokens.get(req_token, {})
+            if _tdata.get("status") != "active":
+                return jsonify({"signal_id": f"BLOCKED-{int(time.time())}","signal":"WAIT","status":"BLOCKED","market":request.args.get('pair','EURUSD'),"pair":request.args.get('pair','EURUSD'),"direction":"WAIT","reason":"⛔ BLOCKED - Suspended / Deleted - Contact Admin","risk_percent":1,"expiry_timestamp":int((time.time()+60)*1000),"remainingSeconds":60,"time_left":60,"blocked":True})
         mode=request.args.get('mode','SAFE')
         raw_pair=request.args.get('pair','EURUSD')
-        # === PREMIUM TOKEN CHECK - BLOCK DELETED USERS EVEN IF BOOKMARKLET SAVED ===
-        token = request.args.get('token','') or request.args.get('access','') or request.args.get('premium','') or ''
-        token = token.strip()
-        
-        # If token is provided, validate it - FIXED: Allow free testing if no tokens exist
-        if token and len(approved_tokens) > 0:
-            data = approved_tokens.get(token)
-            if not data:
-                # Token deleted - BLOCK BOT even if bookmarklet saved
-                return jsonify({
-                    "signal_id": f"EXPIRED-{int(time.time())}",
-                    "signal": "WAIT",
-                    "status": "EXPIRED",
-                    "market": raw_pair,
-                    "pair": raw_pair.replace("/","").replace("OTC",""),
-                    "direction": "WAIT",
-                    "reason": "❌ Premium revoked - Token deleted",
-                    "price_action_type": "EXPIRED - Contact Admin",
-                    "confidence": 0,
-                    "risk_percent": 0,
-                    "expiry_timestamp": int((time.time()+60)*1000),
-                    "remainingSeconds": 0,
-                    "time_left": 0,
-                    "is_expired": True
-                })
-            status = data.get("status", "active")
-            if status == "suspended":
-                return jsonify({
-                    "signal_id": f"SUSPENDED-{int(time.time())}",
-                    "signal": "WAIT",
-                    "status": "SUSPENDED",
-                    "market": raw_pair,
-                    "pair": raw_pair.replace("/","").replace("OTC",""),
-                    "direction": "WAIT",
-                    "reason": "⏸️ Premium suspended by admin",
-                    "price_action_type": "SUSPENDED",
-                    "confidence": 0,
-                    "risk_percent": 0,
-                    "expiry_timestamp": int((time.time()+60)*1000),
-                    "remainingSeconds": 0,
-                    "time_left": 0,
-                    "is_suspended": True
-                })
-            if status == "deleted":
-                return jsonify({
-                    "signal_id": f"DELETED-{int(time.time())}",
-                    "signal": "WAIT",
-                    "status": "DELETED",
-                    "market": raw_pair,
-                    "pair": raw_pair.replace("/","").replace("OTC",""),
-                    "direction": "WAIT",
-                    "reason": "❌ Premium deleted - Contact admin for new access",
-                    "price_action_type": "DELETED",
-                    "confidence": 0,
-                    "risk_percent": 0,
-                    "expiry_timestamp": int((time.time()+60)*1000),
-                    "remainingSeconds": 0,
-                    "time_left": 0,
-                    "is_deleted": True
-                })
-        else:
-            # FIX: Jodi kono premium user thake, tahole token chara bot cholbe na
-            # Age eta 'pass' chilo - tai premium user token chara FREE hisebe bot chalato,
-            # admin e dekha jeto na, suspend/delete kora jeto na
-            if len(approved_tokens) > 0:
-                logging.info(f"FREE attempt blocked - no token - pair={raw_pair} ip={request.remote_addr}")
-                return jsonify({
-                    "signal_id": f"NO-TOKEN-{int(time.time())}",
-                    "signal": "WAIT",
-                    "status": "NO_TOKEN",
-                    "market": raw_pair,
-                    "pair": raw_pair.replace("/","").replace("OTC",""),
-                    "direction": "WAIT",
-                    "reason": "🔒 Premium token required - Open your premium link first",
-                    "price_action_type": "NO TOKEN - Contact Admin",
-                    "confidence": 0,
-                    "risk_percent": 0,
-                    "expiry_timestamp": int((time.time()+60)*1000),
-                    "remainingSeconds": 0,
-                    "time_left": 0,
-                    "is_expired": True
-                })
-            pass  # No premium user yet - allow free testing
-        
         # OTC ALLOWED - real off থাকলে OTC দিবে
         is_otc = "OTC" in raw_pair.upper()
         clean_raw = raw_pair.upper().replace(" OTC","").replace("(OTC)","").replace("OTC","").strip()
@@ -280,11 +250,6 @@ def api_verify():
         return jsonify({"valid": False, "reason": "no token"})
     data = approved_tokens.get(token)
     if data:
-        # Track active user for admin panel
-        data["last_seen"] = int(time.time())
-        data["last_seen_human"] = time.strftime("%Y-%m-%d %H:%M:%S")
-        data["last_ip"] = request.remote_addr
-        save_tokens()
         status = data.get("status", "active")
         if status == "suspended":
             return jsonify({"valid": False, "reason": "suspended", "data": data})
@@ -341,54 +306,12 @@ WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
 """
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    is_admin = (user_id == ADMIN_ID)
     kb=[
         [InlineKeyboardButton("Account Create Link", url=AFFILIATE_LINK)],
         [InlineKeyboardButton("🌐 Website", url=WEBSITE_URL), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
         [InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
-    if is_admin:
-        kb.append([InlineKeyboardButton("🔧 Admin Panel", callback_data="admin_panel")])
-        kb.append([InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")])
-        kb.append([InlineKeyboardButton("📊 Stats / Tokens", callback_data="admin_stats")])
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-
-async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != ADMIN_ID:
-        await update.message.reply_text("❌ Admin only")
-        return
-    kb=[
-        [InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")],
-        [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
-        [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")],
-        [InlineKeyboardButton("📋 List All Tokens", callback_data="list_all_tokens")]
-    ]
-    await update.message.reply_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-
-async def premium_users_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != ADMIN_ID:
-        await update.message.reply_text("❌ Admin only")
-        return
-    users = get_all_premium_users()
-    if not users:
-        await update.message.reply_text("👥 No premium users yet")
-        return
-    text = f"👥 <b>Premium Users ({len(users)})</b>\n\n"
-    kb = []
-    for idx, u in enumerate(users[:15]):
-        trader = u.get("trader_id","N/A")
-        user_id = u.get("user_id","N/A")
-        amount = u.get("amount","0")
-        status = u.get("status","active")
-        token_short = u["token"][:8]
-        text += f"{idx+1}. ID:{trader} | User:{user_id} | ${amount} | {status} | {token_short}...\n"
-        kb.append([
-            InlineKeyboardButton(f"❌ Del {trader}", callback_data=f"delprem_{u['token'][:16]}"),
-            InlineKeyboardButton(f"⏸️ Suspend {trader}" if status=="active" else f"▶️ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
-        ])
-    kb.append([InlineKeyboardButton("🔄 Refresh", callback_data="manage_premium"), InlineKeyboardButton("🗑️ Delete All", callback_data="del_all_premium")])
-    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
@@ -400,7 +323,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user.id == ADMIN_ID and ADMIN_ID in pending_custom_msg:
         target_uid = pending_custom_msg.pop(ADMIN_ID)
         try:
-            await context.bot.send_message(chat_id=int(target_uid), text=f"📩 <b>Admin:</b>\n\n{text}\n\n- GHOST Team 👻", parse_mode='HTML', disable_web_page_preview=True)
+            await context.bot.send_message(chat_id=int(target_uid), text=f"📩 <b>Admin:</b>\n\n{text}\n\n- GHOST Team 👻", parse_mode='HTML')
             await update.message.reply_text(f"✅ Sent to {target_uid}")
         except Exception as e:
             await update.message.reply_text(f"❌ {e}")
@@ -532,7 +455,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = d.split("_")[1]
         msg = f"📩 Deposit Not Found\nLink theke $10 deposit koren\nLink: {AFFILIATE_LINK}"
         try:
-            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML', disable_web_page_preview=True)
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
             await q.edit_message_text(f"✅ Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
@@ -540,7 +463,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = d.split("_")[1]
         msg = f"❌ Link theke na\nNew account khulun: {AFFILIATE_LINK}"
         try:
-            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML', disable_web_page_preview=True)
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
             await q.edit_message_text(f"✅ Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
@@ -548,48 +471,10 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = d.split("_")[1]
         msg = "📸 Screenshot din Deposit History"
         try:
-            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML', disable_web_page_preview=True)
+            await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
             await q.edit_message_text(f"✅ Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
-    elif d == "admin_panel":
-        if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
-            return
-        kb=[
-            [InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")],
-            [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
-            [InlineKeyboardButton("📋 List Tokens", callback_data="list_all_tokens")],
-            [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")]
-        ]
-        await q.edit_message_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}\n\nUse /admin or /premium to manage", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-
-    elif d == "admin_stats":
-        if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
-            return
-        users = get_all_premium_users()
-        active = sum(1 for u in users if u.get("status","active")=="active")
-        suspended = sum(1 for u in users if u.get("status")=="suspended")
-        text = f"📊 <b>STATS</b>\n\nTotal Tokens: {len(approved_tokens)}\nActive: {active}\nSuspended: {suspended}\n\n"
-        for u in users[:10]:
-            text += f"ID:{u.get('trader_id')} | ${u.get('amount')} | {u.get('status')}\n"
-        kb=[
-            [InlineKeyboardButton("👥 Manage Users", callback_data="manage_premium")],
-            [InlineKeyboardButton("🔄 Refresh", callback_data="admin_stats")]
-        ]
-        await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-
-    elif d == "list_all_tokens":
-        if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
-            return
-        users = get_all_premium_users()
-        text = f"📋 All Tokens ({len(users)})\n\n"
-        for u in users[:20]:
-            text += f"Trader:{u.get('trader_id')} | Token:{u['token'][:20]}... | User:{u.get('user_id')} | ${u.get('amount')} | {u.get('status')}\n\n"
-        await q.edit_message_text(text)
-
     elif d == "manage_premium":
         if q.from_user.id != ADMIN_ID:
             await q.answer("❌ Admin only", show_alert=True)
@@ -724,13 +609,10 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "amount": str(amount), "created": int(time.time())}
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
-            # Bookmarklet WITH token - so if you delete token, bookmarklet stops working
-            # FIX: Use fetch+eval loader (bypasses Quotex CSP script-src which blocks <script src=external>). Single slash, token via window.GHOST_TOKEN
-            bookmarklet_with_token = "javascript:(function(){window.GHOST_TOKEN='" + premium_token + "';fetch('" + WEBSITE_URL + "/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{eval(c)}).catch(e=>alert('Load Fail: '+e.message))})();"
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
-                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)]
+                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK)]
             ]
             msg = f"""🎉 CONGRATULATIONS PREMIUM APPROVED 🎉
 
@@ -741,11 +623,6 @@ Status: ✅ ACTIVE
 🔓 YOUR SPECIAL LINK:
 <code>{premium_link}</code>
 
-🔖 YOUR BOOKMARKLET (WITH TOKEN - Auto blocks if deleted):
-<code>{bookmarklet_with_token}</code>
-
-⚠️ IMPORTANT: Bookmarklet e token ache, tai tumi jodi user ke delete koro, or bookmarklet auto BLOCK hoye jabe - BOT e BLOCKED dekhabe!
-
 Normal link e sudhu Channel+Admin, ei link e sob Premium.
 
 - GHOST Team 👻
@@ -755,7 +632,7 @@ Normal link e sudhu Channel+Admin, ei link e sob Premium.
                     await context.bot.send_photo(chat_id=int(uid), photo=sticker, caption=f"✅ ID {trader_id} ${amount}")
             except:
                 pass
-            await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML', disable_web_page_preview=True)
+            await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
             await q.edit_message_text(f"✅ Approved {trader_id} ${amount} -> {uid}\n{premium_link}")
         except Exception as e:
             logging.error(f"dep fail {traceback.format_exc()}")
@@ -768,21 +645,8 @@ Normal link e sudhu Channel+Admin, ei link e sob Premium.
         except Exception as e:
             await q.edit_message_text(f"Fail {e}")
     elif d=="bookmark_guide":
-        guide = f"""🔖 <b>Bookmarklet Guide (WITH TOKEN SYSTEM)</b>
-
-1️⃣ Premium link theke token auto save hoy localStorage e
-2️⃣ Bookmarklet e token thakle: ghost.js?token=YOUR_TOKEN
-3️⃣ Jodi admin token delete kore, bot e BLOCKED dekhabe - Bookmarklet thakleo kaj korbe na!
-
-<b>Normal Bookmarklet (No token - Free):</b>
-<code>javascript:(function(){{fetch('{WEBSITE_URL}/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{{eval(c)}}).catch(e=>alert('Load Fail: '+e.message))}})();</code>
-
-<b>Premium Bookmarklet (With token - Blockable):</b>
-<code>javascript:(function(){{window.GHOST_TOKEN='YOUR_TOKEN';fetch('{WEBSITE_URL}/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{{eval(c)}}).catch(e=>alert('Load Fail: '+e.message))}})();</code>
-
-Delete korle token invalid hoye jay, tai bookmarklet thakleo BLOCKED dekhabe!
-"""
-        await q.message.reply_text(guide, parse_mode='HTML')
+        guide = f"Bookmarklet: javascript:(function(){{var s=document.createElement('script');s.src='{WEBSITE_URL}/ghost.js?v='+Date.now();document.body.appendChild(s);}})();"
+        await q.message.reply_text(guide)
 
 def run_flask():
     port=int(os.environ.get("PORT",10000))
@@ -794,10 +658,6 @@ def run_bot():
         return
     app=ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("admin", admin_command))
-    app.add_handler(CommandHandler("premium", premium_users_command))
-    app.add_handler(CommandHandler("users", premium_users_command))
-    app.add_handler(CommandHandler("manage", admin_command))
     app.add_handler(CommandHandler("myid", myid))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(MessageHandler(filters.PHOTO, handle_media))
@@ -808,13 +668,5 @@ def run_bot():
     app.run_polling()
 
 if __name__=="__main__":
-    if BOT_TOKEN:
-        threading.Thread(target=run_flask, daemon=True).start()
-        try:
-            run_bot()
-        except Exception as e:
-            logging.error(f"Bot crashed: {e}")
-            run_flask()
-    else:
-        logging.warning("BOT_TOKEN missing - Flask only")
-        run_flask()
+    threading.Thread(target=run_flask, daemon=True).start()
+    run_bot()
