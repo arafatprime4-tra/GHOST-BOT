@@ -57,6 +57,7 @@ css.innerHTML=`
 .gh-sig.up{background:linear-gradient(145deg,#00ff88,#00b35e,#006e3a);color:#fff;animation:ghGlowGreen 1.1s ease-in-out infinite;border:1px solid rgba(0,255,136,.7)}
 .gh-sig.down{background:linear-gradient(145deg,#ff2d55,#d6002e,#8a0020);color:#fff;animation:ghGlowRed 1.1s ease-in-out infinite;border:1px solid rgba(255,45,85,.7)}
 .gh-sig.wait{background:linear-gradient(145deg,#141a2a,#0a0e1a);color:#5a6f8a;border:1px solid rgba(0,240,255,.18)}
+.gh-sig.off{background:linear-gradient(145deg,#330000,#1a0000);color:#ffb3c2;border:1px solid rgba(255,45,85,.5)}
 .gh-bar{height:2px;margin:2px 6px 0;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden}
 .gh-bar-fill{height:100%;width:0%;border-radius:10px;background:linear-gradient(90deg,#00f0ff,#00ff88);transition:width .5s linear}
 .gh-meta{font-size:5.5px;color:#8a9ab5;text-align:center;margin:5px 0 6px;letter-spacing:.4px;font-weight:600;line-height:1.4}
@@ -151,6 +152,10 @@ function check_loss_protection(){
   return {allowed:true, remaining:0};
 }
 function register_loss(src){
+  // FIX: Double-fire safety - 800ms er moddhe 2nd call ignore (click+touchend bug er jonno)
+  let _now = Date.now();
+  if(_now - (window.__last_loss_ts||0) < 800 && src==='MANUAL') return;
+  window.__last_loss_ts = _now;
   consecutive_losses++; loss_count++; last_loss_ts = Date.now();
   localStorage.setItem('ghost_loss_count', String(loss_count));
   localStorage.setItem('ghost_consecutive_losses', String(consecutive_losses));
@@ -166,6 +171,9 @@ function register_loss(src){
   showToast('❌ LOSS '+consecutive_losses+'/2', consecutive_losses>=2 ? '30 MIN OFF - NO SIGNAL' : 'Continue');
 }
 function register_win(src){
+  let _nowW = Date.now();
+  if(_nowW - (window.__last_win_ts||0) < 800 && src==='MANUAL') return;
+  window.__last_win_ts = _nowW;
   console.log('✅ WIN via '+src+' - resetting');
   if(consecutive_losses>0){ consecutive_losses=0; localStorage.setItem('ghost_consecutive_losses','0'); }
   updateLossUI();
@@ -180,13 +188,12 @@ function showToast(title, subtitle){
     setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>{toast.style.display='none'},300); },2500);
   }catch(e){}
 }
-// Manual buttons - 100% guarantee, auto fail korleo kaj korbe
-document.getElementById('gh-win-btn').addEventListener('click',e=>{e.stopPropagation(); register_win('MANUAL');});
-document.getElementById('gh-loss-btn').addEventListener('click',e=>{e.stopPropagation(); register_loss('MANUAL');});
-document.getElementById('gh-win-btn').addEventListener('touchend',e=>{e.stopPropagation(); register_win('MANUAL');});
-document.getElementById('gh-loss-btn').addEventListener('touchend',e=>{e.stopPropagation(); register_loss('MANUAL');});
-try{ document.getElementById('gh-reset').addEventListener('click',e=>{e.stopPropagation(); window.resetLossProtection();}); }catch(e){}
-try{ document.getElementById('gh-reset').addEventListener('touchend',e=>{e.stopPropagation(); window.resetLossProtection();}); }catch(e){}
+// Manual buttons - FIX: 1 Click = 2 Loss bug. Mobile e 1 Tap e touchend + click 2 ta fire hoy, tai shudhu click rakhlam, touchend remove. + 800ms debounce.
+let last_manual_ts = 0;
+function manualGuard(){ let n=Date.now(); if(n-last_manual_ts<800) return false; last_manual_ts=n; return true; }
+document.getElementById('gh-win-btn').addEventListener('click',e=>{e.stopPropagation(); if(!manualGuard()) return; register_win('MANUAL');});
+document.getElementById('gh-loss-btn').addEventListener('click',e=>{e.stopPropagation(); if(!manualGuard()) return; register_loss('MANUAL');});
+try{ document.getElementById('gh-reset').addEventListener('click',e=>{e.stopPropagation(); if(!manualGuard()) return; window.resetLossProtection();}); }catch(e){}
 
 // ===== BALANCE TRACKING - Quotex balance diye WIN/LOSS dhora (popup miss holeo) =====
 function getBalance(){
@@ -434,9 +441,18 @@ function getCurrentMarket(){
   }catch(e){}
   return currentPair;
 }
+let pendingPair=""; let pendingPairSince=0;
 function autoDetectMarket(){
   let newMarket=getCurrentMarket();
-  if(newMarket && newMarket!==currentPair){ currentPair=newMarket; let mpEl=document.getElementById('gh-pair'); if(mpEl) mpEl.innerHTML=newMarket.replace('OTC',' OTC').replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2')+'<small>GHOST AI</small>'; lockedSignalId=""; lockedUntil=0; currentSignal=null; fetchSignal(newMarket); }
+  if(!newMarket || newMarket===currentPair){ pendingPair=""; return currentPair; }
+  // STABLE FIX: Lock thakle pair switch korbo na - nahole 1 sec por por UP/DOWN flip hoy (video te oita hoise)
+  if(lockedSignalId && Date.now()<lockedUntil && currentSignal){ return currentPair; }
+  // STABLE FIX: Pair change 2-bar consecutive same ashte hobe (1.6 sec stable) - DOM noise e 1-bar vul pair asle lock clear hobe na
+  if(newMarket!==pendingPair){ pendingPair=newMarket; pendingPairSince=Date.now(); return currentPair; }
+  if(Date.now()-pendingPairSince<1600) return currentPair;
+  // 2-bar stable - ekhon switch
+  pendingPair="";
+  currentPair=newMarket; let mpEl=document.getElementById('gh-pair'); if(mpEl) mpEl.innerHTML=newMarket.replace('OTC',' OTC').replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2')+'<small>GHOST AI</small>'; lockedSignalId=""; lockedUntil=0; currentSignal=null; fetchSignal(newMarket);
   return newMarket;
 }
 function getRealPrice(){
@@ -457,7 +473,7 @@ function getRealPrice(){
 function showSTOP(){
   let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");let secEl=document.getElementById("gh-sec");
   let chk=check_loss_protection();
-  if(sigEl&&txtEl){ sigEl.className="gh-sig wait"; txtEl.textContent="⛔ OFF"; if(arrowEl) arrowEl.textContent="⛔"; if(reasonEl) reasonEl.textContent='2 Loss - '+chk.remaining+' min OFF - NO SIGNAL'; sigEl.style.background="#330000"; }
+  if(sigEl&&txtEl){ sigEl.className="gh-sig off"; txtEl.textContent="⛔ OFF"; if(arrowEl) arrowEl.textContent="⛔"; if(reasonEl) reasonEl.textContent='2 Loss - '+chk.remaining+' min OFF - NO SIGNAL'; sigEl.style.background=""; }
   if(barEl) barEl.style.width='0%';
   if(confEl) confEl.textContent='OFF';
   if(secEl) secEl.textContent=chk.remaining+'m OFF';
@@ -473,6 +489,8 @@ function updateUI(j){
   let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");
   let dir=j.signal||j.direction;
   if(sigEl&&txtEl){
+    // FIX: Signal box Red/Green hoyna - showSTOP er inline #330000 CSS gradient ke override kore rakhto. Age clear koro.
+    sigEl.style.background=""; sigEl.style.backgroundImage=""; sigEl.style.boxShadow="";
     if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; txtEl.textContent="▲ UP"; if(arrowEl) arrowEl.textContent="▲"; if(reasonEl) reasonEl.textContent=j.reason||""; }
     else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; txtEl.textContent="▼ DOWN"; if(arrowEl) arrowEl.textContent="▼"; if(reasonEl) reasonEl.textContent=j.reason||""; }
     else{ sigEl.className="gh-sig wait"; txtEl.textContent="◉ WAIT"; if(arrowEl) arrowEl.textContent="◉"; if(reasonEl) reasonEl.textContent=j.reason||"Analyzing..."; }
@@ -501,6 +519,13 @@ function fetchSignal(forcePair){
     if(!j) return;
     if(j.signal==="UP") j.signal="CALL";
     if(j.signal==="DOWN") j.signal="PUT";
+    // STABLE FIX: Server BLOCKED bolle PA fallback diye signal dekhano jabe na - BLOCKED e thakbe
+    if(j.status==="BLOCKED"||j.blocked){
+      currentSignal=null; lockedSignalId=""; lockedUntil=0;
+      let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let arrowEl=document.getElementById("gh-arrow");
+      if(sigEl&&txtEl){ sigEl.className="gh-sig off"; txtEl.textContent="⛔ BLOCKED"; if(arrowEl) arrowEl.textContent="⛔"; if(reasonEl) reasonEl.textContent=j.reason||"⛔ BLOCKED - No Valid Token"; sigEl.style.background=""; }
+      return;
+    }
     if(j.status==="EXPIRED"||j.status==="DELETED"||j.is_expired){
       if(TOKEN){ TOKEN=""; localStorage.removeItem('ghost_premium_token'); setTimeout(()=>fetchSignal(),1000); return; }
       return;
@@ -511,8 +536,8 @@ function fetchSignal(forcePair){
         try{
           let pa=runPAFilter(candleHistory);
           if(pa && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf>=60){
-            let clockSec=60-new Date().getSeconds();
-            let fake={...pa,market:asset,pair:asset,confidence:pa.conf,expiry_timestamp:now+clockSec*1000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason,status:"ACTIVE"};
+            // STABLE FIX: PA signal er expiry = lock er sathe same (58s), nahole 500ms interval age clear kore flip hoy
+            let fake={...pa,market:asset,pair:asset,confidence:pa.conf,expiry_timestamp:now+58000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason,status:"ACTIVE"};
             lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake); return;
           }
         }catch(e){}
@@ -520,7 +545,8 @@ function fetchSignal(forcePair){
       if(candleHistory.length>0){
         let lastC=candleHistory[candleHistory.length-1];
         let dir=lastC.bull?"CALL":"PUT";
-        let fake={signal:dir,confidence:58,reason:"Momentum",price_action_type:"Momentum",market:asset,pair:asset,expiry_timestamp:now+60000,signal_id:asset+"-MOM-"+now,status:"ACTIVE"};
+        // STABLE FIX: Momentum expiry o 58s lock er sathe same
+        let fake={signal:dir,confidence:58,reason:"Momentum",price_action_type:"Momentum",market:asset,pair:asset,expiry_timestamp:now+58000,signal_id:asset+"-MOM-"+now,status:"ACTIVE"};
         lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake); return;
       }
       let waitSig={signal:"WAIT",confidence:0,reason:"Collecting data...",price_action_type:"Loading",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"WAIT-"+now,status:"WAITING"};
@@ -539,13 +565,14 @@ setInterval(()=>{
   // FIX: 2 Loss = DIRECT OFF - interval eo protection check, nahole STOP er majhe UP flicker hoto
   let protI=check_loss_protection();
   if(!protI.allowed){ showSTOP(); return; }
-  autoDetectMarket();
+  // STABLE FIX: Lock thakle autoDetectMarket call korbo na - lock clear hoye flip hoy
+  if(!(lockedSignalId && Date.now()<lockedUntil && currentSignal)) autoDetectMarket();
   if(!currentSignal){ let secEl=document.getElementById("gh-sec"); if(secEl){let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";} return; }
   let rem=Math.max(0,Math.ceil((currentSignal.expiry_timestamp-Date.now())/1000));
   let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=rem+"s";
   if(rem<=0){ currentSignal=null; lockedSignalId=""; lockedUntil=0; } else updateUI(currentSignal);
 },500);
-setInterval(()=>autoDetectMarket(),800);
+setInterval(()=>{ if(!(lockedSignalId && Date.now()<lockedUntil && currentSignal)) autoDetectMarket(); },1500);
 setInterval(()=>fetchSignal(),3000);
 setInterval(()=>{ detectResultAdvanced(); checkBalanceChange(); },1000);
 startResultObserver();
