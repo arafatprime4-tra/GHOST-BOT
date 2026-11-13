@@ -57,6 +57,7 @@ css.innerHTML=`
 .gh-sig.up{background:linear-gradient(145deg,#00ff88,#00b35e,#006e3a);color:#fff;animation:ghGlowGreen 1.1s ease-in-out infinite;border:1px solid rgba(0,255,136,.7)}
 .gh-sig.down{background:linear-gradient(145deg,#ff2d55,#d6002e,#8a0020);color:#fff;animation:ghGlowRed 1.1s ease-in-out infinite;border:1px solid rgba(255,45,85,.7)}
 .gh-sig.wait{background:linear-gradient(145deg,#141a2a,#0a0e1a);color:#5a6f8a;border:1px solid rgba(0,240,255,.18)}
+.gh-sig.off{background:linear-gradient(145deg,#330000,#1a0000);color:#ffb3c2;border:1px solid rgba(255,45,85,.5)}
 .gh-bar{height:2px;margin:2px 6px 0;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden}
 .gh-bar-fill{height:100%;width:0%;border-radius:10px;background:linear-gradient(90deg,#00f0ff,#00ff88);transition:width .5s linear}
 .gh-meta{font-size:5.5px;color:#8a9ab5;text-align:center;margin:5px 0 6px;letter-spacing:.4px;font-weight:600;line-height:1.4}
@@ -151,6 +152,10 @@ function check_loss_protection(){
   return {allowed:true, remaining:0};
 }
 function register_loss(src){
+  // FIX: Double-fire safety - 800ms er moddhe 2nd call ignore (click+touchend bug er jonno)
+  let _now = Date.now();
+  if(_now - (window.__last_loss_ts||0) < 800 && src==='MANUAL') return;
+  window.__last_loss_ts = _now;
   consecutive_losses++; loss_count++; last_loss_ts = Date.now();
   localStorage.setItem('ghost_loss_count', String(loss_count));
   localStorage.setItem('ghost_consecutive_losses', String(consecutive_losses));
@@ -166,6 +171,9 @@ function register_loss(src){
   showToast('❌ LOSS '+consecutive_losses+'/2', consecutive_losses>=2 ? '30 MIN OFF - NO SIGNAL' : 'Continue');
 }
 function register_win(src){
+  let _nowW = Date.now();
+  if(_nowW - (window.__last_win_ts||0) < 800 && src==='MANUAL') return;
+  window.__last_win_ts = _nowW;
   console.log('✅ WIN via '+src+' - resetting');
   if(consecutive_losses>0){ consecutive_losses=0; localStorage.setItem('ghost_consecutive_losses','0'); }
   updateLossUI();
@@ -180,13 +188,12 @@ function showToast(title, subtitle){
     setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>{toast.style.display='none'},300); },2500);
   }catch(e){}
 }
-// Manual buttons - 100% guarantee, auto fail korleo kaj korbe
-document.getElementById('gh-win-btn').addEventListener('click',e=>{e.stopPropagation(); register_win('MANUAL');});
-document.getElementById('gh-loss-btn').addEventListener('click',e=>{e.stopPropagation(); register_loss('MANUAL');});
-document.getElementById('gh-win-btn').addEventListener('touchend',e=>{e.stopPropagation(); register_win('MANUAL');});
-document.getElementById('gh-loss-btn').addEventListener('touchend',e=>{e.stopPropagation(); register_loss('MANUAL');});
-try{ document.getElementById('gh-reset').addEventListener('click',e=>{e.stopPropagation(); window.resetLossProtection();}); }catch(e){}
-try{ document.getElementById('gh-reset').addEventListener('touchend',e=>{e.stopPropagation(); window.resetLossProtection();}); }catch(e){}
+// Manual buttons - FIX: 1 Click = 2 Loss bug. Mobile e 1 Tap e touchend + click 2 ta fire hoy, tai shudhu click rakhlam, touchend remove. + 800ms debounce.
+let last_manual_ts = 0;
+function manualGuard(){ let n=Date.now(); if(n-last_manual_ts<800) return false; last_manual_ts=n; return true; }
+document.getElementById('gh-win-btn').addEventListener('click',e=>{e.stopPropagation(); if(!manualGuard()) return; register_win('MANUAL');});
+document.getElementById('gh-loss-btn').addEventListener('click',e=>{e.stopPropagation(); if(!manualGuard()) return; register_loss('MANUAL');});
+try{ document.getElementById('gh-reset').addEventListener('click',e=>{e.stopPropagation(); if(!manualGuard()) return; window.resetLossProtection();}); }catch(e){}
 
 // ===== BALANCE TRACKING - Quotex balance diye WIN/LOSS dhora (popup miss holeo) =====
 function getBalance(){
@@ -457,7 +464,7 @@ function getRealPrice(){
 function showSTOP(){
   let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");let secEl=document.getElementById("gh-sec");
   let chk=check_loss_protection();
-  if(sigEl&&txtEl){ sigEl.className="gh-sig wait"; txtEl.textContent="⛔ OFF"; if(arrowEl) arrowEl.textContent="⛔"; if(reasonEl) reasonEl.textContent='2 Loss - '+chk.remaining+' min OFF - NO SIGNAL'; sigEl.style.background="#330000"; }
+  if(sigEl&&txtEl){ sigEl.className="gh-sig off"; txtEl.textContent="⛔ OFF"; if(arrowEl) arrowEl.textContent="⛔"; if(reasonEl) reasonEl.textContent='2 Loss - '+chk.remaining+' min OFF - NO SIGNAL'; sigEl.style.background=""; }
   if(barEl) barEl.style.width='0%';
   if(confEl) confEl.textContent='OFF';
   if(secEl) secEl.textContent=chk.remaining+'m OFF';
@@ -473,6 +480,8 @@ function updateUI(j){
   let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");
   let dir=j.signal||j.direction;
   if(sigEl&&txtEl){
+    // FIX: Signal box Red/Green hoyna - showSTOP er inline #330000 CSS gradient ke override kore rakhto. Age clear koro.
+    sigEl.style.background=""; sigEl.style.backgroundImage=""; sigEl.style.boxShadow="";
     if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; txtEl.textContent="▲ UP"; if(arrowEl) arrowEl.textContent="▲"; if(reasonEl) reasonEl.textContent=j.reason||""; }
     else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; txtEl.textContent="▼ DOWN"; if(arrowEl) arrowEl.textContent="▼"; if(reasonEl) reasonEl.textContent=j.reason||""; }
     else{ sigEl.className="gh-sig wait"; txtEl.textContent="◉ WAIT"; if(arrowEl) arrowEl.textContent="◉"; if(reasonEl) reasonEl.textContent=j.reason||"Analyzing..."; }
