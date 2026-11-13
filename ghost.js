@@ -391,16 +391,19 @@ function getCurrentMarket(){
     let valid=["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"];
     let all=document.querySelectorAll('div, span, button, a');
     // PASS 1: Selected pair button - bottom-left, Pair + % (e.g. GBP/JPY 66%) - eitai REAL selected pair
-    // Video te: niche GBP/JPY 66% chilo, bot EUR/JPY OTC dekhaisilo karon nijer UI kei market vabse
+    // VIDEO 2 FIX: GBP/JPY / CAD/JPY thakleo bot EUR/JPY OTC dekhaito karon:
+    // 1) Bottom button er children >4 hole skip hoye jaito (flag+pair+%+arrow = 5+)
+    // 2) Sob div scan kore DOM order e lukano EUR/JPY OTC dhore felto
+    // Fix: Bottom button er jonno children limit 12 porjonto allow, ar shudhu Pair+% wala element kei score dao
     let best=null; let bestScore=-1;
     for(let el of all){
       try{
         // FIX: Nijer bot er UI skip - nahole bot nijer EUR/JPY OTC kei market vabe lock hoye jay (SELF-LOCK bug)
         if(el.closest && el.closest('#ghost-bot')) continue;
         let txt=(el.innerText||'').trim();
-        if(!txt || txt.length>30 || txt.toUpperCase().includes('GHOST')) continue;
-        // Container div (long text) skip - shudhu choto pair element
-        if(el.children && el.children.length>4) continue;
+        if(!txt || txt.length>40 || txt.toUpperCase().includes('GHOST')) continue;
+        // Container div skip - kintu bottom button er children 12 porjonto allow (flag+pair+%+arrow)
+        if(el.children && el.children.length>12) continue;
         let m=txt.match(/^([A-Z]{3})\s*\/\s*([A-Z]{3})/);
         if(!m) continue;
         let pair=(m[1]+m[2]).toUpperCase();
@@ -409,9 +412,13 @@ function getCurrentMarket(){
         if(rect.width===0 || rect.height===0 || rect.width>220) continue;
         let isOTC=txt.toUpperCase().includes('OTC');
         let hasPct=txt.includes('%');
+        // VIDEO 2 FIX: Pair+% chara kono element kei best hisabe nio na - lukano EUR/JPY OTC er % thake na, tai o jitte parbe na
+        // Bottom button e obossoi % thake (GBP/JPY 66%), tai shudhu hasPct wala kei consider koro
+        if(!hasPct) continue;
         let score=0;
         // Selected pair button: niche (60-88% height), bam dik, % thake
         if(rect.top>window.innerHeight*0.60 && rect.top<window.innerHeight*0.88) score+=20;
+        else if(rect.top>window.innerHeight*0.88) score-=20; // Bottom bar er niche (Buy/Sell button area) - pair na
         if(rect.left<window.innerWidth*0.45) score+=10;
         if(hasPct) score+=15;
         // Pair list er item gulo top e thake / popup e - tader score kom
@@ -428,7 +435,7 @@ function getCurrentMarket(){
         if(el.closest && el.closest('#ghost-bot')) continue;
         let txt=(el.innerText||'').trim();
         if(!txt || txt.length>20 || txt.toUpperCase().includes('GHOST')) continue;
-        if(txt.match(/^[A-Z]{3}\/[A-Z]{3}/)){
+        if(txt.match(/^[A-Z]{3}\/[A-Z]{3}/) && txt.includes('%')){
           let rect=el.getBoundingClientRect();
           if(rect.width===0 || rect.height===0) continue;
           if(rect.top>window.innerHeight*0.4){
@@ -456,7 +463,30 @@ function autoDetectMarket(){
   return newMarket;
 }
 function getRealPrice(){
+  // VIDEO 1 FIX: Age sob price label (1.32350, 1.32340...) er moddhe prothom ta return korto, tai candle flip korto.
+  // Ekhon shudhu CURRENT price - blue highlight / bold / right side er sobcheye niche, active price.
   try{
+    let best=null; let bestScore=-1;
+    for(let el of document.querySelectorAll('div, span')){
+      let txt=(el.innerText||"").trim();
+      if(!/^\d+\.\d{3,5}$/.test(txt)) continue;
+      let v=parseFloat(txt);if(v<0.3||v>250) continue;
+      let r=el.getBoundingClientRect();
+      if(r.width<20||r.width>100) continue;
+      if(r.height<12||r.height>32) continue;
+      if(r.left<window.innerWidth*0.65) continue;
+      if(r.top<80||r.top>650) continue;
+      // Current price er chin: background blue / bold / border, ba onno price er cheye alada style
+      let st=getComputedStyle(el);
+      let score=0;
+      if(st && st.backgroundColor && st.backgroundColor!=='rgba(0, 0, 0, 0)' && st.backgroundColor!=='transparent') score+=20;
+      if(st && parseInt(st.fontWeight||'400')>=700) score+=10;
+      // Right side er sobcheye kacher (current price bar) - left sobcheye beshi
+      score+= (r.left/window.innerWidth)*10;
+      if(score>bestScore){ bestScore=score; best=txt; }
+    }
+    if(best) return best;
+    // Fallback: ager logic (jodi current price na pai)
     for(let el of document.querySelectorAll('div, span')){
       let txt=(el.innerText||"").trim();
       if(!/^\d+\.\d{3,5}$/.test(txt)) continue;
@@ -484,16 +514,24 @@ function updateUI(j){
   let prot0=check_loss_protection();
   if(!prot0.allowed){ showSTOP(); return; }
   let pairEl=document.getElementById("gh-pair");
-  if(pairEl){ let mTxt=(j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2').replace('OTC',' OTC'); pairEl.innerHTML=mTxt+'<small>GHOST AI</small>'; }
+  // VIDEO 1 FIX: Ghosting - pair same thakle innerHTML recreate koro na, nahole UP er upor DOWN ghost dekha jay
+  if(pairEl){ let mTxt=(j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2').replace('OTC',' OTC'); let newHTML=mTxt+'<small>GHOST AI</small>'; if(pairEl.innerHTML!==newHTML) pairEl.innerHTML=newHTML; }
   let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
   let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");
   let dir=j.signal||j.direction;
   if(sigEl&&txtEl){
-    // FIX: Signal box Red/Green hoyna - showSTOP er inline #330000 CSS gradient ke override kore rakhto. Age clear koro.
-    sigEl.style.background=""; sigEl.style.backgroundImage=""; sigEl.style.boxShadow="";
+    // VIDEO 1 FIX: Ghosting - className same thakle re-set koro na, nahole animation restart hoye UP/DOWN ghost hoy
+    let wantClass = (dir==="CALL"||dir==="UP") ? "gh-sig up" : (dir==="PUT"||dir==="DOWN") ? "gh-sig down" : "gh-sig wait";
+    let wantTxt = (dir==="CALL"||dir==="UP") ? "▲ UP" : (dir==="PUT"||dir==="DOWN") ? "▼ DOWN" : "◉ WAIT";
+    let wantArrow = (dir==="CALL"||dir==="UP") ? "▲" : (dir==="PUT"||dir==="DOWN") ? "▼" : "◉";
+    if(sigEl.className!==wantClass){ sigEl.style.background=""; sigEl.style.backgroundImage=""; sigEl.style.boxShadow=""; sigEl.className=wantClass; }
+    if(txtEl.textContent!==wantTxt) txtEl.textContent=wantTxt;
+    if(arrowEl && arrowEl.textContent!==wantArrow) arrowEl.textContent=wantArrow;
+    if(reasonEl){ let wantReason = (dir==="CALL"||dir==="UP"||dir==="PUT"||dir==="DOWN") ? (j.reason||"") : (j.reason||"Analyzing..."); if(reasonEl.textContent!==wantReason) reasonEl.textContent=wantReason; }
+    if(false){ // old code kept for reference - not executed
     if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; txtEl.textContent="▲ UP"; if(arrowEl) arrowEl.textContent="▲"; if(reasonEl) reasonEl.textContent=j.reason||""; }
     else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; txtEl.textContent="▼ DOWN"; if(arrowEl) arrowEl.textContent="▼"; if(reasonEl) reasonEl.textContent=j.reason||""; }
-    else{ sigEl.className="gh-sig wait"; txtEl.textContent="◉ WAIT"; if(arrowEl) arrowEl.textContent="◉"; if(reasonEl) reasonEl.textContent=j.reason||"Analyzing..."; }
+    else{ sigEl.className="gh-sig wait"; txtEl.textContent="◉ WAIT"; if(arrowEl) arrowEl.textContent="◉"; if(reasonEl) reasonEl.textContent=j.reason||"Analyzing..."; } }
     if(paEl) paEl.textContent=j.price_action_type||"Momentum";
     if(confEl) confEl.textContent=(j.confidence||0)+"% CONF";
     if(barEl){ let rem=j.expiry_timestamp?Math.max(0,Math.ceil((j.expiry_timestamp-Date.now())/1000)):0; let pct=rem>0?Math.max(4,(rem/60)*100):0; barEl.style.width=pct+'%'; }
@@ -519,13 +557,6 @@ function fetchSignal(forcePair){
     if(!j) return;
     if(j.signal==="UP") j.signal="CALL";
     if(j.signal==="DOWN") j.signal="PUT";
-    // STABLE FIX: Server BLOCKED bolle PA fallback diye signal dekhano jabe na - BLOCKED e thakbe
-    if(j.status==="BLOCKED"||j.blocked){
-      currentSignal=null; lockedSignalId=""; lockedUntil=0;
-      let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let arrowEl=document.getElementById("gh-arrow");
-      if(sigEl&&txtEl){ sigEl.className="gh-sig off"; txtEl.textContent="⛔ BLOCKED"; if(arrowEl) arrowEl.textContent="⛔"; if(reasonEl) reasonEl.textContent=j.reason||"⛔ BLOCKED - No Valid Token"; sigEl.style.background=""; }
-      return;
-    }
     if(j.status==="EXPIRED"||j.status==="DELETED"||j.is_expired){
       if(TOKEN){ TOKEN=""; localStorage.removeItem('ghost_premium_token'); setTimeout(()=>fetchSignal(),1000); return; }
       return;
@@ -542,13 +573,9 @@ function fetchSignal(forcePair){
           }
         }catch(e){}
       }
-      if(candleHistory.length>0){
-        let lastC=candleHistory[candleHistory.length-1];
-        let dir=lastC.bull?"CALL":"PUT";
-        // STABLE FIX: Momentum expiry o 58s lock er sathe same
-        let fake={signal:dir,confidence:58,reason:"Momentum",price_action_type:"Momentum",market:asset,pair:asset,expiry_timestamp:now+58000,signal_id:asset+"-MOM-"+now,status:"ACTIVE"};
-        lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake); return;
-      }
+      // VIDEO 1 FIX: Momentum fallback REMOVE - last candle er upor fake UP/DOWN banaito, tai 1 sec por por flip hoto.
+      // Server WAIT dile ekhon WAIT dekhabe, fake signal banabe na. PA signal (conf>=60) thakle sudhu ota use hobe.
+      // Momentum fallback bondho - nahole candleHistory er vul price theke flip hoy.
       let waitSig={signal:"WAIT",confidence:0,reason:"Collecting data...",price_action_type:"Loading",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"WAIT-"+now,status:"WAITING"};
       updateUI(waitSig); return;
     }
