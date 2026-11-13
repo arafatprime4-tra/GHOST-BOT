@@ -101,28 +101,6 @@ def get_tokens_backup_json():
     except:
         return "{}"
 
-@app.route("/api/backup-tokens", methods=["GET"])
-def backup_tokens():
-    # STABLE: Update er age ei URL theke backup JSON download koro - user kokhono harabe na
-    # Usage: https://giogram-backend.onrender.com/api/backup-tokens
-    try:
-        return app.response_class(get_tokens_backup_json(), mimetype="application/json", headers={"Content-Disposition": "attachment; filename=approved_tokens_backup.json"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/api/restore-tokens", methods=["POST"])
-def restore_tokens():
-    # STABLE: Backup JSON diye restore - jodi kokhono user muche jay
-    try:
-        data = request.get_json(force=True)
-        if isinstance(data, dict) and len(data) > 0:
-            approved_tokens.update(data)
-            save_tokens()
-            return jsonify({"success": True, "total": len(approved_tokens), "message": f"Restored {len(data)} tokens, total now {len(approved_tokens)}"})
-        return jsonify({"success": False, "message": "Empty or invalid backup"}), 400
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
 def create_premium_token(trader_id, user_id, amount):
     token = secrets.token_urlsafe(32)
     approved_tokens[token] = {
@@ -173,6 +151,27 @@ def get_all_premium_users():
     return users
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
+
+# STABLE: Backup / Restore - flask_app er PORE define korte hobe, nahole NameError: app is not defined
+@flask_app.route("/api/backup-tokens", methods=["GET"])
+def backup_tokens():
+    try:
+        return flask_app.response_class(get_tokens_backup_json(), mimetype="application/json", headers={"Content-Disposition": "attachment; filename=approved_tokens_backup.json"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@flask_app.route("/api/restore-tokens", methods=["POST"])
+def restore_tokens():
+    try:
+        data = request.get_json(force=True)
+        if isinstance(data, dict) and len(data) > 0:
+            approved_tokens.update(data)
+            save_tokens()
+            return jsonify({"success": True, "total": len(approved_tokens), "message": f"Restored {len(data)} tokens, total now {len(approved_tokens)}"})
+        return jsonify({"success": False, "message": "Empty or invalid backup"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @flask_app.after_request
 def after_request(r): 
     r.headers.add('Access-Control-Allow-Origin','*')
@@ -189,6 +188,12 @@ def serve_static(path):
 @flask_app.route('/api/signal')
 def api_signal():
     try:
+        # KILL-SWITCH: Ag er sob bookmarklet bad - shudhu NEW LYRA-V2 cholbe
+        # Old ghost.js (ghost.js) jara use kore, tader ver param thakbe na -> BLOCKED, kono signal pabe na
+        ver = request.args.get('ver','')
+        # V3 = newest (voice fix + cache fix), V2 = ager LYRA (grace 1 din), baki sob OLD
+        if ver not in ("LYRA-V2","LYRA-V3"):
+            return jsonify({"signal_id": f"OLD-{int(time.time())}","signal":"WAIT","status":"OLD_VERSION","market":request.args.get('pair','EURUSD'),"pair":request.args.get('pair','EURUSD'),"direction":"WAIT","reason":"OLD BOOKMARKLET EXPIRED - New Link Nao","risk_percent":1,"expiry_timestamp":int((time.time()+60)*1000),"remainingSeconds":60,"time_left":60,"blocked":True})
         mode=request.args.get('mode','SAFE')
         raw_pair=request.args.get('pair','EURUSD')
         # OTC ALLOWED - real off থাকলে OTC দিবে
@@ -278,7 +283,7 @@ def api_admin_suspend_token():
 def health(): 
     return f"GHOST LIVE ADMIN={ADMIN_ID} TOKENS={len(approved_tokens)} OK"
 
-WELCOME = """👻 <b>GHOST PREMIUM</b> 👻
+WELCOME = """Ghost <b>GHOST PREMIUM</b> Ghost
 
 <b>বটটা ফ্রি, কিন্তু সঠিক পথে। কোনো সেল না।</b>
 
@@ -307,8 +312,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user.id == ADMIN_ID and ADMIN_ID in pending_custom_msg:
         target_uid = pending_custom_msg.pop(ADMIN_ID)
         try:
-            await context.bot.send_message(chat_id=int(target_uid), text=f"📩 <b>Admin:</b>\n\n{text}\n\n- GHOST Team 👻", parse_mode='HTML')
-            await update.message.reply_text(f"✅ Sent to {target_uid}")
+            await context.bot.send_message(chat_id=int(target_uid), text=f"📩 <b>Admin:</b>\n\n{text}\n\n- GHOST Team Ghost", parse_mode='HTML')
+            await update.message.reply_text(f" Sent to {target_uid}")
         except Exception as e:
             await update.message.reply_text(f"❌ {e}")
         return
@@ -330,7 +335,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             num_only = re.sub(r'[^0-9]', '', text)
             await update.message.reply_text(f"🚫 শুধু নাম্বার: {num_only}", parse_mode='HTML')
         else:
-            await update.message.reply_text("👻 ID পাঠান: 1234567\nEURUSD লিখে signal\n/start", parse_mode='HTML')
+            await update.message.reply_text("Ghost ID পাঠান: 1234567\nEURUSD লিখে signal\n/start", parse_mode='HTML')
         return
     tid = text
     if len(tid) < 4 or len(tid) > 12:
@@ -338,14 +343,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     user_trader_map[user.id] = tid
     kb = [
-        [InlineKeyboardButton("✅ হ্যাঁ, ডিপোজিট করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("❌ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
+        [InlineKeyboardButton(" হ্যাঁ, ডিপোজিট করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("❌ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
         [InlineKeyboardButton("📸 Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
     ]
-    await update.message.reply_text(f"✅ ID <code>{tid}</code> Received!\n💰 <b>ডিপোজিট করেছেন?</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    await update.message.reply_text(f" ID <code>{tid}</code> Received!\n💰 <b>ডিপোজিট করেছেন?</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     try:
         if ADMIN_ID != 0:
             kb_admin = [
-                [InlineKeyboardButton("✅ Direct Approve", callback_data=f"ap_{user.id}_{tid}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{user.id}")],
+                [InlineKeyboardButton(" Direct Approve", callback_data=f"ap_{user.id}_{tid}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{user.id}")],
                 [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{user.id}")]
             ]
             await context.bot.send_message(chat_id=ADMIN_ID, text=f"📩 <b>New ID</b>\nTrader ID: <code>{tid}</code>\nUser: <code>{user.id}</code> @{user.username or 'N/A'}", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
@@ -362,17 +367,17 @@ async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await context.bot.send_photo(chat_id=int(target_uid), photo=update.message.photo[-1].file_id, caption=f"📩 {cap}", parse_mode='HTML')
             else:
                 await context.bot.send_message(chat_id=int(target_uid), text=f"📩 {cap}")
-            await update.message.reply_text(f"✅ Media sent to {target_uid}")
+            await update.message.reply_text(f" Media sent to {target_uid}")
         except Exception as e:
             await update.message.reply_text(f"❌ {e}")
         return
     tid = user_trader_map.get(user.id, "N/A")
-    kb = [[InlineKeyboardButton("✅ হ্যাঁ, ডিপোজিট করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না", callback_data=f"dpnM_{user.id}_{tid}")]]
+    kb = [[InlineKeyboardButton(" হ্যাঁ, ডিপোজিট করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না", callback_data=f"dpnM_{user.id}_{tid}")]]
     await update.message.reply_text(f"📸 Received ID {tid}\n💰 ডিপোজিট করেছেন?", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     try:
         if ADMIN_ID != 0:
             cap = f"📸 Proof User {user.id} @{user.username or 'N/A'} Trader {tid}"
-            kb_admin = [[InlineKeyboardButton("✅ Approve", callback_data=f"ap_{user.id}_{tid}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{user.id}")], [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{user.id}")]]
+            kb_admin = [[InlineKeyboardButton(" Approve", callback_data=f"ap_{user.id}_{tid}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{user.id}")], [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{user.id}")]]
             if update.message.photo:
                 await context.bot.send_photo(chat_id=ADMIN_ID, photo=update.message.photo[-1].file_id, caption=cap, reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
             elif update.message.sticker:
@@ -400,8 +405,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         trader_id = parts[2] if len(parts)>2 else "N/A"
         try:
             kb_admin = [[InlineKeyboardButton("💰 Deposit Select", callback_data=f"ap_{uid}_{trader_id}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{uid}")], [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}")]]
-            await context.bot.send_message(chat_id=ADMIN_ID, text=f"✅ User Claims Deposit\nUser {uid} Trader {trader_id}", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
-            await q.edit_message_text(f"✅ Claim sent Admin ID {trader_id}")
+            await context.bot.send_message(chat_id=ADMIN_ID, text=f" User Claims Deposit\nUser {uid} Trader {trader_id}", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+            await q.edit_message_text(f" Claim sent Admin ID {trader_id}")
         except Exception as e:
             await q.edit_message_text(f"Fail {e}")
     elif d.startswith("dpn_"):
@@ -414,8 +419,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         trader_id = sp[1] if len(sp)>1 else "N/A"
         try:
             kb_admin = [[InlineKeyboardButton("💰 Approve Amount", callback_data=f"ap_{uid}_{trader_id}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{uid}")], [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{uid}")]]
-            await context.bot.send_message(chat_id=ADMIN_ID, text=f"✅ Media + Deposit Claim User {uid} ID {trader_id}", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
-            await q.edit_message_text(f"✅ Media claim sent ID {trader_id}")
+            await context.bot.send_message(chat_id=ADMIN_ID, text=f" Media + Deposit Claim User {uid} ID {trader_id}", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+            await q.edit_message_text(f" Media claim sent ID {trader_id}")
         except Exception as e:
             await q.edit_message_text(f"Fail {e}")
     elif d.startswith("dpnM_"):
@@ -440,7 +445,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         msg = f"📩 Deposit Not Found\nLink theke $10 deposit koren\nLink: {AFFILIATE_LINK}"
         try:
             await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
-            await q.edit_message_text(f"✅ Sent to {uid}")
+            await q.edit_message_text(f" Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
     elif d.startswith("cmnolink_"):
@@ -448,7 +453,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         msg = f"❌ Link theke na\nNew account khulun: {AFFILIATE_LINK}"
         try:
             await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
-            await q.edit_message_text(f"✅ Sent to {uid}")
+            await q.edit_message_text(f" Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
     elif d.startswith("cmscreen_"):
@@ -456,7 +461,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         msg = "📸 Screenshot din Deposit History"
         try:
             await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
-            await q.edit_message_text(f"✅ Sent to {uid}")
+            await q.edit_message_text(f" Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
     elif d == "manage_premium":
@@ -505,7 +510,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await context.bot.send_message(chat_id=int(user_id), text=f"❌ Your premium access (Trader ID {trader}) has been revoked by admin.\n\nContact admin via bot to request again.")
             except:
                 pass
-            await q.edit_message_text(f"✅ Deleted premium for Trader {trader} (User {user_id})\nToken {token_part}... removed\nUser can request again via bot.")
+            await q.edit_message_text(f" Deleted premium for Trader {trader} (User {user_id})\nToken {token_part}... removed\nUser can request again via bot.")
         else:
             await q.edit_message_text(f"❌ Token not found: {token_part}")
 
@@ -534,7 +539,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 unsuspend_premium_token(full_token)
                 try:
-                    await context.bot.send_message(chat_id=int(user_id), text=f"▶️ Your premium access (Trader ID {trader}) has been restored! ✅")
+                    await context.bot.send_message(chat_id=int(user_id), text=f"▶️ Your premium access (Trader ID {trader}) has been restored! ")
                 except:
                     pass
                 await q.edit_message_text(f"▶️ Unsuspended Trader {trader} (User {user_id})\nAccess restored.")
@@ -546,7 +551,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.answer("❌ Admin only", show_alert=True)
             return
         kb = [
-            [InlineKeyboardButton("✅ Yes Delete ALL", callback_data="confirm_del_all")],
+            [InlineKeyboardButton(" Yes Delete ALL", callback_data="confirm_del_all")],
             [InlineKeyboardButton("❌ Cancel", callback_data="manage_premium")]
         ]
         await q.edit_message_text(f"⚠️ Delete ALL {len(approved_tokens)} premium users?\nThis cannot be undone!\nUsers will need to request again.", reply_markup=InlineKeyboardMarkup(kb))
@@ -602,22 +607,22 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Trader ID: <code>{trader_id}</code>
 Deposit: ${amount}
-Status: ✅ ACTIVE
+Status:  ACTIVE
 
 🔓 YOUR SPECIAL LINK:
 <code>{premium_link}</code>
 
 Normal link e sudhu Channel+Admin, ei link e sob Premium.
 
-- GHOST Team 👻
+- GHOST Team Ghost
 """
             try:
                 with open('approved_sticker.jpg','rb') as sticker:
-                    await context.bot.send_photo(chat_id=int(uid), photo=sticker, caption=f"✅ ID {trader_id} ${amount}")
+                    await context.bot.send_photo(chat_id=int(uid), photo=sticker, caption=f" ID {trader_id} ${amount}")
             except:
                 pass
             await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-            await q.edit_message_text(f"✅ Approved {trader_id} ${amount} -> {uid}\n{premium_link}")
+            await q.edit_message_text(f" Approved {trader_id} ${amount} -> {uid}\n{premium_link}")
         except Exception as e:
             logging.error(f"dep fail {traceback.format_exc()}")
             await q.edit_message_text(f"❌ Error {e}")
@@ -634,7 +639,8 @@ Normal link e sudhu Channel+Admin, ei link e sob Premium.
 
 def run_flask():
     port=int(os.environ.get("PORT",10000))
-    flask_app.run(host="0.0.0.0", port=port)
+    # use_reloader False - nahole Render e 2 bar run hoye port clash hoy
+    flask_app.run(host="0.0.0.0", port=port, use_reloader=False)
 
 def run_bot():
     if not BOT_TOKEN:
@@ -652,7 +658,11 @@ def run_bot():
     app.run_polling()
 
 if __name__=="__main__":
-    threading.Thread(target=run_flask, daemon=True).start()
-    run_bot()
-
-
+    # FIX: BOT_TOKEN na thakle age run_bot() return kore dito, daemon Flask thread more jeto, Render Exited with status 1 dito
+    # Ekhon: BOT_TOKEN na thakle Flask ke main thread e blocking chalau - Render kokhono morbe na
+    if not BOT_TOKEN:
+        print("BOT_TOKEN missing - running Flask only (Bot off, Website + API on)")
+        run_flask()
+    else:
+        threading.Thread(target=run_flask, daemon=True).start()
+        run_bot()
