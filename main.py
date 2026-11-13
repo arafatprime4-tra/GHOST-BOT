@@ -595,10 +595,10 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "amount": str(amount), "created": int(time.time())}
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
-            kb=
+            kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
-                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK) ]
+                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)]
             ]
             msg = f"""🎉 CONGRATULATIONS PREMIUM APPROVED 🎉
 
