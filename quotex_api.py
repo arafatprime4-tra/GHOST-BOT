@@ -268,6 +268,10 @@ class QuantumEngine:
                 conf=pa_result["conf"]
                 reason=pa_result["reason"]
                 pa_type=pa_result.get("pa_type","SMC")
+                # LYRA voice - build detailed voice for this SMC signal
+                _price_tmp = self.prices.get(pair_upper, [1.0])[-1] if isinstance(self.prices.get(pair_upper), list) else self.prices.get(check_pair, [1.0])[-1]
+                if isinstance(_price_tmp, list): _price_tmp=_price_tmp[-1]
+                _voice_tmp, _entry_tmp = build_lyra_voice(check_pair, final, conf, pa_type, reason, round(_price_tmp,5))
                 is_trap=pa_result.get("is_trap",False)
                 if final!="WAIT":
                     price=self.prices.get(pair_upper, [1.0])[-1] if isinstance(self.prices.get(pair_upper), list) else self.prices.get(check_pair, [1.0])[-1]
@@ -293,6 +297,9 @@ class QuantumEngine:
                         "generated_at": int(now),
                         "filter": {"trend": final, "pa_type": pa_type, "mode": mode, "pa_enabled": True, "smc": True},
                         "engine": f"GHOST PREMIUM SMC - {pa_type}",
+                        "voice_text": _voice_tmp,
+                        "entry_type": _entry_tmp,
+                        "analysis_detail": reason,
                         "strategies": [reason, pa_type, f"{pd['zone']}", f"Structure: {struct['structure']}"],
                         "timestamp": int(now),
                         "risk_percent": 1
@@ -313,10 +320,25 @@ class QuantumEngine:
                 conf = 58
             
             final="CALL" if last.close>prev.close else "PUT"
+            _voice_mom, _entry_mom = build_lyra_voice(check_pair, final, conf, "Momentum", f"Momentum {prev.close:.5f}->{last.close:.5f}", round(last.close,5))
             # If strong momentum, increase confidence
             if body_strength > 0.6:
                 conf += 5
             
+            # Momentum o 62 er niche WAIT - nahole weak signal chole asbe
+            if conf < 62:
+                return {
+                    "signal_id": f"{check_pair}-WAIT-{int(now)}",
+                    "pair": check_pair, "market": f"{check_pair[:3]}/{check_pair[3:]}{' OTC' if is_otc else ''}" if len(check_pair)==6 else check_pair,
+                    "signal": "WAIT", "direction": "WAIT", "confidence": conf,
+                    "reason": f"Weak Momentum {conf}% < 62 - WAIT for strong",
+                    "price_action_type": "WAIT", "status": "WAIT",
+                    "price": round(self.prices.get(pair_upper, [1.0])[-1] if isinstance(self.prices.get(pair_upper), list) else 1.085,5),
+                    "expiry_timestamp": int((now_dt+timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000),
+                    "time_left": clock_sec, "remainingSeconds": clock_sec, "generated_at": int(now),
+                    "filter": {"trend": final, "mode": mode}, "engine": "GHOST WAIT - Low Confidence",
+                    "strategies": ["WAIT"], "timestamp": int(now), "risk_percent": 1
+                }
             price=self.prices.get(pair_upper, [1.0])[-1]
             if isinstance(price, list): price=price[-1]
             expiry=int((now_dt+timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000)
@@ -338,6 +360,9 @@ class QuantumEngine:
                 "generated_at": int(now),
                 "filter": {"trend": final, "mode": mode, "trend_strength": trend_candles},
                 "engine": "GHOST PREMIUM SMC - Momentum",
+                "voice_text": _voice_mom,
+                "entry_type": _entry_mom,
+                "analysis_detail": f"Momentum {prev.close:.5f}->{last.close:.5f} | Trend:{trend_candles}/5",
                 "strategies": ["Momentum", f"Trend {trend_candles}/5"],
                 "timestamp": int(now),
                 "risk_percent": 1
@@ -373,5 +398,40 @@ class QuantumEngine:
 
     def calc_signal(self, override_mode=None, pair="EURUSD"):
         return self.get_signal(pair, override_mode or "SAFE")
+
+
+def build_lyra_voice(pair, direction, conf, pa_type, reason, price, extra=None):
+    # LYRA-style voice: Ki dia analysis, kmn entry, wick rejection naki opening, confidence koto
+    # direction: CALL = UP, PUT = DOWN
+    dir_word = "UP" if direction=="CALL" else "DOWN"
+    extra = extra or {}
+    # Entry type: Wick Rejection vs Opening vs Order Block etc
+    if "Rejection" in pa_type or "Wick" in pa_type:
+        entry = "wick rejection"
+        entry_detail = f"I see a strong wick rejection. Price rejected from support, wick is more than 2 times body. So entry from wick rejection, not from opening."
+    elif "Liquidity" in pa_type:
+        entry = "liquidity grab"
+        entry_detail = f"Price swept liquidity above equal highs, then closed back below. That is a trap. So entry from liquidity grab reversal."
+    elif "Order Block" in pa_type or "OB" in pa_type:
+        entry = "order block"
+        entry_detail = f"Price came back to order block and holding. Smart money order block. So entry from order block retest."
+    elif "FVG" in pa_type or "Gap" in pa_type:
+        entry = "fair value gap"
+        entry_detail = f"Fair value gap is filling. Price is inside gap. So entry from gap fill."
+    elif "BOS" in pa_type:
+        entry = "break of structure"
+        entry_detail = f"Break of structure, higher high and higher low. Trend is strong. So entry from breakout, on opening of next candle."
+    elif "CHOCH" in pa_type:
+        entry = "change of character"
+        entry_detail = f"Change of character, failed low, reversal starting. So entry from reversal opening."
+    elif "Momentum" in pa_type:
+        entry = "opening"
+        entry_detail = f"No clear SMC pattern, but momentum is strong, trend candles are in same direction. So entry from opening of next candle."
+    else:
+        entry = "opening"
+        entry_detail = f"Entry from opening of next candle, structure confirms."
+    # Build voice - 2-3 sentences, LYRA moto sob kicu bolbe
+    voice = f"Ghost here. {pair} analysis. {entry_detail} Direction is {dir_word}. Confidence {conf} percent. Price {price}. Entry type {entry}. Take entry now, on next candle opening, with 1 percent risk."
+    return voice, entry
 
 signal_engine=QuantumEngine()
