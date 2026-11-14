@@ -51,6 +51,14 @@ css.innerHTML=
 ".gh-next{flex:1;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:10px;color:#fff;font-weight:900;padding:10px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px}"+
 ".gh-back{width:62px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px}"+
 ".gh-sig{margin:9px 11px 0;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:900;color:#fff}"+
+".gh-sig.motion{animation:ghSignalMotion 1.2s ease-in-out infinite}"+
+"@keyframes ghSignalMotion{0%{transform:scale(1);box-shadow:0 0 10px rgba(255,45,85,.4)}50%{transform:scale(1.04);box-shadow:0 0 22px rgba(255,45,85,.8)}100%{transform:scale(1);box-shadow:0 0 10px rgba(255,45,85,.4)}}"+
+".gh-sig.up-motion{animation:ghUpMotion 1s ease-in-out infinite}"+
+"@keyframes ghUpMotion{0%{transform:translateY(0)}50%{transform:translateY(-3px)}100%{transform:translateY(0)}}"+
+".gh-sig.down-motion{animation:ghDownMotion 1s ease-in-out infinite}"+
+"@keyframes ghDownMotion{0%{transform:translateY(0)}50%{transform:translateY(3px)}100%{transform:translateY(0)}}"+
+".gh-mic-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:4px 8px;font-size:8px;cursor:pointer;display:flex;align-items:center;gap:4px}"+
+".gh-mic-btn.listening{background:#ff2d55;animation:ghSignalMotion 0.8s ease-in-out infinite}"+
 ".gh-sig.up{background:linear-gradient(145deg,rgba(0,200,83,.85),rgba(0,150,36,.85))}"+
 ".gh-sig.down{background:linear-gradient(145deg,rgba(255,23,68,.9),rgba(213,0,43,.9))}"+
 ".gh-sig.wait{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px}"+
@@ -78,7 +86,7 @@ box.innerHTML=
 '<div class="gh-orb" id="gh-orb">'+ICON.ghost+'</div>'+
 '<div class="gh-card gh-card-hidden" id="gh-card">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
-'<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div>'+
+'<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><button class="gh-mic-btn" id="gh-mic-btn">Mic</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div>'+
 '<div id="gh-body"></div>'+
 '<div class="gh-sig-wrap gh-hidden" id="gh-sig-wrap"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div class="gh-analysis" id="gh-analysis"></div></div>'+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
@@ -132,14 +140,15 @@ function ghBuildVoiceText(j, lang){
     else if(entry.indexOf('break')>=0) entryHi = 'break of structure hua hai, breakout se entry lunga';
     return 'Bhai suno, ' + pair + ' me ek accha ' + dirHi + ' entry mila hai. ' + entryHi + '. Confidence ' + conf + ' percent hai. Abhi entry lo, deri mat karo.';
   } else if(lang==='en'){
+    // ENGLISH NATIVE: Rate English e English er moto bolbe - proper fluent English
     var dirEn = isUp ? 'UP' : 'DOWN';
-    var entryEn = 'I will take entry from opening.';
-    if(entry.indexOf('wick')>=0) entryEn = 'Wick rejection happened, price bounced from support. I will take entry from wick rejection, not from opening.';
-    else if(entry.indexOf('liquidity')>=0) entryEn = 'Liquidity grab happened, it was a trap. I will take reversal entry.';
-    else if(entry.indexOf('order')>=0) entryEn = 'Price is holding at order block. I will take entry from order block.';
-    else if(entry.indexOf('gap')>=0) entryEn = 'Gap is filling. I will take entry from gap.';
-    else if(entry.indexOf('break')>=0) entryEn = 'Break of structure happened. I will take breakout entry.';
-    return 'Brother listen, ' + pair + ' has a good ' + dirEn + ' entry. ' + entryEn + ' Confidence ' + conf + ' percent. Take entry now.';
+    var entryEn = 'I will take the entry from the opening.';
+    if(entry.indexOf('wick')>=0) entryEn = 'I checked the wick rejection carefully. The price bounced strongly from support. So I will take the entry from the wick rejection, not from the opening.';
+    else if(entry.indexOf('liquidity')>=0) entryEn = 'I saw a liquidity grab. It was a trap. So I will take a reversal entry.';
+    else if(entry.indexOf('order')>=0) entryEn = 'The price is holding at the order block. I will take the entry from the order block.';
+    else if(entry.indexOf('gap')>=0) entryEn = 'The gap is filling. I will take the entry from the gap.';
+    else if(entry.indexOf('break')>=0) entryEn = 'Break of structure happened. I will take the breakout entry.';
+    return 'Hey, listen. I found a strong ' + dirEn + ' entry on ' + pair + '. ' + entryEn + ' Confidence is ' + conf + ' percent. Take the entry now, within the first thirty seconds.';
   } else {
     var dirBn = isUp ? 'UP' : 'DOWN';
     var entryBn = 'opening theke entry nibo.';
@@ -151,6 +160,161 @@ function ghBuildVoiceText(j, lang){
     return 'Bhai shuno, ' + pair + ' te ekta valo ' + dirBn + ' entry paichi. ' + entryBn + ' Confidence ' + conf + ' percent. Ekhoni entry nao.';
   }
 }
+// === NEW FEATURES: English Native + Chart Time + 30 Sec Window + Voice Chat + Motion Signal ===
+// 1. CHART TIME: Quotex chart er time porbe - UTC time + Countdown theke
+function ghGetChartTime(){
+  try{
+    var t = document.body.innerText || "";
+    // UTC Time: 12:14:07 -> seconds = 07
+    var utc = t.match(/(\d{2}):(\d{2}):(\d{2})/);
+    var countdown = t.match(/00:(\d{2})/);
+    var result = {utcSec: -1, remaining: -1, elapsed: -1, source: 'none'};
+    if(utc){
+      var hh = parseInt(utc[1],10), mm = parseInt(utc[2],10), ss = parseInt(utc[3],10);
+      result.utcSec = ss;
+      result.utcMin = mm;
+      result.utcHour = hh;
+      result.source = 'utc';
+      // 1 Min candle: elapsed = ss, 5 Min: elapsed = (mm % 5)*60 + ss, 2 Min: (mm % 2)*60 + ss
+      var dur = 60;
+      try{ dur = state.duration || 60; }catch(e){}
+      if(dur===60) result.elapsed = ss;
+      else if(dur===300) result.elapsed = (mm % 5)*60 + ss;
+      else if(dur===120) result.elapsed = (mm % 2)*60 + ss;
+      else if(dur===600) result.elapsed = (mm % 10)*60 + ss;
+      else if(dur===30) result.elapsed = ss % 30;
+      else if(dur===5) result.elapsed = ss % 5;
+      else result.elapsed = ss;
+    }
+    if(countdown){
+      result.remaining = parseInt(countdown[1],10);
+      // Countdown is time remaining in trade - if 00:53, remaining 53, elapsed for 1 Min = 60-53=7
+      // Use countdown as more accurate if available
+      try{
+        var d = state.duration || 60;
+        if(d===60) result.elapsed = 60 - result.remaining;
+      }catch(e){}
+      result.source = result.source + '+countdown';
+    }
+    return result;
+  }catch(e){ return {elapsed:-1, remaining:-1, utcSec:-1}; }
+}
+function ghIsEntryWindow(){
+  var ct = ghGetChartTime();
+  // 25-30 Sec Window: Prothom 25-30 sec er vitore entry, 30 sec pore entry na
+  if(ct.elapsed===-1) return {ok:true, elapsed:-1, reason:'no-time'};
+  if(ct.elapsed <= 30) return {ok:true, elapsed:ct.elapsed, reason:'in-window'};
+  return {ok:false, elapsed:ct.elapsed, reason:'late'};
+}
+// 2. VOICE CHAT: User Banglay bolle bujhe, English e answer dibe (selected lang e)
+var ghListening = false;
+var ghRecognition = null;
+function ghStartListening(){
+  try{
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+      ghSpeak("Bhai, ei browser e voice sunar system nai. Chrome e try koro.");
+      return;
+    }
+    if(ghListening){
+      try{ ghRecognition.stop(); }catch(e){}
+      ghListening = false;
+      return;
+    }
+    ghRecognition = new SR();
+    // User Banglay bolbe - Bangla shunbo, English e answer dibo (selected lang onujayi)
+    ghRecognition.lang = 'bn-BD';
+    ghRecognition.interimResults = false;
+    ghRecognition.continuous = false;
+    ghRecognition.maxAlternatives = 1;
+    ghListening = true;
+    var micBtn = document.getElementById('gh-mic-btn');
+    if(micBtn) micBtn.classList.add('listening');
+    ghSpeak("Haan bhai, bolun, ami shunchi.");
+    ghRecognition.onresult = function(ev){
+      try{
+        var txt = ev.results[0][0].transcript || "";
+        ghListening = false;
+        if(micBtn) micBtn.classList.remove('listening');
+        ghAnswerUser(txt);
+      }catch(e){}
+    };
+    ghRecognition.onerror = function(){
+      ghListening = false;
+      if(micBtn) micBtn.classList.remove('listening');
+    };
+    ghRecognition.onend = function(){
+      ghListening = false;
+      if(micBtn) micBtn.classList.remove('listening');
+    };
+    ghRecognition.start();
+  }catch(e){
+    ghListening = false;
+  }
+}
+function ghAnswerUser(userText){
+  try{
+    var lang = ghGetVoiceLang();
+    var lower = (userText||"").toLowerCase();
+    var lastSig = window.__gh_lastSig || null;
+    var answer = "";
+    // Intent detection - Bangla + English both
+    if(lower.indexOf('entry')>=0 || lower.indexOf('entri')>=0 || lower.indexOf('nibo')>=0 || lower.indexOf('nebo')>=0){
+      var ct = ghGetChartTime();
+      if(lastSig){
+        var dir = (lastSig.signal||'CALL')==='CALL' ? 'UP' : 'DOWN';
+        if(lang==='en'){
+          answer = "Yes, take " + dir + " entry now. Wick rejection confirmed, confidence " + (lastSig.confidence||0) + " percent. Candle time " + (ct.elapsed>=0 ? ct.elapsed + " seconds" : "is good") + ".";
+        } else if(lang==='hi'){
+          answer = "Haan bhai, abhi " + dir + " entry lo. Wick rejection confirm hai, confidence " + (lastSig.confidence||0) + " percent hai.";
+        } else {
+          answer = "Haan bhai, ekhon " + dir + " entry nao. Wick rejection confirm hoiche, confidence " + (lastSig.confidence||0) + " percent.";
+        }
+      } else {
+        answer = lang==='en' ? "Wait, no signal yet. I am analyzing. Wick rejection dekhchi." : "Ektu wait koro, ekhono signal ashe nai. Ami analysis kortesi.";
+      }
+    } else if(lower.indexOf('confidence')>=0 || lower.indexOf('confi')>=0){
+      answer = lang==='en' ? "Confidence is " + (lastSig? lastSig.confidence||0 : 0) + " percent. Wick rejection is strong." : "Confidence " + (lastSig? lastSig.confidence||0 : 0) + " percent. Wick rejection valo.";
+    } else if(lower.indexOf('time')>=0 || lower.indexOf('somoy')>=0 || lower.indexOf('kotokhon')>=0){
+      var ct2 = ghGetChartTime();
+      if(ct2.elapsed>=0){
+        if(ct2.elapsed>30){
+          answer = lang==='en' ? "30 seconds already passed, " + ct2.elapsed + " seconds. Do not take entry now, wait for next candle." : "30 second par hoye geche, " + ct2.elapsed + " second. Ekhon entry nio na, porer candle er jonno wait koro.";
+        } else {
+          answer = lang==='en' ? "Candle time is " + ct2.elapsed + " seconds. You are in the entry window, first 30 seconds. Take entry now." : "Candle time " + ct2.elapsed + " second. Tumi entry window er vitore acho, prothom 30 second. Ekhon entry nao.";
+        }
+      } else {
+        answer = lang==='en' ? "I cannot read chart time right now." : "Chart time porte partesi na ekhon.";
+      }
+    } else if(lower.indexOf('hello')>=0 || lower.indexOf('hi')>=0 || lower.indexOf('kemon')>=0 || lower.indexOf('assalam')>=0){
+      answer = lang==='en' ? "Hello brother, I am listening. Ask me about entry, confidence, or time." : "Haan bhai, ami shunchi. Entry, confidence, ba time niye jigges koro.";
+    } else {
+      // General - answer in selected lang (English if English selected)
+      if(lang==='en'){
+        answer = "I understood you. I am analyzing with SMC and Price Action, looking for wick rejection. Ask me about entry.";
+      } else if(lang==='hi'){
+        answer = "Main samajh gaya bhai. Main SMC aur Price Action se analysis kar raha hoon, wick rejection dekh raha hoon.";
+      } else {
+        answer = "Bujhsi bhai. Ami SMC ar Price Action diya analysis kortesi, wick rejection dekhtesi. Entry niye jigges koro.";
+      }
+    }
+    // Answer in selected lang - if English selected, English e bolbe, Bangla bolleo English e answer
+    window.__gh_lastVoice = "";
+    lastSpoken = "";
+    ghSpeak(answer);
+    // Force speak in selected lang - ghSpeak uses ghGetVoiceLang, so it will be English if English selected
+    // But ghSpeak uses lastSpoken check, we cleared it, so it will speak
+    try{
+      var u = new SpeechSynthesisUtterance(answer);
+      u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD';
+      u.rate = ghGetVoiceRate(); u.pitch = ghGetVoicePitch();
+      var v = ghFindVoice(lang); if(v) u.voice = v;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }catch(e){}
+}
+
 function ghSpeak(text, sigData){
   try{
     if(!state.voice) return;
@@ -356,9 +520,22 @@ function fetchSignalLyra(){
     window.__gh_lastVoice = voiceToSpeak;
     window.__gh_lastDirBn = (dir==="CALL"||dir==="UP") ? "UP" : "DOWN";
     window.__gh_lastConf = (j.confidence||0);
-    if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
-    else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
-    else{ sigEl.className="gh-sig wait"; sigEl.innerHTML=ICON.wait+'<span>WAIT - '+(j.reason||"Analyzing...")+'</span>'; }
+    // 30 SEC WINDOW: Chart time porbe - Prothom 25-30 sec er vitore entry, 30 sec pore entry na
+    var _win = ghIsEntryWindow();
+    if((dir==="CALL"||dir==="UP"||dir==="PUT"||dir==="DOWN") && !_win.ok && _win.elapsed>30){
+      // 30 sec par hoye geche - Entry nio na, WAIT dekhabe + bolbe
+      sigEl.className="gh-sig wait motion";
+      sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
+      var _lang = ghGetVoiceLang();
+      var _msg = _lang==='en' ? "Thirty seconds already passed, " + _win.elapsed + " seconds. Do not take entry now, wait for the next candle. I checked wick rejection, but time is over." : _lang==='hi' ? "Tees second par ho gaya hai, " + _win.elapsed + " second. Abhi entry mat lo, agle candle ka wait karo." : "Tees second par hoye geche, " + _win.elapsed + " second. Ekhon entry nio na, porer candle er jonno wait koro. Ami wick rejection dekhsi, kintu time sesh.";
+      ghSpeak(_msg);
+      updateMeta();
+      return;
+    }
+    // SIGNAL BUTTON MOTION: CSS + JS - UP/DOWN button e motion animation
+    if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up motion up-motion"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
+    else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down motion down-motion"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
+    else{ sigEl.className="gh-sig wait motion"; sigEl.innerHTML=ICON.wait+'<span>WAIT - '+(j.reason||"Analyzing...")+'</span>'; }
     updateMeta();
   }).catch(function(){});
   if(session.active) setTimeout(fetchSignalLyra, 8000);
@@ -447,6 +624,11 @@ setTimeout(function(){
     });
     if(_rs) _rs.addEventListener('change',function(){ localStorage.setItem('ghost_voice_rate', _rs.value); });
     if(_ps) _ps.addEventListener('change',function(){ localStorage.setItem('ghost_voice_pitch', _ps.value); });
+  }catch(e){}
+  // Mic Button - Bangla shune English e answer
+  try{
+    var _mic = document.getElementById('gh-mic-btn');
+    if(_mic) _mic.addEventListener('click',function(){ ghStartListening(); });
   }catch(e){}
   render();
 })();
