@@ -82,12 +82,12 @@ box.innerHTML=
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
 '</div>';
 document.body.appendChild(box);
-var saved={}; try{ saved=JSON.parse(localStorage.getItem("ghost_lyra")||"{}"); }catch(e){}
+// OLD SYSTEM: Protyek bar Step 1 theke shuru - Resume bad - Saved step use korbo na
+try{ localStorage.removeItem("ghost_lyra"); }catch(e){}
 var state={duration:60,durationLabel:"1 Min",stake:5,stakeLabel:"$5",count:1,step:1,voice:true};
-if(saved.duration) state={...state,...saved};
 var session={active:false,left:0};
 var lastSpoken=""; var voiceUnlocked=false;
-function save(){ try{ localStorage.setItem("ghost_lyra", JSON.stringify(state)); }catch(e){} }
+function save(){ try{ localStorage.setItem("ghost_lyra_voice", JSON.stringify({voice:state.voice})); }catch(e){} }
 // === VOICE SYSTEM - CSS + JavaScript Language Fix ===
 window.__gh_voices = window.__gh_voices || [];
 function ghLoadVoices(){
@@ -231,12 +231,13 @@ function render(){
     '<div class="gh-btn '+(state.count===20?'sel':'')+'" data-c="20"><div class="gh-ic">20</div><div><b>20 Trades</b><small>EXTENDED</small></div></div>'+
     '</div></div><div class="gh-foot"><button class="gh-back" id="gh-back">'+ICON.arrowL+' Back</button><button class="gh-next" id="gh-start">'+ICON.play+' Start Session</button></div>';
   }
+  // PROTTEK PAGE E VOICE - Kivabe analysis korbe, ki diya korbe - Sudhu mukhe bolbe, page e likhbe na - Clean page
   try{
     if(window.__gh_lastStep !== state.step){
       window.__gh_lastStep = state.step;
-      if(state.step===1) ghSpeak("Bhai, Step 1, Trade Duration select koro. Kotokhon er trade niba?");
-      else if(state.step===2) ghSpeak("Bhai, Step 2, Investment Stake select koro. Koto dollar diye trade niba?");
-      else if(state.step===3) ghSpeak("Bhai, Step 3, Execution Count select koro. Koyta trade niba?");
+      if(state.step===1) ghSpeak("Bhai, Step 1, Trade Duration select koro. Ami SMC plus Price Action diya analysis korbo. Wick rejection, liquidity grab, order block, break of structure dekhbo. EMA ar RSI diye confirm korbo. Duration select kore Next chap dao.");
+      else if(state.step===2) ghSpeak("Bhai, Step 2, Stake select koro. Ami oi pair er volatility ar confidence diya analysis korbo. High confidence hole boro stake, low hole choto stake. Stake select kore Next chap dao.");
+      else if(state.step===3) ghSpeak("Bhai, Step 3, Count select koro. Ami proti trade er age notun kore analysis korbo. Ek trade er analysis arek trade e use korbo na. Count select kore Start chap dao.");
     }
   }catch(e){}
   body.querySelectorAll('[data-d]').forEach(function(el){ el.addEventListener('click',function(){ state.duration=+el.dataset.d; state.durationLabel=el.dataset.l; save(); ghSpeak("Bhai, " + el.dataset.l + " select korcho, bhalo. Ekhon Next chap dao."); render(); }); });
@@ -398,8 +399,10 @@ var hd=document.getElementById('gh-h');
 hd.addEventListener('mousedown',ds); document.addEventListener('mousemove',dm); document.addEventListener('mouseup',de);
 hd.addEventListener('touchstart',ds,{passive:true}); document.addEventListener('touchmove',dm,{passive:false}); document.addEventListener('touchend',de,{passive:true});
 orb.addEventListener('mousedown',ds); orb.addEventListener('touchstart',ds,{passive:true});
-document.getElementById('gh-lyra-close').addEventListener('click',function(){ box.remove(); });
-document.getElementById('gh-close-bar').addEventListener('click',function(){ box.remove(); });
+// TOP X = Minimize - Card lukabe, choto Orb thakbe - CSS class diye
+  document.getElementById('gh-lyra-close').addEventListener('click',function(e){ e.stopPropagation(); var c=document.getElementById('gh-card'); if(c) c.classList.add('gh-card-hidden'); });
+// BOTTOM Close = Full Close + Next bar Step 1 theke shuru hobe
+  document.getElementById('gh-close-bar').addEventListener('click',function(){ try{ localStorage.removeItem('ghost_lyra'); }catch(e){} box.remove(); });
 // Voice button
 setTimeout(function(){
   var vb=document.getElementById('gh-voice-btn');
