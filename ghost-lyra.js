@@ -28,36 +28,36 @@ var ICON = {
 };
 var css=document.createElement("style");
 css.innerHTML=
-"#ghost-lyra{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:280px;font-family:Inter,sans-serif;user-select:none}"+
-".gh-orb{width:58px;height:58px;margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,80,80,.9),rgba(200,0,0,.85) 45%,rgba(90,0,0,.6) 70%,transparent);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 22px rgba(255,30,30,.7),0 0 45px rgba(255,0,0,.35);animation:ghPulse 2.2s infinite}"+
-".gh-orb svg{width:42px;height:42px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}"+
+"#ghost-lyra{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:2147483647;width:220px;font-family:Inter,sans-serif;user-select:none}"+
+".gh-orb{width:42px;height:42px;margin:0 auto 4px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,80,80,.85),rgba(200,0,0,.70) 45%,rgba(90,0,0,.45) 70%,transparent);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 16px rgba(255,30,30,.6),0 0 30px rgba(255,0,0,.25);animation:ghPulse 2.2s infinite}"+
+".gh-orb svg{width:30px;height:30px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}"+
 "@keyframes ghPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}"+
-".gh-card{background:linear-gradient(145deg,rgba(60,0,10,.55),rgba(20,0,5,.60));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,45,85,.55);border-radius:18px;box-shadow:0 0 28px rgba(255,0,0,.35),0 12px 30px rgba(0,0,0,.45);overflow:hidden}"+
-".gh-h{padding:9px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.12);cursor:move}"+
-".gh-h b{font-size:12px;color:#fff;letter-spacing:1px}.gh-h b span{color:#ff2d55}"+
-".gh-h .gh-right{display:flex;gap:6px;align-items:center}"+
-".gh-voice{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:12px;padding:3px 7px;font-size:9px;cursor:pointer;display:flex;align-items:center;gap:4px}"+
-".gh-step-badge{font-size:8px;color:#fff;background:rgba(255,45,85,.45);padding:2px 6px;border-radius:10px}"+
-".gh-close{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}"+
-".gh-step{padding:11px}"+
-".gh-title{font-size:13px;font-weight:900;color:#fff;margin:0 0 2px}"+
-".gh-sub{font-size:9px;color:rgba(255,255,255,.75);margin:0 0 10px}"+
-".gh-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}"+
-".gh-btn{background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,45,85,.18));border:1px solid rgba(255,255,255,.18);border-radius:11px;padding:9px 7px;display:flex;align-items:center;gap:7px;cursor:pointer;color:#fff}"+
-".gh-btn.sel{background:linear-gradient(145deg,#ff2d55,#c4002e);border-color:#fff;box-shadow:0 0 14px rgba(255,45,85,.6)}"+
-".gh-btn b{font-size:12px;display:block;line-height:1}.gh-btn small{font-size:7px;color:rgba(255,255,255,.85);letter-spacing:.5px}"+
-".gh-btn .gh-ic{width:26px;height:26px;min-width:26px;background:rgba(0,0,0,.25);border-radius:8px;display:flex;align-items:center;justify-content:center}"+
-".gh-foot{padding:0 11px 11px;display:flex;gap:7px}"+
-".gh-next{flex:1;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:10px;color:#fff;font-weight:900;padding:10px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px}"+
-".gh-back{width:62px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px}"+
-".gh-sig{margin:9px 11px 0;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:900;color:#fff}"+
+".gh-card{background:rgba(0,0,0,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:14px;box-shadow:0 0 14px rgba(255,0,0,.18),0 8px 20px rgba(0,0,0,.25);overflow:hidden}"+
+".gh-h{padding:6px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.10);cursor:move}"+
+".gh-h b{font-size:10px;color:#fff;letter-spacing:1px}.gh-h b span{color:#ff2d55}"+
+".gh-h .gh-right{display:flex;gap:4px;align-items:center}"+
+".gh-voice{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:2px 5px;font-size:8px;cursor:pointer;display:flex;align-items:center;gap:3px}"+
+".gh-step-badge{font-size:7px;color:#fff;background:rgba(255,45,85,.45);padding:2px 5px;border-radius:8px}"+
+".gh-close{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}"+
+".gh-step{padding:7px}"+
+".gh-title{font-size:11px;font-weight:900;color:#fff;margin:0 0 1px;text-shadow:0 1px 3px rgba(0,0,0,.6)}"+
+".gh-sub{font-size:8px;color:rgba(255,255,255,.80);margin:0 0 6px;text-shadow:0 1px 2px rgba(0,0,0,.6)}"+
+".gh-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}"+
+".gh-btn{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.20);border-radius:8px;padding:6px 5px;display:flex;align-items:center;gap:5px;cursor:pointer;color:#fff;backdrop-filter:blur(4px)}"+
+".gh-btn.sel{background:linear-gradient(145deg,#ff2d55,#c4002e);border-color:#fff;box-shadow:0 0 10px rgba(255,45,85,.5)}"+
+".gh-btn b{font-size:10px;display:block;line-height:1}.gh-btn small{font-size:6px;color:rgba(255,255,255,.85);letter-spacing:.5px}"+
+".gh-btn .gh-ic{width:20px;height:20px;min-width:20px;background:rgba(0,0,0,.30);border-radius:6px;display:flex;align-items:center;justify-content:center}"+
+".gh-foot{padding:0 7px 7px;display:flex;gap:5px}"+
+".gh-next{flex:1;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:8px;color:#fff;font-weight:900;padding:7px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;gap:4px}"+
+".gh-back{width:50px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;font-size:10px}"+
+".gh-sig{margin:6px 7px 0;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;font-weight:900;color:#fff}"+
 ".gh-sig.up{background:linear-gradient(145deg,rgba(0,200,83,.85),rgba(0,150,36,.85))}"+
 ".gh-sig.down{background:linear-gradient(145deg,rgba(255,23,68,.9),rgba(213,0,43,.9))}"+
-".gh-sig.wait{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px}"+
-".gh-sig.off{background:rgba(0,0,0,.55);border:1px solid rgba(255,45,85,.6);font-size:11px}"+
-".gh-meta{font-size:9px;color:rgba(255,255,255,.7);text-align:center;padding:6px 0 2px}"+
-".gh-hint{font-size:8px;color:rgba(255,255,255,.55);text-align:center;padding:0 0 8px}"+
-".gh-close-bar{margin:0 11px 11px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;padding:8px;text-align:center;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}";
+".gh-sig.wait{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:10px}"+
+".gh-sig.off{background:rgba(0,0,0,.45);border:1px solid rgba(255,45,85,.6);font-size:10px}"+
+".gh-meta{font-size:8px;color:rgba(255,255,255,.80);text-align:center;padding:4px 0 1px;text-shadow:0 1px 2px rgba(0,0,0,.6)}"+
+".gh-hint{font-size:7px;color:rgba(255,255,255,.60);text-align:center;padding:0 0 5px}"+
+".gh-close-bar{margin:0 7px 7px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:5px;text-align:center;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}";
 document.head.appendChild(css);
 var box=document.createElement("div");
 box.id="ghost-lyra";
@@ -67,7 +67,7 @@ box.innerHTML=
 '<div class="gh-card" id="gh-card" style="display:none">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
 '<div id="gh-body"></div>'+
-'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div id="gh-analysis" style="display:none;margin:8px 11px 0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font-size:10px;line-height:1.5;color:#fff"></div><div style="padding:8px 11px 0"><button id="gh-speak-btn" style="width:100%;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:10px;color:#fff;font-weight:900;padding:9px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px">'+ICON.voiceOn+'<span>Speak Analysis Again</span></button></div></div>'+
+'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div id="gh-analysis" style="display:none;margin:6px 7px 0;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px;font-size:8px;line-height:1.4;color:#fff"></div><div style="padding:8px 11px 0"><button id="gh-speak-btn" style="width:100%;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:10px;color:#fff;font-weight:900;padding:9px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px">'+ICON.voiceOn+'<span>Speak Analysis Again</span></button></div></div>'+
 '<div class="gh-hint">Tap Orb to Collapse | Drag to Move</div>'+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
 '</div>';
@@ -90,16 +90,57 @@ function ghSpeak(text){
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     var u=new SpeechSynthesisUtterance(text);
-    // BANGLA: bn-BD voice, rate 0.95 - normal human er moto speed, robot lagbe na
-    u.lang='bn-BD'; u.rate=0.95; u.pitch=1; u.volume=1;
-    try{
-      var vs=window.speechSynthesis.getVoices();
-      // Bangla voice khujo: Google Bangla, Microsoft Bengali, Samsung Bangla
-      var bn=vs.find(function(v){ return v.lang && (v.lang.toLowerCase().indexOf('bn')===0 || v.lang.toLowerCase().indexOf('ben')===0); });
-      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bengali')>=0; });
-      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bangla')>=0; });
-      if(bn) u.voice=bn;
-    }catch(e){}
+    // BANGLA VOICE FIX: Phone e Bangla voice na thakle Bengali script bujbe na, tai Roman Bangla te bolbe
+    var vs=[];
+    try{ vs=window.speechSynthesis.getVoices(); }catch(e){}
+    var bn=vs.find(function(v){ return v.lang && (v.lang.toLowerCase().indexOf('bn')===0 || v.lang.toLowerCase().indexOf('ben')===0); });
+    if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bengali')>=0; });
+    if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bangla')>=0; });
+    var hasBanglaVoice = !!bn;
+    var speakText = text;
+    if(!hasBanglaVoice){
+      // Bangla voice nai - Bengali script ke Roman Bangla te convert koro, jate English voice o Bangla er moto bole
+      // Example: "ভাই শুনো" -> "Bhai shuno"
+      speakText = text
+        .replace(/ভাই শুনো/g, "Bhai shuno")
+        .replace(/ঘোস্ট রেডি/g, "Ghost ready")
+        .replace(/আমি বাংলায় বলবো/g, "Ami Banglay bolbo")
+        .replace(/ভাই/g, "Bhai")
+        .replace(/শুনো/g, "shuno")
+        .replace(/ভালো/g, "valo")
+        .replace(/আপ/g, "UP")
+        .replace(/ডাউন/g, "DOWN")
+        .replace(/এন্ট্রি পাইছি/g, "entry paichi")
+        .replace(/এন্ট্রি নাও/g, "entry nao")
+        .replace(/এখনই/g, "ekhoni")
+        .replace(/দেরি করো না/g, "deri koro na")
+        .replace(/কনফিডেন্স/g, "confidence")
+        .replace(/পারসেন্ট/g, "percent")
+        .replace(/উইক রিজেকশন/g, "wick rejection")
+        .replace(/লিকুইডিটি গ্র্যাব/g, "liquidity grab")
+        .replace(/অর্ডার ব্লক/g, "order block")
+        .replace(/ব্রেক অফ স্ট্রাকচার/g, "break of structure")
+        .replace(/তে একটা/g, "te ekta")
+        .replace(/তাই/g, "tai")
+        .replace(/থেকে/g, "theke")
+        .replace(/হইছে/g, "hoiche")
+        .replace(/আর/g, "ar")
+        .replace(/আছে/g, "ache");
+      // Jodi ekhono Bengali script thake (convert hoy nai), tahole English fallback
+      if(/[\u0980-\u09FF]/.test(speakText)){
+        // Bengali script roye geche - Roman e full fallback
+        speakText = "Bhai shuno, " + (window.__gh_lastDirBn || "UP") + " entry paichi. Confidence " + (window.__gh_lastConf || "80") + " percent. Ekhoni entry nao.";
+      }
+      u.lang='en-US'; u.rate=0.95; u.pitch=1; u.volume=1;
+      // English voice diye Roman Bangla bolbe - bujha jabe
+    } else {
+      u.lang='bn-BD'; u.rate=0.95; u.pitch=1; u.volume=1;
+      u.voice=bn;
+    }
+    var u2 = u;
+    u.text = speakText;
+    // For debugging: show which voice used
+    window.__gh_voiceMode = hasBanglaVoice ? "BANGLA" : "ROMAN-BANGLA";
     window.speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -235,6 +276,8 @@ function fetchSignalLyra(){
     // Analysis box e dekhao
     var anaBox=document.getElementById('gh-analysis'); if(anaBox){ anaBox.style.display='block'; anaBox.innerHTML='<b>Analysis:</b> '+(j.analysis_detail||j.reason||'')+'<br><b>Entry:</b> '+(j.entry_type||'opening')+' | <b>Confidence:</b> '+(j.confidence||0)+'%<br><b>Confluence:</b> '+(j.confluence||1)+' signals | <b>RSI:</b> '+(j.rsi||'--')+' | <b>EMA:</b> '+(j.ema_bias||'--')+'<br><b>LOCK:</b> Locked for this minute - Flicker off'; }
     window.__gh_lastVoice = voiceToSpeak;
+    window.__gh_lastDirBn = (dir==="CALL"||dir==="UP") ? "UP" : "DOWN";
+    window.__gh_lastConf = (j.confidence||0);
     if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
     else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
     else{ sigEl.className="gh-sig wait"; sigEl.innerHTML=ICON.wait+'<span>WAIT - '+(j.reason||"Analyzing...")+'</span>'; }
