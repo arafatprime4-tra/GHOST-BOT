@@ -66,9 +66,9 @@ box.innerHTML=
 '<div class="gh-orb" id="gh-orb">'+ICON.ghost+'</div>'+
 '<div class="gh-card" id="gh-card" style="display:none">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
-'<div id="gh-body"></div>'+
-'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div id="gh-analysis" style="display:none;margin:8px 11px 0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font-size:10px;line-height:1.5;color:#fff"></div><div style="padding:8px 11px 0"><button id="gh-speak-btn" style="width:100%;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:10px;color:#fff;font-weight:900;padding:9px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px">'+ICON.voiceOn+'<span>Speak Analysis Again</span></button></div></div>'+
-'<div class="gh-hint">Tap Orb to Collapse | Drag to Move</div>'+
+'<div id="gh-voice-set" style="display:flex;gap:4px;align-items:center;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.10);font-size:8px;color:#fff"><span style="opacity:.8">Voice:</span><button data-vlang="bn" style="flex:1;padding:3px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer">Bangla</button><button data-vlang="hi" style="flex:1;padding:3px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer">Hindi</button><button data-vlang="en" style="flex:1;padding:3px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer">English</button><select id="gh-rate" style="background:rgba(0,0,0,.3);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:8px;padding:2px"><option value="0.8">Slow</option><option value="0.95">Normal</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select id="gh-pitch" style="background:rgba(0,0,0,.3);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:8px;padding:2px"><option value="0.8">Low Pitch</option><option value="1">Normal</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div><div id="gh-body"></div>'+
+'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div id="gh-analysis" style="display:none;margin:8px 11px 0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font-size:10px;line-height:1.5;color:#fff"></div><div style="padding:8px 11px 0"><button id="</div></div>'+
+''+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
 '</div>';
 document.body.appendChild(box);
@@ -91,12 +91,39 @@ function ghSpeak(text){
     window.speechSynthesis.cancel();
     var u=new SpeechSynthesisUtterance(text);
     // BANGLA VOICE FIX: Phone e Bangla voice na thakle Bengali script bujbe na, tai Roman Bangla te bolbe
+    // VOICE FIX: User Hindi select korche, Fast + Pitch diche - age ami jor kore Bangla + 0.95 chapaia ditam, tai tar setting kaj korto na
+    // Ekhon: User er setting manbo - localStorage theke lang/rate/pitch nibo
+    var userLang = 'bn';
+    var userRate = 0.95;
+    var userPitch = 1;
+    try{
+      userLang = localStorage.getItem('ghost_voice_lang') || 'bn';
+      userRate = parseFloat(localStorage.getItem('ghost_voice_rate') || '0.95');
+      userPitch = parseFloat(localStorage.getItem('ghost_voice_pitch') || '1');
+      // Jodi user Hindi select kore thake, tahole Hindi use korbo, Bangla na
+      if(!localStorage.getItem('ghost_voice_lang')){
+        // First time: Phone er default voice check koro - Hindi default hole Hindi nibo
+        var _vs0 = window.speechSynthesis.getVoices()||[];
+        var _def = _vs0.find(function(v){ return v.default; });
+        if(_def && _def.lang && _def.lang.toLowerCase().indexOf('hi')===0) userLang='hi';
+      }
+    }catch(e){}
     var vs=[];
     try{ vs=window.speechSynthesis.getVoices(); }catch(e){}
-    var bn=vs.find(function(v){ return v.lang && (v.lang.toLowerCase().indexOf('bn')===0 || v.lang.toLowerCase().indexOf('ben')===0); });
-    if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bengali')>=0; });
-    if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bangla')>=0; });
+    // User er lang onujayi voice khujo - Hindi hole Hindi, Bangla hole Bangla, English hole English
+    var bn=null;
+    if(userLang==='hi'){
+      bn=vs.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf('hi')===0; });
+      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('hindi')>=0; });
+    } else if(userLang==='en'){
+      bn=vs.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf('en')===0; });
+    } else {
+      bn=vs.find(function(v){ return v.lang && (v.lang.toLowerCase().indexOf('bn')===0 || v.lang.toLowerCase().indexOf('ben')===0); });
+      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bengali')>=0; });
+      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bangla')>=0; });
+    }
     var hasBanglaVoice = !!bn;
+    // User er rate/pitch use korbo - age 0.95 fixed chilo, ekhon user er ta
     var speakText = text;
     if(!hasBanglaVoice){
       // Bangla voice nai - Bengali script ke Roman Bangla te convert koro, jate English voice o Bangla er moto bole
@@ -131,10 +158,10 @@ function ghSpeak(text){
         // Bengali script roye geche - Roman e full fallback
         speakText = "Bhai shuno, " + (window.__gh_lastDirBn || "UP") + " entry paichi. Confidence " + (window.__gh_lastConf || "80") + " percent. Ekhoni entry nao.";
       }
-      u.lang='en-US'; u.rate=0.95; u.pitch=1; u.volume=1;
-      // English voice diye Roman Bangla bolbe - bujha jabe
+      // Hindi user: Hindi voice na thakle English voice diye Roman Hindi/Bangla bolbe, but user er rate/pitch manbe
+      u.lang = (userLang==='hi' ? 'hi-IN' : 'en-US'); u.rate=userRate; u.pitch=userPitch; u.volume=1;
     } else {
-      u.lang='bn-BD'; u.rate=0.95; u.pitch=1; u.volume=1;
+      u.lang = (userLang==='hi' ? 'hi-IN' : userLang==='en' ? 'en-US' : 'bn-BD'); u.rate=userRate; u.pitch=userPitch; u.volume=1;
       u.voice=bn;
     }
     var u2 = u;
@@ -149,8 +176,11 @@ function ghUnlockVoice(){
     voiceUnlocked=true; state.voice=true; save();
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    var u=new SpeechSynthesisUtterance('ভাই, ঘোস্ট রেডি। আমি বাংলায় বলবো।');
-    u.lang='bn-BD'; u.rate=0.95; window.speechSynthesis.speak(u);
+    var _ul = 'bn', _ur=0.95, _up=1;
+    try{ _ul=localStorage.getItem('ghost_voice_lang')||'bn'; _ur=parseFloat(localStorage.getItem('ghost_voice_rate')||'0.95'); _up=parseFloat(localStorage.getItem('ghost_voice_pitch')||'1'); }catch(e){}
+    var _txt = _ul==='hi' ? 'Bhai, Ghost ready. Main Hindi me bolunga.' : _ul==='en' ? 'Ghost ready. I will speak in English.' : 'ভাই, ঘোস্ট রেডি। আমি বাংলায় বলবো।';
+    var u=new SpeechSynthesisUtterance(_txt);
+    u.lang = _ul==='hi' ? 'hi-IN' : _ul==='en' ? 'en-US' : 'bn-BD'; u.rate=_ur; u.pitch=_up; window.speechSynthesis.speak(u);
     var vb=document.getElementById('gh-voice-btn'); if(vb) vb.innerHTML=ICON.voiceOn+'<span>Voice: ON</span>';
   }catch(e){}
 }
@@ -203,19 +233,11 @@ function render(){
 function startSession(){
   session.active=true; session.left=state.count; save();
   ghSpeak("Bhai, session start hoiche. Ami " + getPair() + " market analysis kortesi. Signal pailei bolbo, tumi sudhu shuno.");
-  document.getElementById('gh-body').innerHTML='<div class="gh-step"><p class="gh-title">'+ICON.check+' Session Started</p><p class="gh-sub">'+state.durationLabel+' | '+state.stakeLabel+' | '+state.count+' Trades | Signal Only - Manually Buy/Sell in Quotex</p><div class="gh-foot"><button class="gh-back" id="gh-edit">'+ICON.edit+' Edit</button><button class="gh-next" id="gh-stop">'+ICON.stop+' Stop</button></div></div>';
+  document.getElementById('gh-body').innerHTML='<div class="gh-step"><p class="gh-title">'+ICON.check+' Session Started</p><p class="gh-sub">'+state.durationLabel+' | '+state.stakeLabel+' | '+state.count+' Trades</p><div class="gh-foot"><button class="gh-back" id="gh-edit">'+ICON.edit+' Edit</button><button class="gh-next" id="gh-stop">'+ICON.stop+' Stop</button></div></div>';
   document.getElementById('gh-edit').addEventListener('click',function(){ state.step=1; render(); });
   document.getElementById('gh-stop').addEventListener('click',function(){ session.active=false; session.left=0; state.step=1; render(); document.getElementById('gh-sig-wrap').style.display='none'; });
   document.getElementById('gh-sig-wrap').style.display='block';
-  // Speak Again button - LYRA moto abar bolbe
-  setTimeout(function(){
-    var sb=document.getElementById('gh-speak-btn');
-    if(sb) sb.addEventListener('click',function(){
-      if(!voiceUnlocked) ghUnlockVoice();
-      if(window.__gh_lastVoice) ghSpeak(window.__gh_lastVoice);
-      else ghSpeak("Ghost here. No analysis yet. Wait for next signal.");
-    });
-  },300);
+
   fetchSignalLyra();
 }
 function updateMeta(){
@@ -371,5 +393,28 @@ setTimeout(function(){
     else if('speechSynthesis' in window) window.speechSynthesis.cancel();
   });
 },300);
-render();
+  try{
+    var _sl = localStorage.getItem('ghost_voice_lang') || 'bn';
+    var _sr = localStorage.getItem('ghost_voice_rate') || '0.95';
+    var _sp = localStorage.getItem('ghost_voice_pitch') || '1';
+    var _rs = document.getElementById('gh-rate'); if(_rs) _rs.value=_sr;
+    var _ps = document.getElementById('gh-pitch'); if(_ps) _ps.value=_sp;
+    document.querySelectorAll('[data-vlang]').forEach(function(b){
+      if(b.dataset.vlang===_sl) b.style.background='#ff2d55';
+      b.addEventListener('click',function(){
+        localStorage.setItem('ghost_voice_lang', b.dataset.vlang);
+        document.querySelectorAll('[data-vlang]').forEach(function(x){ x.style.background='rgba(255,255,255,.12)'; });
+        b.style.background='#ff2d55';
+        var _t = b.dataset.vlang==='hi' ? 'Bhai, Hindi voice select ho gaya. Ab main Hindi me bolunga.' : b.dataset.vlang==='en' ? 'English voice selected.' : 'Bhai, Bangla voice select hoiche.';
+        var _u = new SpeechSynthesisUtterance(_t);
+        _u.lang = b.dataset.vlang==='hi' ? 'hi-IN' : b.dataset.vlang==='en' ? 'en-US' : 'bn-BD';
+        _u.rate = parseFloat(localStorage.getItem('ghost_voice_rate')||'0.95'); _u.pitch = parseFloat(localStorage.getItem('ghost_voice_pitch')||'1');
+        try{ var _vs = window.speechSynthesis.getVoices(); var _v = _vs.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf(b.dataset.vlang)===0; }); if(_v) _u.voice=_v; }catch(e){}
+        window.speechSynthesis.cancel(); window.speechSynthesis.speak(_u);
+      });
+    });
+    if(_rs) _rs.addEventListener('change',function(){ localStorage.setItem('ghost_voice_rate', _rs.value); });
+    if(_ps) _ps.addEventListener('change',function(){ localStorage.setItem('ghost_voice_pitch', _ps.value); });
+  }catch(e){}
+  render();
 })();
