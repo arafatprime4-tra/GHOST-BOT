@@ -29,7 +29,7 @@ try{
 let css=document.createElement("style");
 css.innerHTML=`
 /* ===== GHOST FUTURISTIC HUD - v2 FIXED LOSS ===== */
-#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:linear-gradient(165deg,rgba(255,255,255,.18),rgba(255,255,255,.06) 40%,rgba(10,15,35,.18));border:1px solid rgba(0,240,255,.45);border-radius:10px;box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 28px rgba(0,240,255,.22),0 0 60px rgba(0,120,255,.18),0 18px 40px #000d;backdrop-filter:blur(14px);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
+#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:linear-gradient(165deg,rgba(10,15,35,.96),rgba(5,8,20,.98));border:1px solid rgba(0,240,255,.45);border-radius:10px;box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 28px rgba(0,240,255,.22),0 0 60px rgba(0,120,255,.18),0 18px 40px #000d;backdrop-filter:blur(14px);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
 #ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#00f0ff,#7b2fff,#00ff88,transparent);animation:ghBorderFlow 2.4s linear infinite;background-size:200% 100%}
 @keyframes ghBorderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
 @keyframes ghPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
@@ -564,13 +564,8 @@ setInterval(()=>{
   if(!protI.allowed){ showSTOP(); return; }
   // STABLE FIX: Lock thakle autoDetectMarket call korbo na - lock clear hoye flip hoy
   if(!(lockedSignalId && Date.now()<lockedUntil && currentSignal)) autoDetectMarket();
-  // COUNTDOWN FIX: UTC diye hisab kortam, tai Chart er End of trade 00:42 er shathe milto na
-  // Ekhon End of trade diye hisab korbo - Chart e 00:42 thakle Panel eo 00:42 dekhabe
-  var _endMatch=null; try{ var _t=document.body.innerText||""; _endMatch=_t.match(/End of trade[\s\S]{0,30}?(\d{1,2}):(\d{2})/i); }catch(e){}
-  var _endSec=-1; if(_endMatch){ _endSec=parseInt(_endMatch[1],10)*60+parseInt(_endMatch[2],10); }
-  if(!currentSignal){ let secEl=document.getElementById("gh-sec"); if(secEl){ if(_endSec>=0) secEl.textContent=_endSec+"s"; else {let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";} } return; }
+  if(!currentSignal){ let secEl=document.getElementById("gh-sec"); if(secEl){let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";} return; }
   let rem=Math.max(0,Math.ceil((currentSignal.expiry_timestamp-Date.now())/1000));
-  if(_endSec>=0) rem=_endSec;
   let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=rem+"s";
   if(rem<=0){ currentSignal=null; lockedSignalId=""; lockedUntil=0; } else updateUI(currentSignal);
 },500);
