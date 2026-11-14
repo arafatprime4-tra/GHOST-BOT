@@ -79,8 +79,8 @@ box.innerHTML=
 '<div class="gh-card gh-card-hidden" id="gh-card">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
 '<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div>'+
+'<div id="gh-body"></div>'+
 '<div class="gh-sig-wrap gh-hidden" id="gh-sig-wrap"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div class="gh-analysis" id="gh-analysis"></div></div>'+
-''+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
 '</div>';
 document.body.appendChild(box);
