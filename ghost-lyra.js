@@ -9,6 +9,10 @@ if(window.__GHOST_LOADED__){
   }catch(e){ window.__GHOST_LOADED__ = false; }
 }
 window.__GHOST_LOADED__ = true;
+
+// ===== VOICE OFF - User bolse Voice/Kotha bola OFF =====
+try{ if(window.speechSynthesis){ window.speechSynthesis.cancel(); window.speechSynthesis.speak = function(){}; } }catch(e){}
+
 console.log('👻 GHOST BOT LOADING...');
 // ===== BOX FIRST - CSS fail korleo Box asbe =====
 try{
@@ -16,7 +20,7 @@ try{
   if(_old) _old.remove();
   let _box = document.createElement('div');
   _box.id = 'ghost-bot';
-  _box.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:#0a0f23;border:1px solid #00f0ff;border-radius:12px;color:#fff;font-family:sans-serif;text-align:center;padding:5px;box-shadow:0 0 28px rgba(0,240,255,.3)';
+  _box.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:rgba(10,15,35,0.55);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:1px solid #00f0ff;border-radius:12px;color:#fff;font-family:sans-serif;text-align:center;padding:5px;box-shadow:0 0 28px rgba(0,240,255,.3)';
   _box.innerHTML = '<div style="font-size:6px;letter-spacing:1px;color:#00f0ff">GHOST AI</div><div style="font-size:9px;font-weight:900;margin:2px 0">LOADING...</div><div style="font-size:8px;color:#00ff88">Bot Ashtese...</div>';
   (document.body || document.documentElement).appendChild(_box);
   console.log('👻 GHOST BOT BOX CREATED - FIRST');
