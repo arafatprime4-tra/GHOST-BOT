@@ -67,7 +67,7 @@ box.innerHTML=
 '<div class="gh-card" id="gh-card" style="display:none">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
 '<div id="gh-body"></div>'+
-'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div></div>'+
+'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div id="gh-analysis" style="display:none;margin:8px 11px 0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font-size:10px;line-height:1.5;color:#fff"></div><div style="padding:8px 11px 0"><button id="gh-speak-btn" style="width:100%;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:10px;color:#fff;font-weight:900;padding:9px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px">'+ICON.voiceOn+'<span>Speak Analysis Again</span></button></div></div>'+
 '<div class="gh-hint">Tap Orb to Collapse | Drag to Move</div>'+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
 '</div>';
@@ -83,6 +83,7 @@ function ghSpeak(text){
     if(!state.voice) return;
     if(!voiceUnlocked) return;
     if(text===lastSpoken) return;
+    // LYRA long analysis - jodi same signal er same voice abar ase, tao 1 bar bolbe, pore Speak Again button e bolbe
     lastSpoken=text;
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
@@ -146,6 +147,15 @@ function startSession(){
   document.getElementById('gh-edit').addEventListener('click',function(){ state.step=1; render(); });
   document.getElementById('gh-stop').addEventListener('click',function(){ session.active=false; session.left=0; state.step=1; render(); document.getElementById('gh-sig-wrap').style.display='none'; });
   document.getElementById('gh-sig-wrap').style.display='block';
+  // Speak Again button - LYRA moto abar bolbe
+  setTimeout(function(){
+    var sb=document.getElementById('gh-speak-btn');
+    if(sb) sb.addEventListener('click',function(){
+      if(!voiceUnlocked) ghUnlockVoice();
+      if(window.__gh_lastVoice) ghSpeak(window.__gh_lastVoice);
+      else ghSpeak("Ghost here. No analysis yet. Wait for next signal.");
+    });
+  },300);
   fetchSignalLyra();
 }
 function updateMeta(){
@@ -168,14 +178,24 @@ function fetchSignalLyra(){
   if(token) url+="&token="+encodeURIComponent(token);
   fetch(url).then(function(r){ return r.json(); }).then(function(j){
     var sigEl=document.getElementById('gh-sig'); if(!sigEl) return;
+    // New signal_id asle lastSpoken reset koro - nahole notun signal bolbe na
+    if(j.signal_id && j.signal_id !== window.__gh_lastSignalId){
+      window.__gh_lastSignalId = j.signal_id;
+      lastSpoken = "";
+    }
     var dir=j.signal||j.direction;
     if(j.status==="OLD_VERSION" || (j.blocked && j.reason && j.reason.indexOf("OLD")>=0)){
       sigEl.className="gh-sig off"; sigEl.innerHTML=ICON.wait+'<span>OLD - NEW LINK NAO</span>';
       ghSpeak("Old bookmarklet expired. Get new link.");
       return;
     }
-    if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak("Up signal, confidence "+(j.confidence||0)+" percent"); }
-    else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; ghSpeak("Down signal, confidence "+(j.confidence||0)+" percent"); }
+    // LYRA-style voice: j.voice_text thakle full analysis bolbe - Wick rejection naki opening, confidence, entry
+    var voiceToSpeak = j.voice_text || ("Ghost here. " + (dir==="CALL"||dir==="UP" ? "Up" : "Down") + " signal, confidence " + (j.confidence||0) + " percent. Entry from " + (j.entry_type||"opening") + ". " + (j.reason||""));
+    // Analysis box e dekhao
+    var anaBox=document.getElementById('gh-analysis'); if(anaBox){ anaBox.style.display='block'; anaBox.innerHTML='<b>Analysis:</b> '+(j.analysis_detail||j.reason||'')+'<br><b>Entry:</b> '+(j.entry_type||'opening')+' | <b>Confidence:</b> '+(j.confidence||0)+'%<br><b>Confluence:</b> '+(j.confluence||1)+' signals | <b>RSI:</b> '+(j.rsi||'--')+' | <b>EMA:</b> '+(j.ema_bias||'--'); }
+    window.__gh_lastVoice = voiceToSpeak;
+    if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
+    else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
     else{ sigEl.className="gh-sig wait"; sigEl.innerHTML=ICON.wait+'<span>WAIT - '+(j.reason||"Analyzing...")+'</span>'; }
     updateMeta();
   }).catch(function(){});
