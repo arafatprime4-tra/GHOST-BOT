@@ -111,14 +111,19 @@ try{
   if('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = ghLoadVoices;
 }catch(e){}
 function ghGetVoiceLang(){ try{ return localStorage.getItem('ghost_voice_lang') || 'bn'; }catch(e){ return 'bn'; } }
-function ghGetVoiceRate(){ try{ return parseFloat(localStorage.getItem('ghost_voice_rate') || '0.95'); }catch(e){ return 0.95; } }
-function ghGetVoicePitch(){ try{ return parseFloat(localStorage.getItem('ghost_voice_pitch') || '1.0'); }catch(e){ return 1.0; } }
+function ghGetVoiceRate(){ try{ var v=parseFloat(localStorage.getItem('ghost_voice_rate') || '0.88'); if(v>1.15) v=1.0; if(v<0.7) v=0.95; return v; }catch(e){ return 0.88; } }
+function ghGetVoicePitch(){ try{ var v=parseFloat(localStorage.getItem('ghost_voice_pitch') || '0.95'); if(v>1.1) v=1.0; if(v<0.8) v=1.0; return v; }catch(e){ return 1.0; } }
 function ghFindVoice(lang){
   var vs = window.__gh_voices && window.__gh_voices.length ? window.__gh_voices : [];
   try{ var live = window.speechSynthesis.getVoices() || []; if(live.length>vs.length) vs = live; }catch(e){}
   if(!vs.length) return null;
   var code = lang==='hi' ? 'hi' : lang==='en' ? 'en' : 'bn';
-  var v = vs.find(function(x){ return x.lang && x.lang.toLowerCase().indexOf(code)===0; });
+  // LYRA STYLE: Google voice age nibo - Android TTS robotic lage, Google human lage
+  // Age Google + lang, tarpor lang, tarpor default
+  var v = vs.find(function(x){ return x.name && x.name.toLowerCase().indexOf('google')>=0 && x.lang && x.lang.toLowerCase().indexOf(code)===0 && (x.name.toLowerCase().indexOf('female')>=0 || x.name.toLowerCase().indexOf('natural')>=0); });
+  if(!v) v = vs.find(function(x){ return x.name && x.name.toLowerCase().indexOf('google')>=0 && x.lang && x.lang.toLowerCase().indexOf(code)===0; });
+  if(!v) v = vs.find(function(x){ return x.lang && x.lang.toLowerCase().indexOf(code)===0 && x.name && x.name.toLowerCase().indexOf('natural')>=0; });
+  if(!v) v = vs.find(function(x){ return x.lang && x.lang.toLowerCase().indexOf(code)===0; });
   if(!v && code==='bn') v = vs.find(function(x){ return x.name && (x.name.toLowerCase().indexOf('bengali')>=0 || x.name.toLowerCase().indexOf('bangla')>=0); });
   if(!v && code==='hi') v = vs.find(function(x){ return x.name && x.name.toLowerCase().indexOf('hindi')>=0; });
   if(!v) v = vs.find(function(x){ return x.default; });
@@ -131,34 +136,33 @@ function ghBuildVoiceText(j, lang){
   var conf = j.confidence || 0;
   var entry = j.entry_type || 'opening';
   if(lang==='hi'){
-    // LYRA STYLE: Choto, clear, human - lomba na
     var dirHi = isUp ? 'UP' : 'DOWN';
-    var reasonHi = 'Wick rejection confirm.';
-    if(entry.indexOf('wick')>=0) reasonHi = 'Wick rejection confirm.';
-    else if(entry.indexOf('liquidity')>=0) reasonHi = 'Liquidity grab. Trap tha.';
-    else if(entry.indexOf('order')>=0) reasonHi = 'Order block holding.';
-    else if(entry.indexOf('gap')>=0) reasonHi = 'Gap filling.';
-    else if(entry.indexOf('break')>=0) reasonHi = 'Break of structure.';
-    return 'Bhai suno. ' + pair + ', ' + dirHi + ' entry. ' + reasonHi + ' Confidence ' + conf + ' percent. Abhi entry lo.';
+    var entryHi = 'opening se entry lunga';
+    if(entry.indexOf('wick')>=0) entryHi = 'wick rejection se entry lunga, opening se nahi. Price support se wapas gaya hai';
+    else if(entry.indexOf('liquidity')>=0) entryHi = 'liquidity grab hua hai, trap tha, isliye reversal se entry lunga';
+    else if(entry.indexOf('order')>=0) entryHi = 'order block se entry lunga';
+    else if(entry.indexOf('gap')>=0) entryHi = 'gap fill ho raha hai, gap se entry lunga';
+    else if(entry.indexOf('break')>=0) entryHi = 'break of structure hua hai, breakout se entry lunga';
+    return 'Bhai suno, ' + pair + ' me ek accha ' + dirHi + ' entry mila hai. ' + entryHi + '. Confidence ' + conf + ' percent hai. Abhi entry lo, deri mat karo.';
   } else if(lang==='en'){
-    // LYRA STYLE: Short, clear, human - 2 choto sentence, pause diye - lomba paragraph na, AI er moto lagbe na
+    // ENGLISH NATIVE: Rate English e English er moto bolbe - proper fluent English
     var dirEn = isUp ? 'UP' : 'DOWN';
-    var reasonEn = 'Wick rejection confirmed.';
-    if(entry.indexOf('wick')>=0) reasonEn = 'Wick rejection confirmed.';
-    else if(entry.indexOf('liquidity')>=0) reasonEn = 'Liquidity grab. It was a trap.';
-    else if(entry.indexOf('order')>=0) reasonEn = 'Order block holding.';
-    else if(entry.indexOf('gap')>=0) reasonEn = 'Gap filling.';
-    else if(entry.indexOf('break')>=0) reasonEn = 'Break of structure.';
-    return 'Hey, listen. ' + pair + ', ' + dirEn + ' entry. ' + reasonEn + ' Confidence ' + conf + ' percent. Take entry now.';
+    var entryEn = 'I will take the entry from the opening.';
+    if(entry.indexOf('wick')>=0) entryEn = 'I checked the wick rejection carefully. The price bounced strongly from support. So I will take the entry from the wick rejection, not from the opening.';
+    else if(entry.indexOf('liquidity')>=0) entryEn = 'I saw a liquidity grab. It was a trap. So I will take a reversal entry.';
+    else if(entry.indexOf('order')>=0) entryEn = 'The price is holding at the order block. I will take the entry from the order block.';
+    else if(entry.indexOf('gap')>=0) entryEn = 'The gap is filling. I will take the entry from the gap.';
+    else if(entry.indexOf('break')>=0) entryEn = 'Break of structure happened. I will take the breakout entry.';
+    return 'Hey, listen. I found a strong ' + dirEn + ' entry on ' + pair + '. ' + entryEn + ' Confidence is ' + conf + ' percent. Take the entry now, within the first thirty seconds.';
   } else {
-        var dirBn = isUp ? 'UP' : 'DOWN';
-    var reasonBn = 'Wick rejection confirm.';
-    if(entry.indexOf('wick')>=0) reasonBn = 'Wick rejection confirm.';
-    else if(entry.indexOf('liquidity')>=0) reasonBn = 'Liquidity grab. Trap chilo.';
-    else if(entry.indexOf('order')>=0) reasonBn = 'Order block holding.';
-    else if(entry.indexOf('gap')>=0) reasonBn = 'Gap filling.';
-    else if(entry.indexOf('break')>=0) reasonBn = 'Break of structure.';
-    return 'Bhai shuno. ' + pair + ', ' + dirBn + ' entry. ' + reasonBn + ' Confidence ' + conf + ' percent. Ekhon entry nao.';
+    var dirBn = isUp ? 'UP' : 'DOWN';
+    var entryBn = 'opening theke entry nibo.';
+    if(entry.indexOf('wick')>=0) entryBn = 'wick rejection hoiche, price support theke ghure geche. Tai wick theke entry nibo, opening theke na.';
+    else if(entry.indexOf('liquidity')>=0) entryBn = 'liquidity grab hoiche, trap chilo, tai reversal theke entry nibo.';
+    else if(entry.indexOf('order')>=0) entryBn = 'order block theke entry nibo.';
+    else if(entry.indexOf('gap')>=0) entryBn = 'gap fill hoiteche, gap theke entry nibo.';
+    else if(entry.indexOf('break')>=0) entryBn = 'break of structure hoiche, breakout theke entry nibo.';
+    return 'Bhai shuno, ' + pair + ' te ekta valo ' + dirBn + ' entry paichi. ' + entryBn + ' Confidence ' + conf + ' percent. Ekhoni entry nao.';
   }
 }
 // === NEW FEATURES: English Native + Chart Time + 30 Sec Window + Voice Chat + Motion Signal ===
@@ -218,37 +222,85 @@ function ghStartListening(){
       return;
     }
     if(ghListening){
+      window.__gh_wantListen = false;
+      window.__gh_micSpeakingBlock = false;
       try{ ghRecognition.stop(); }catch(e){}
       ghListening = false;
+      var _mb = document.getElementById('gh-mic-btn'); if(_mb){ _mb.classList.remove('listening'); _mb.textContent = 'Mic'; }
+      // Mic OFF hole pending kotha bolbe
+      if(window.__gh_pendingSpeak){ var _p = window.__gh_pendingSpeak; window.__gh_pendingSpeak = null; setTimeout(function(){ ghSpeak(_p); }, 300); }
       return;
     }
+    // MIC PERMISSION CHECK: Age getUserMedia diye permission nibo, nahole Chrome auto off kore dey
+    // XRecorder cholle ekhanei fail korbe, agei bujha jabe
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+      navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+        try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
+        ghStartRecognitionNow(SR, micBtn);
+      }).catch(function(err){
+        ghListening = false; window.__gh_wantListen = false;
+        if(micBtn) micBtn.classList.remove('listening');
+        ghSpeak("Mic permission dao. Chrome e Mic allow koro. XRecorder cholle Stop koro.");
+        return;
+      });
+      return;
+    }
+    ghStartRecognitionNow(SR, micBtn);
+    return;
+  }catch(e){ ghListening = false; }
+}
+function ghStartRecognitionNow(SR, micBtn){
+  try{
     ghRecognition = new SR();
-    // User Banglay bolbe - Bangla shunbo, English e answer dibo (selected lang onujayi)
     ghRecognition.lang = 'bn-BD';
-    ghRecognition.interimResults = false;
-    ghRecognition.continuous = false;
+    ghRecognition.interimResults = true;
+    ghRecognition.continuous = true;
     ghRecognition.maxAlternatives = 1;
     ghListening = true;
+    window.__gh_wantListen = true;
+    window.__gh_micSpeakingBlock = true;
+    // Mic ON hole Ghost er TTS bondho - nahole Mic auto off hoy
+    try{ window.speechSynthesis.cancel(); window.__gh_speakQueue = []; window.__gh_speaking = false; }catch(e){}
     var micBtn = document.getElementById('gh-mic-btn');
-    if(micBtn) micBtn.classList.add('listening');
-    ghSpeak("Haan bhai, bolun, ami shunchi.");
+    if(micBtn){ micBtn.classList.add('listening'); micBtn.textContent = 'Listening...'; }
+    // FIX: Age ghSpeak() age boltam, tai TTS Mic ke block kore auto off hoye jeto
+    // Ekhon age Mic start korbo, tarpor 300ms pore bolbo - Mic age on hobe
+    // ghSpeak ekhon queue te jabe, Mic ke block korbe na
     ghRecognition.onresult = function(ev){
       try{
-        var txt = ev.results[0][0].transcript || "";
-        ghListening = false;
-        if(micBtn) micBtn.classList.remove('listening');
+        // Final result holei answer dibo, interim hole wait korbo - nahole half kotha bujhe answer dibe
+        var res = ev.results[ev.results.length-1];
+        if(!res.isFinal) return;
+        var txt = res[0].transcript || "";
+        if(!txt.trim()) return;
+        // Answer dibe, kintu Mic ON thakbe - auto off hobe na, abar bolte parba
         ghAnswerUser(txt);
       }catch(e){}
     };
-    ghRecognition.onerror = function(ev){
-      ghListening = false;
-      if(micBtn) micBtn.classList.remove('listening');
-      // Mic busy - Screen Recorder use kortese - popup diye block korbo na, voice e bolbo
-      if(ev && ev.error==='not-allowed' || ev && ev.error==='audio-capture'){
-        try{ ghSpeak("Mic busy. Recorder bondho kore abar try koro."); }catch(e){}
+        ghRecognition.onerror = function(ev){
+      // no-speech / audio-capture hole auto off hobe na, 800ms pore abar start hobe - jodi user Mic ON rakhte chay
+      if(ev && (ev.error==='no-speech' || ev.error==='aborted')){
+        if(window.__gh_wantListen){
+          setTimeout(function(){ try{ ghRecognition.start(); }catch(e){} }, 800);
+          return;
+        }
       }
+      if(ev && (ev.error==='not-allowed' || ev.error==='audio-capture')){
+        // XRecorder Mic use kortese - ekbar bolbe, bar bar popup dibe na
+        ghListening = false; window.__gh_wantListen = false;
+        if(micBtn) micBtn.classList.remove('listening');
+        try{ ghSpeak("Mic busy. XRecorder bondho kore abar Mic chap dao."); }catch(e){}
+        return;
+      }
+      ghListening = false; window.__gh_wantListen = false;
+      if(micBtn) micBtn.classList.remove('listening');
     };
     ghRecognition.onend = function(){
+      // Auto Off bondho: User jodi Mic ON rakhte chay, auto restart hobe
+      if(window.__gh_wantListen && ghListening){
+        setTimeout(function(){ try{ ghRecognition.start(); }catch(e){} }, 500);
+        return;
+      }
       ghListening = false;
       if(micBtn) micBtn.classList.remove('listening');
     };
@@ -303,11 +355,20 @@ function ghAnswerUser(userText){
         answer = "Bujhsi bhai. Ami SMC ar Price Action diya analysis kortesi, wick rejection dekhtesi. Entry niye jigges koro.";
       }
     }
-    // FIX: Double speak bondho - age ghSpeak + direct speak 2 bar boltachilo, tai ekta kothar vitore arekta dhukto
-    // Ekhon sudhu ghSpeak ekbar bolbe, clear vabe
+    // Answer in selected lang - if English selected, English e bolbe, Bangla bolleo English e answer
     window.__gh_lastVoice = "";
     lastSpoken = "";
     ghSpeak(answer);
+    // Force speak in selected lang - ghSpeak uses ghGetVoiceLang, so it will be English if English selected
+    // But ghSpeak uses lastSpoken check, we cleared it, so it will speak
+    try{
+      var u = new SpeechSynthesisUtterance(answer);
+      u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD';
+      u.rate = ghGetVoiceRate(); u.pitch = ghGetVoicePitch();
+      var v = ghFindVoice(lang); if(v) u.voice = v;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }catch(e){}
   }catch(e){}
 }
 
@@ -315,6 +376,13 @@ function ghSpeak(text, sigData){
   try{
     if(!state.voice) return;
     if(!voiceUnlocked) return;
+    // MIC ON thakle TTS pause - Chrome e Mic + TTS ekshathe cholle Mic auto off hoye jay
+    // Eita-i asol karon: Ghost jokhon bolte thake, tokhon Mic sunte pare na
+    // Tai Mic ON thakle signal er kotha queue te rakhbo, Mic OFF hole bolbo
+    if(window.__gh_wantListen && window.__gh_micSpeakingBlock){
+      window.__gh_pendingSpeak = text;
+      return;
+    }
     var lang = ghGetVoiceLang();
     var rate = ghGetVoiceRate();
     var pitch = ghGetVoicePitch();
@@ -329,32 +397,21 @@ function ghSpeak(text, sigData){
     if(speakText===lastSpoken && !sigData) return;
     lastSpoken=speakText;
     if(!('speechSynthesis' in window)) return;
-    // HUMAN VOICE QUEUE: Ekta kotha sesh na hole porer ta shuru hobe na - overlap bondho
-    // Age cancel kore sathe sathe notun ta bolto, tai ekta kothar vitore arekta dhukto
-    window.__gh_speakQueue = window.__gh_speakQueue || [];
-    window.__gh_speaking = window.__gh_speaking || false;
-    window.__gh_speakQueue.push({text: speakText, lang: lang, rate: rate, pitch: pitch});
-    // Jodi ekhon bolte thake, queue te rakho, sesh hole porer ta bolbe
-    if(window.__gh_speaking) return;
-    var doNext = function(){
-      if(!window.__gh_speakQueue.length){ window.__gh_speaking = false; return; }
-      window.__gh_speaking = true;
-      var item = window.__gh_speakQueue.shift();
-      // Ager ta cancel kore 120ms pause diye notun ta bolbe - clear vabe, overlap hobe na
-      window.speechSynthesis.cancel();
-      setTimeout(function(){
-        var u=new SpeechSynthesisUtterance(item.text);
-        u.lang = item.lang==='hi' ? 'hi-IN' : item.lang==='en' ? 'en-US' : 'bn-BD';
-        u.rate = item.rate; u.pitch = item.pitch; u.volume = 1;
-        var v = ghFindVoice(item.lang);
-        if(v) u.voice = v;
-        // LYRA style: Natural pause - sentence sesh hole ektu thambe
-        u.onend = function(){ setTimeout(function(){ window.__gh_speaking = false; doNext(); }, 250); };
-        u.onerror = function(){ window.__gh_speaking = false; doNext(); };
-        window.speechSynthesis.speak(u);
-      }, 120);
+    window.speechSynthesis.cancel();
+    var doSpeak = function(){
+      var u=new SpeechSynthesisUtterance(speakText);
+      u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD';
+      u.rate = rate; u.pitch = pitch; u.volume = 1;
+      var v = ghFindVoice(lang);
+      if(v) u.voice = v;
+      window.speechSynthesis.speak(u);
     };
-    doNext();
+    if(window.__gh_voices.length===0){
+      ghLoadVoices();
+      setTimeout(doSpeak, 180);
+    } else {
+      doSpeak();
+    }
   }catch(e){}
 }
 function ghUnlockVoice(){
@@ -527,56 +584,17 @@ function fetchSignalLyra(){
     window.__gh_lastVoice = voiceToSpeak;
     window.__gh_lastDirBn = (dir==="CALL"||dir==="UP") ? "UP" : "DOWN";
     window.__gh_lastConf = (j.confidence||0);
-    // FIX: Video te UP <-> WAIT flicker kortesilo - karon proti 8 sec e UTC time check kore WAIT e flip korto
-    // Thik: Ekbar signal lock hole 30 sec dhore oi signal e thakbe, proti fetch e window check kore flip korbe na
-    // Lock: Same signal_id hole window check korbo na, locked signal dekhabe
-    var _now = Date.now();
-    var _isNewSignal = (j.signal_id && j.signal_id !== window.__gh_lockedId);
-    var _lockExpired = (!_isNewSignal && window.__gh_lockedUntil && _now > window.__gh_lockedUntil);
-    if(!_isNewSignal && window.__gh_lockedId && !_lockExpired){
-      // Same signal, lock active - window check skip, locked signal dekhabe, flicker hobe na
-      if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up motion up-motion"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; }
-      else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down motion down-motion"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; }
-      updateMeta();
-      return;
-    }
-    if(_lockExpired){
-      // Lock sesh - 30 sec par hoye geche, ekbar WAIT dekhabe, tarpor next signal er jonno wait
-      if(window.__gh_30sSpoken !== window.__gh_lockedId){
-        window.__gh_30sSpoken = window.__gh_lockedId;
-        sigEl.className="gh-sig wait motion";
-        sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
-        var _l2 = ghGetVoiceLang();
-        var _m2 = _l2==='en' ? "Thirty seconds passed for this signal. Do not take entry now, wait for the next candle." : _l2==='hi' ? "Is signal ke liye tees second khatam ho gaya. Abhi entry mat lo." : "Ei signal er jonno 30 second sesh. Ekhon entry nio na, porer candle er jonno wait koro.";
-        ghSpeak(_m2);
-      } else {
-        sigEl.className="gh-sig wait motion";
-        sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
-      }
-      window.__gh_lockedId = null;
-      updateMeta();
-      return;
-    }
-    // NEW SIGNAL: Ekhon window check korbo - Prothom 25-30 sec er vitore hole lock korbo, 30 sec pore hole WAIT
+    // 30 SEC WINDOW: Chart time porbe - Prothom 25-30 sec er vitore entry, 30 sec pore entry na
     var _win = ghIsEntryWindow();
     if((dir==="CALL"||dir==="UP"||dir==="PUT"||dir==="DOWN") && !_win.ok && _win.elapsed>30){
+      // 30 sec par hoye geche - Entry nio na, WAIT dekhabe + bolbe
       sigEl.className="gh-sig wait motion";
       sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
-      // Ekbar bolbe, proti fetch e bar bar bolbe na - flicker + voice spam bondho
-      if(window.__gh_30sSpoken !== (j.signal_id||'no-id')){
-        window.__gh_30sSpoken = j.signal_id||'no-id';
-        var _lang = ghGetVoiceLang();
-        var _msg = _lang==='en' ? "Thirty seconds already passed, " + _win.elapsed + " seconds. Do not take entry now, wait for the next candle. I checked wick rejection, but time is over." : _lang==='hi' ? "Tees second par ho gaya hai, " + _win.elapsed + " second. Abhi entry mat lo, agle candle ka wait karo." : "Tees second par hoye geche, " + _win.elapsed + " second. Ekhon entry nio na, porer candle er jonno wait koro. Ami wick rejection dekhsi, kintu time sesh.";
-        ghSpeak(_msg);
-      }
+      var _lang = ghGetVoiceLang();
+      var _msg = _lang==='en' ? "Thirty seconds already passed, " + _win.elapsed + " seconds. Do not take entry now, wait for the next candle. I checked wick rejection, but time is over." : _lang==='hi' ? "Tees second par ho gaya hai, " + _win.elapsed + " second. Abhi entry mat lo, agle candle ka wait karo." : "Tees second par hoye geche, " + _win.elapsed + " second. Ekhon entry nio na, porer candle er jonno wait koro. Ami wick rejection dekhsi, kintu time sesh.";
+      ghSpeak(_msg);
       updateMeta();
       return;
-    }
-    // NEW SIGNAL + Window OK: Lock koro 30 sec er jonno - flicker hobe na
-    if(j.signal_id && (dir==="CALL"||dir==="UP"||dir==="PUT"||dir==="DOWN")){
-      window.__gh_lockedId = j.signal_id;
-      window.__gh_lockedUntil = _now + 30000;
-      window.__gh_30sSpoken = null;
     }
     // SIGNAL BUTTON MOTION: CSS + JS - UP/DOWN button e motion animation
     if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up motion up-motion"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
@@ -650,7 +668,7 @@ setTimeout(function(){
 },300);
   try{
     var _sl = localStorage.getItem('ghost_voice_lang') || 'bn';
-    var _sr = localStorage.getItem('ghost_voice_rate') || '0.95';
+    var _sr = localStorage.getItem('ghost_voice_rate') || '0.88';
     var _sp = localStorage.getItem('ghost_voice_pitch') || '1';
     var _rs = document.getElementById('gh-rate'); if(_rs) _rs.value=_sr;
     var _ps = document.getElementById('gh-pitch'); if(_ps) _ps.value=_sp;
