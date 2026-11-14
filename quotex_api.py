@@ -176,6 +176,8 @@ class QuantumEngine:
         self.last_fetch = 0
         self.pa_filter = SMCEngine()
         self.pa_enabled = True
+        # FLICKER FIX: 1 Min e 1 ta signal lock - 4 sec por por UP/DOWN paltaibe na
+        self.signal_cache = {}  # key: pair+mode+minute -> signal dict
     
     def _gen_candles(self, price_list):
         import random
@@ -213,6 +215,17 @@ class QuantumEngine:
         now_dt=datetime.now()
         clock_sec=60-now_dt.second
         if clock_sec==60: clock_sec=0
+        # FLICKER FIX: Same minute e same signal return koro - cache check
+        _minute_key = now_dt.strftime("%Y%m%d%H%M") + "_" + pair.upper() + "_" + mode
+        if hasattr(self, 'signal_cache') and _minute_key in self.signal_cache:
+            _cached = self.signal_cache[_minute_key]
+            # time_left update koro, baki sob same rakho - signal paltaibe na
+            _cached = dict(_cached)
+            _cached["time_left"] = clock_sec
+            _cached["remainingSeconds"] = clock_sec
+            _cached["is_locked"] = True
+            _cached["locked_minute"] = now_dt.strftime("%H:%M")
+            return _cached
         raw_pair=pair
         pair_upper=pair.upper().replace("/","").replace(" ","").strip()
         is_otc="OTC" in raw_pair.upper()
@@ -277,7 +290,7 @@ class QuantumEngine:
                     price=self.prices.get(pair_upper, [1.0])[-1] if isinstance(self.prices.get(pair_upper), list) else self.prices.get(check_pair, [1.0])[-1]
                     if isinstance(price, list): price=price[-1]
                     expiry=int((now_dt+timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000)
-                    return {
+                    _sig = {
                         "signal_id": f"{check_pair}{'-OTC' if is_otc else ''}-{final}-SMC-{uuid.uuid4().hex[:6]}",
                         "pair": check_pair,
                         "market": f"{check_pair[:3]}/{check_pair[3:]}{' OTC' if is_otc else ''}" if len(check_pair)==6 else check_pair,
@@ -304,6 +317,12 @@ class QuantumEngine:
                         "timestamp": int(now),
                         "risk_percent": 1
                     }
+                    # FLICKER FIX: Cache e rakho - ei minute e ar notun signal banabe na
+                    _sig["locked_minute"] = now_dt.strftime("%H:%M")
+                    _sig["is_locked"] = True
+                    try: self.signal_cache[_minute_key] = dict(_sig)
+                    except: pass
+                    return _sig
         # Fallback momentum - IMPROVED: Never WAIT, always give signal with accuracy
         if len(candles)>=2:
             last=candles[-1]
@@ -342,7 +361,7 @@ class QuantumEngine:
             price=self.prices.get(pair_upper, [1.0])[-1]
             if isinstance(price, list): price=price[-1]
             expiry=int((now_dt+timedelta(seconds=clock_sec if clock_sec>0 else 60)).timestamp()*1000)
-            return {
+            _sig_mom = {
                 "signal_id": f"{check_pair}{'-OTC' if is_otc else ''}-{final}-MOM-{uuid.uuid4().hex[:6]}",
                 "pair": check_pair,
                 "market": f"{check_pair[:3]}/{check_pair[3:]}{' OTC' if is_otc else ''}" if len(check_pair)==6 else check_pair,
@@ -367,6 +386,11 @@ class QuantumEngine:
                 "timestamp": int(now),
                 "risk_percent": 1
             }
+            _sig_mom["locked_minute"] = now_dt.strftime("%H:%M")
+            _sig_mom["is_locked"] = True
+            try: self.signal_cache[_minute_key] = dict(_sig_mom)
+            except: pass
+            return _sig_mom
         # Absolute fallback - NEVER WAIT, even with no candles
         import random
         final = "CALL" if random.random() > 0.5 else "PUT"
@@ -400,38 +424,44 @@ class QuantumEngine:
         return self.get_signal(pair, override_mode or "SAFE")
 
 
+
 def build_lyra_voice(pair, direction, conf, pa_type, reason, price, extra=None):
-    # LYRA-style voice: Ki dia analysis, kmn entry, wick rejection naki opening, confidence koto
-    # direction: CALL = UP, PUT = DOWN
-    dir_word = "UP" if direction=="CALL" else "DOWN"
-    extra = extra or {}
-    # Entry type: Wick Rejection vs Opening vs Order Block etc
+    # BANGLA HUMAN VOICE - Normal manusher moto Bangla bolbe, robot er moto English na
+    # pair: EURUSD -> "Euro Dollar"
+    pair_bangla = pair.replace("EURUSD","Euro Dollar").replace("GBPUSD","Pound Dollar").replace("USDJPY","Dollar Yen").replace("AUDUSD","Aussie Dollar").replace("USDCAD","Dollar Cad").replace("EURJPY","Euro Yen").replace("GBPJPY","Pound Yen")
+    dir_bangla = "UP" if direction=="CALL" else "DOWN"
+    dir_word = "upore" if direction=="CALL" else "niche"
+    # Entry type Bangla
     if "Rejection" in pa_type or "Wick" in pa_type:
         entry = "wick rejection"
-        entry_detail = f"I see a strong wick rejection. Price rejected from support, wick is more than 2 times body. So entry from wick rejection, not from opening."
+        entry_bangla = f"Nice, {pair_bangla} te ekta sundor wick rejection paichi. Price niche support theke ghure geche, wick ta body er theke onek boro. Tai wick theke entry nibo, opening theke na."
     elif "Liquidity" in pa_type:
         entry = "liquidity grab"
-        entry_detail = f"Price swept liquidity above equal highs, then closed back below. That is a trap. So entry from liquidity grab reversal."
-    elif "Order Block" in pa_type or "OB" in pa_type:
+        entry_bangla = f"{pair_bangla} te liquidity grab hoiche. Price upore giye equal high sweep kore abar niche chole asche. Eta trap chilo. Tai ekhon niche entry nibo."
+    elif "Order Block" in pa_type or "OB" in pa_type or "Breaker" in pa_type:
         entry = "order block"
-        entry_detail = f"Price came back to order block and holding. Smart money order block. So entry from order block retest."
+        entry_bangla = f"{pair_bangla} te order block e price asche ar hold korteche. Smart money er block. Tai order block theke entry nibo."
     elif "FVG" in pa_type or "Gap" in pa_type:
         entry = "fair value gap"
-        entry_detail = f"Fair value gap is filling. Price is inside gap. So entry from gap fill."
+        entry_bangla = f"{pair_bangla} te fair value gap fill hoiteche. Price gap er vitore ache. Tai gap theke entry nibo."
     elif "BOS" in pa_type:
         entry = "break of structure"
-        entry_detail = f"Break of structure, higher high and higher low. Trend is strong. So entry from breakout, on opening of next candle."
+        entry_bangla = f"{pair_bangla} te break of structure hoiche, higher high ar higher low banaiteche. Trend onek strong. Tai breakout theke, next candle er opening e entry nibo."
     elif "CHOCH" in pa_type:
         entry = "change of character"
-        entry_detail = f"Change of character, failed low, reversal starting. So entry from reversal opening."
+        entry_bangla = f"{pair_bangla} te change of character hoiche, ager low ta fail korche, reversal suru hoiche. Tai reversal theke entry nibo."
     elif "Momentum" in pa_type:
         entry = "opening"
-        entry_detail = f"No clear SMC pattern, but momentum is strong, trend candles are in same direction. So entry from opening of next candle."
+        entry_bangla = f"{pair_bangla} te kono clear pattern nai, kintu momentum strong, trend candle gulo ekdike jaiteche. Tai opening theke entry nibo."
     else:
         entry = "opening"
-        entry_detail = f"Entry from opening of next candle, structure confirms."
-    # Build voice - 2-3 sentences, LYRA moto sob kicu bolbe
-    voice = f"Ghost here. {pair} analysis. {entry_detail} Direction is {dir_word}. Confidence {conf} percent. Price {price}. Entry type {entry}. Take entry now, on next candle opening, with 1 percent risk."
+        entry_bangla = f"{pair_bangla} te structure confirm hoiche. Tai opening theke entry nibo."
+    # BANGLA voice - human moto, Bengali script e (bn-BD TTS valo bole)
+    # Use Bengali script for natural pronunciation
+    dir_bn = "আপ" if direction=="CALL" else "ডাউন"
+    voice_bn = f"ভাই শুনো, {pair_bangla} তে একটা ভালো {dir_bn} এন্ট্রি পাইছি। {entry_bangla} কনফিডেন্স {conf} পারসেন্ট। এখনই এন্ট্রি নাও, দেরি করো না।"
+    # Also keep Roman Bangla for fallback - frontend will use Bengali script first
+    voice = voice_bn
     return voice, entry
 
 signal_engine=QuantumEngine()
