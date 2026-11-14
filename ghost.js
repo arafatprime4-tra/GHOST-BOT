@@ -16,7 +16,7 @@ try{
   if(_old) _old.remove();
   let _box = document.createElement('div');
   _box.id = 'ghost-bot';
-  _box.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:rgba(255,255,255,.12);backdrop-filter:blur(25px) saturate(180%);-webkit-backdrop-filter:blur(25px) saturate(180%);border:1px solid rgba(255,255,255,.50);border-radius:16px;color:#fff;font-family:sans-serif;text-align:center;padding:5px;box-shadow:0 8px 32px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.60)';
+  _box.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:#0a0f23;border:1px solid #00f0ff;border-radius:12px;color:#fff;font-family:sans-serif;text-align:center;padding:5px;box-shadow:0 0 28px rgba(0,240,255,.3)';
   _box.innerHTML = '<div style="font-size:6px;letter-spacing:1px;color:#00f0ff">GHOST AI</div><div style="font-size:9px;font-weight:900;margin:2px 0">LOADING...</div><div style="font-size:8px;color:#00ff88">Bot Ashtese...</div>';
   (document.body || document.documentElement).appendChild(_box);
   console.log('👻 GHOST BOT BOX CREATED - FIRST');
@@ -25,7 +25,7 @@ try{
 let css=document.createElement("style");
 css.innerHTML=`
 /* ===== GHOST FUTURISTIC HUD - v2 FIXED LOSS ===== */
-#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.50);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.60);backdrop-filter:blur(25px) saturate(180%);-webkit-backdrop-filter:blur(25px) saturate(180%);font-family:'Segoe UI',Inter,sans-serif;color:#fff;overflow:hidden;user-select:none}
+#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:linear-gradient(165deg,rgba(10,15,35,.96),rgba(5,8,20,.98));border:1px solid rgba(0,240,255,.45);border-radius:10px;box-shadow:0 0 0 1px rgba(0,240,255,.12),0 0 28px rgba(0,240,255,.22),0 0 60px rgba(0,120,255,.18),0 18px 40px #000d;backdrop-filter:blur(14px);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
 #ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#00f0ff,#7b2fff,#00ff88,transparent);animation:ghBorderFlow 2.4s linear infinite;background-size:200% 100%}
 @keyframes ghBorderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
 @keyframes ghPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
@@ -36,7 +36,7 @@ css.innerHTML=`
 @keyframes ghGlowRed{0%,100%{box-shadow:0 0 12px rgba(255,45,85,.55),0 0 32px rgba(255,45,85,.30)}50%{box-shadow:0 0 22px rgba(255,45,85,.85),0 0 48px rgba(255,45,85,.45)}}
 @keyframes ghScan{0%{top:-10%}100%{top:110%}}
 @keyframes ghShine{0%{left:-80%}100%{left:120%}}
-.gh-h{padding:2px 5px;background:transparent;border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
+.gh-h{padding:2px 5px;background:linear-gradient(90deg,rgba(0,240,255,.14),rgba(123,47,255,.12),transparent);border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
 .gh-h-left{display:flex;align-items:center;gap:6px}
 .gh-dot{width:6px;height:6px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,.6);animation:ghPulse 1.2s infinite}
 .gh-h b{font-size:6.5px;color:#fff;letter-spacing:1.2px;font-weight:900}
@@ -56,7 +56,7 @@ css.innerHTML=`
 .gh-sig .gh-shine{position:absolute;top:0;width:40px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);animation:ghShine 1.8s ease-in-out infinite}
 .gh-sig.up{background:linear-gradient(145deg,#00ff88,#00b35e,#006e3a);color:#fff;animation:ghGlowGreen 1.1s ease-in-out infinite;border:1px solid rgba(0,255,136,.7)}
 .gh-sig.down{background:linear-gradient(145deg,#ff2d55,#d6002e,#8a0020);color:#fff;animation:ghGlowRed 1.1s ease-in-out infinite;border:1px solid rgba(255,45,85,.7)}
-.gh-sig.wait{background:linear-gradient(135deg,rgba(255,255,255,.35),rgba(255,255,255,.10));color:#fff;border:1px solid rgba(255,255,255,.55);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);box-shadow:inset 0 2px 4px rgba(255,255,255,.60)}
+.gh-sig.wait{background:linear-gradient(145deg,#141a2a,#0a0e1a);color:#5a6f8a;border:1px solid rgba(0,240,255,.18)}
 .gh-sig.off{background:linear-gradient(145deg,#330000,#1a0000);color:#ffb3c2;border:1px solid rgba(255,45,85,.5)}
 .gh-bar{height:2px;margin:2px 6px 0;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden}
 .gh-bar-fill{height:100%;width:0%;border-radius:10px;background:linear-gradient(90deg,#00f0ff,#00ff88);transition:width .5s linear}
@@ -84,7 +84,7 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM v3 GLASS</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
@@ -562,11 +562,11 @@ function fetchSignal(forcePair){
       return;
     }
     if(lockedSignalId && now<lockedUntil && currentSignal){ updateUI(currentSignal); return; }
-    if(j.signal==="WAIT"||!j.signal||j.confidence<40){
-      if(candleHistory.length>=1 && paEnabled){
+    if(j.signal==="WAIT"||!j.signal||j.confidence<50){
+      if(candleHistory.length>=6 && paEnabled){
         try{
           let pa=runPAFilter(candleHistory);
-          if(pa && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf>=40){
+          if(pa && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf>=60){
             // STABLE FIX: PA signal er expiry = lock er sathe same (58s), nahole 500ms interval age clear kore flip hoy
             let fake={...pa,market:asset,pair:asset,confidence:pa.conf,expiry_timestamp:now+58000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason,status:"ACTIVE"};
             lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake); return;
@@ -576,7 +576,7 @@ function fetchSignal(forcePair){
       // VIDEO 1 FIX: Momentum fallback REMOVE - last candle er upor fake UP/DOWN banaito, tai 1 sec por por flip hoto.
       // Server WAIT dile ekhon WAIT dekhabe, fake signal banabe na. PA signal (conf>=60) thakle sudhu ota use hobe.
       // Momentum fallback bondho - nahole candleHistory er vul price theke flip hoy.
-      let waitSig={signal:"WAIT",confidence:0,reason:"Analyzing chart...",price_action_type:"Analyzing",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"WAIT-"+now,status:"WAITING"};
+      let waitSig={signal:"WAIT",confidence:0,reason:"Collecting data...",price_action_type:"Loading",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"WAIT-"+now,status:"WAITING"};
       updateUI(waitSig); return;
     }
     if(j.status==="ACTIVE"&&(j.signal==="CALL"||j.signal==="PUT")){
@@ -615,7 +615,7 @@ autoDetectMarket();
     if(!errBox){
       errBox = document.createElement('div');
       errBox.id = 'ghost-bot';
-      errBox.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:rgba(255,255,255,.12);backdrop-filter:blur(25px) saturate(180%);color:#fff;padding:10px;border-radius:16px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid rgba(255,255,255,.50)';
+      errBox.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:#111;color:#fff;padding:10px;border-radius:12px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid #00f0ff';
       errBox.innerHTML = '<b>GHOST AI</b><br>Error: '+e.message+'<br><small>Bookmarklet abar tap koro</small>';
       document.body.appendChild(errBox);
     }
@@ -629,7 +629,7 @@ setTimeout(function(){
       console.log('GHOST BOT NOT FOUND - FORCE CREATING');
       let nb = document.createElement('div');
       nb.id = 'ghost-bot';
-      nb.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:rgba(255,255,255,.12);backdrop-filter:blur(25px) saturate(180%);color:#fff;padding:10px;border-radius:16px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid rgba(255,255,255,.50)';
+      nb.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:#111;color:#fff;padding:10px;border-radius:12px;text-align:center;font-family:sans-serif;font-size:11px;border:1px solid #00f0ff';
       nb.innerHTML = '<b>GHOST AI</b><br>LOADING...<br><small>Render wake up hocche, 10s wait koro</small>';
       document.body.appendChild(nb);
     } else {
