@@ -156,13 +156,14 @@ function ghBuildVoiceText(j, lang){
     return 'Hey, listen. I found a strong ' + dirEn + ' entry on ' + pair + '. ' + entryEn + ' Confidence is ' + conf + ' percent. Take the entry now, within the first thirty seconds.';
   } else {
     var dirBn = isUp ? 'UP' : 'DOWN';
-    var entryBn = 'opening theke entry nibo.';
-    if(entry.indexOf('wick')>=0) entryBn = 'wick rejection hoiche, price support theke ghure geche. Tai wick theke entry nibo, opening theke na.';
-    else if(entry.indexOf('liquidity')>=0) entryBn = 'liquidity grab hoiche, trap chilo, tai reversal theke entry nibo.';
-    else if(entry.indexOf('order')>=0) entryBn = 'order block theke entry nibo.';
-    else if(entry.indexOf('gap')>=0) entryBn = 'gap fill hoiteche, gap theke entry nibo.';
-    else if(entry.indexOf('break')>=0) entryBn = 'break of structure hoiche, breakout theke entry nibo.';
-    return 'Bhai shuno, ' + pair + ' te ekta valo ' + dirBn + ' entry paichi. ' + entryBn + ' Confidence ' + conf + ' percent. Ekhoni entry nao.';
+    // Bengali script e bolbe - Roman Bangla TTS robotic lage, Bengali script natural lage (LYRA er moto)
+    var reasonBn = 'উইক রিজেকশন কনফার্ম।';
+    if(entry.indexOf('wick')>=0) reasonBn = 'উইক রিজেকশন কনফার্ম।';
+    else if(entry.indexOf('liquidity')>=0) reasonBn = 'লিকুইডিটি গ্র্যাব। ট্র্যাপ ছিলো।';
+    else if(entry.indexOf('order')>=0) reasonBn = 'অর্ডার ব্লক হোল্ডিং।';
+    else if(entry.indexOf('gap')>=0) reasonBn = 'গ্যাপ ফিলিং।';
+    else if(entry.indexOf('break')>=0) reasonBn = 'ব্রেক অফ স্ট্রাকচার।';
+    return 'ভাই শুনো। ' + pair + ', ' + dirBn + ' এন্ট্রি। ' + reasonBn + ' কনফিডেন্স ' + conf + ' পারসেন্ট। এখনই এন্ট্রি নাও।';
   }
 }
 // === NEW FEATURES: English Native + Chart Time + 30 Sec Window + Voice Chat + Motion Signal ===
@@ -170,9 +171,23 @@ function ghBuildVoiceText(j, lang){
 function ghGetChartTime(){
   try{
     var t = document.body.innerText || "";
-    // UTC Time: 12:14:07 -> seconds = 07
+    // FIX: Chart Time - UTC diye hisab kortam, tai Quotex er End of trade er shathe milto na
+    // Quotex candle UTC minute e shuru hoy na, End of trade countdown diye hisab korte hobe
+    // Video te: End of trade 00:25, Countdown 00:29 - 2 ta alada, End of trade ta-i thik
+    var endMatch = t.match(/End of trade[\s\S]{0,30}?(\d{1,2}):(\d{2})/i);
     var utc = t.match(/(\d{2}):(\d{2}):(\d{2})/);
-    var countdown = t.match(/00:(\d{2})/);
+    var countdown = null;
+    if(endMatch){
+      var em = parseInt(endMatch[1],10), es = parseInt(endMatch[2],10);
+      var remainingEnd = em*60 + es;
+      var dur = 60; try{ dur = state.duration || 60; }catch(e){}
+      var elapsedEnd = dur - remainingEnd;
+      // Elapsed 0-60 er vitore thakle End of trade tai use korbo
+      if(elapsedEnd>=0 && elapsedEnd<=dur){
+        return {utcSec: es, remaining: remainingEnd, elapsed: elapsedEnd, source: 'end-of-trade', endText: endMatch[0]};
+      }
+    }
+    countdown = t.match(/00:(\d{2})/);
     var result = {utcSec: -1, remaining: -1, elapsed: -1, source: 'none'};
     if(utc){
       var hh = parseInt(utc[1],10), mm = parseInt(utc[2],10), ss = parseInt(utc[3],10);
@@ -474,9 +489,9 @@ function render(){
   try{
     if(window.__gh_lastStep !== state.step){
       window.__gh_lastStep = state.step;
-      if(state.step===1) ghSpeak("Bhai, Step 1, Trade Duration select koro. Ami SMC plus Price Action diya analysis korbo. Wick rejection, liquidity grab, order block, break of structure dekhbo. EMA ar RSI diye confirm korbo. Duration select kore Next chap dao.");
-      else if(state.step===2) ghSpeak("Bhai, Step 2, Stake select koro. Ami oi pair er volatility ar confidence diya analysis korbo. High confidence hole boro stake, low hole choto stake. Stake select kore Next chap dao.");
-      else if(state.step===3) ghSpeak("Bhai, Step 3, Count select koro. Ami proti trade er age notun kore analysis korbo. Ek trade er analysis arek trade e use korbo na. Count select kore Start chap dao.");
+      if(state.step===1) ghSpeak("ভাই, স্টেপ ওয়ান। ডিউরেশন সিলেক্ট করো।");
+      else if(state.step===2) ghSpeak("ভাই, স্টেপ টু। স্টেক সিলেক্ট করো।");
+      else if(state.step===3) ghSpeak("ভাই, স্টেপ থ্রি। কয়টা ট্রেড নিবা, সিলেক্ট করো।");
     }
   }catch(e){}
   body.querySelectorAll('[data-d]').forEach(function(el){ el.addEventListener('click',function(){ state.duration=+el.dataset.d; state.durationLabel=el.dataset.l; save(); ghSpeak("Bhai, " + el.dataset.l + " select korcho, bhalo. Ekhon Next chap dao."); render(); }); });
@@ -497,7 +512,7 @@ function startSession(){
   fetchSignalLyra();
 }
 function updateMeta(){
-  var m=document.getElementById('gh-meta'); if(m) m.textContent='Pair: '+ghFormatPairForDisplay(window.__gh_currentPair)+' | Duration: '+state.durationLabel+' | Stake: '+state.stakeLabel+' | Left: '+(session.active?session.left+'/'+state.count:'--');
+  var m=document.getElementById('gh-meta'); if(m){ var _ct=ghGetChartTime(); var _timeTxt = _ct.remaining>=0 ? ' | Time Left: '+_ct.remaining+'s' : ''; m.textContent='Pair: '+ghFormatPairForDisplay(window.__gh_currentPair)+' | Duration: '+state.durationLabel+' | Stake: '+state.stakeLabel+' | Left: '+(session.active?session.left+'/'+state.count:'--')+_timeTxt; }
 }
 function getPair(){
   try{
@@ -591,7 +606,7 @@ function fetchSignalLyra(){
       sigEl.className="gh-sig wait motion";
       sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
       var _lang = ghGetVoiceLang();
-      var _msg = _lang==='en' ? "Thirty seconds already passed, " + _win.elapsed + " seconds. Do not take entry now, wait for the next candle. I checked wick rejection, but time is over." : _lang==='hi' ? "Tees second par ho gaya hai, " + _win.elapsed + " second. Abhi entry mat lo, agle candle ka wait karo." : "Tees second par hoye geche, " + _win.elapsed + " second. Ekhon entry nio na, porer candle er jonno wait koro. Ami wick rejection dekhsi, kintu time sesh.";
+      var _msg = _lang==='en' ? "Thirty seconds passed. Do not take entry now. Wait for next candle." : _lang==='hi' ? "Tees second par ho gaya. Abhi entry mat lo. Agle candle ka wait karo." : "ত্রিশ সেকেন্ড পার হয়ে গেছে। এখন এন্ট্রি নিও না। পরের ক্যান্ডেলের জন্য অপেক্ষা করো।";
       ghSpeak(_msg);
       updateMeta();
       return;
