@@ -117,7 +117,7 @@ function ghFindVoice(lang){
 function ghBuildVoiceText(j, lang){
   var dir = j.signal || j.direction || 'CALL';
   var isUp = (dir==='CALL' || dir==='UP');
-  var pair = j.pair || 'EURUSD';
+  var pair = ghFormatPairForDisplay(j.pair || 'EURUSD');
   var conf = j.confidence || 0;
   var entry = j.entry_type || 'opening';
   if(lang==='hi'){
@@ -257,7 +257,7 @@ function startSession(){
   fetchSignalLyra();
 }
 function updateMeta(){
-  var m=document.getElementById('gh-meta'); if(m) m.textContent='Pair: '+(window.__gh_currentPair||'--')+(window.__gh_isOTC ? ' OTC' : '')+' | Duration: '+state.durationLabel+' | Stake: '+state.stakeLabel+' | Left: '+(session.active?session.left+'/'+state.count:'--');
+  var m=document.getElementById('gh-meta'); if(m) m.textContent='Pair: '+ghFormatPairForDisplay(window.__gh_currentPair)+' | Duration: '+state.durationLabel+' | Stake: '+state.stakeLabel+' | Left: '+(session.active?session.left+'/'+state.count:'--');
 }
 function getPair(){
   try{
@@ -274,22 +274,37 @@ function getPair(){
         var around = t.slice(Math.max(0,idx-10), idx+40);
         var isOTC = /OTC/i.test(around);
         window.__gh_isOTC = isOTC;
-        return isOTC ? p + "OTC" : p;
+        window.__gh_basePair = p;
+        return p; // Base pair only - OTC flag alada, display te (OTC) add hobe - duplicate hobe na
       }
     }
     if(/OTC/i.test(t) && window.__gh_currentPair){
-      if(window.__gh_currentPair.indexOf("OTC")<0) return window.__gh_currentPair + "OTC";
-      return window.__gh_currentPair;
+      window.__gh_isOTC = true;
+      return window.__gh_currentPair.replace(/OTC/gi,'');
     }
   }catch(e){}
   return window.__gh_currentPair||'EURUSD';
+}
+// CSS+JS: Pair format - Display te USD/CHF (OTC) dekhabe, API te USDCHFOTC pathabe
+function ghFormatPairForDisplay(pair){
+  if(!pair) return '--';
+  var base = pair.replace(/OTC/gi,'');
+  var isOTC = window.__gh_isOTC || /OTC/i.test(pair);
+  var formatted = base.slice(0,3) + '/' + base.slice(3);
+  return isOTC ? formatted + ' (OTC)' : formatted;
+}
+function ghFormatPairForAPI(pair){
+  if(!pair) return 'EURUSD';
+  var base = pair.replace(/OTC/gi,'');
+  return window.__gh_isOTC ? base + 'OTC' : base;
 }
 function fetchSignalLyra(){
   if(!session.active) return;
   var pair=getPair();
   window.__gh_currentPair=pair;
   var token=localStorage.getItem('ghost_premium_token')||'';
-  var url="https://giogram-backend.onrender.com/api/signal?pair="+pair+"&mode=SAFE&ver=LYRA-V3";
+  var apiPair = ghFormatPairForAPI(pair);
+  var url="https://giogram-backend.onrender.com/api/signal?pair="+apiPair+"&mode=SAFE&ver=LYRA-V3";
   if(token) url+="&token="+encodeURIComponent(token);
   fetch(url).then(function(r){ return r.json(); }).then(function(j){
     var sigEl=document.getElementById('gh-sig'); if(!sigEl) return;
