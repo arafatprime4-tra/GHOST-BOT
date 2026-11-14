@@ -29,12 +29,13 @@ var ICON = {
 var css=document.createElement("style");
 css.innerHTML=
 "#ghost-lyra{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:2147483647;width:220px;font-family:Inter,sans-serif;user-select:none}"+
-".gh-orb{width:42px;height:42px;margin:0 auto 4px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,80,80,.85),rgba(200,0,0,.70) 45%,rgba(90,0,0,.45) 70%,transparent);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 16px rgba(255,30,30,.6),0 0 30px rgba(255,0,0,.25);animation:ghPulse 2.2s infinite}"+
+".gh-orb{width:44px;height:44px;margin:0 auto 4px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.45),rgba(255,80,80,.65) 30%,rgba(180,0,30,.75) 65%,rgba(90,0,0,.60));backdrop-filter:blur(12px) saturate(180%);-webkit-backdrop-filter:blur(12px) saturate(180%);border:1px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.30),inset 0 2px 4px rgba(255,255,255,.60),inset 0 -2px 4px rgba(0,0,0,.20),0 0 22px rgba(255,30,30,.55);animation:ghPulse 2.2s infinite}"+
 ".gh-orb svg{width:30px;height:30px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}"+
 "@keyframes ghPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}"+
-".gh-card{background:rgba(0,0,0,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:14px;box-shadow:0 0 14px rgba(255,0,0,.18),0 8px 20px rgba(0,0,0,.25);overflow:hidden}"+
+".gh-card{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.12) 30%,rgba(255,255,255,.06) 60%,rgba(255,45,85,.18) 100%);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.45);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -1px 0 rgba(255,255,255,.15),0 0 28px rgba(255,45,85,.28);overflow:hidden}"+
+".gh-card:before{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0));pointer-events:none;border-radius:16px 16px 0 0}"+
 ".gh-h{padding:6px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.10);cursor:move}"+
-".gh-h b{font-size:10px;color:#fff;letter-spacing:1px}.gh-h b span{color:#ff2d55}"+
+".gh-h b{font-size:10px;color:#fff;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,.50)}.gh-h b span{color:#ff2d55}"+
 ".gh-h .gh-right{display:flex;gap:4px;align-items:center}"+
 ".gh-voice{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:2px 5px;font-size:8px;cursor:pointer;display:flex;align-items:center;gap:3px}"+
 ".gh-step-badge{font-size:7px;color:#fff;background:rgba(255,45,85,.45);padding:2px 5px;border-radius:8px}"+
@@ -43,16 +44,16 @@ css.innerHTML=
 ".gh-title{font-size:11px;font-weight:900;color:#fff;margin:0 0 1px;text-shadow:0 1px 3px rgba(0,0,0,.6)}"+
 ".gh-sub{font-size:8px;color:rgba(255,255,255,.80);margin:0 0 6px;text-shadow:0 1px 2px rgba(0,0,0,.6)}"+
 ".gh-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}"+
-".gh-btn{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.20);border-radius:8px;padding:6px 5px;display:flex;align-items:center;gap:5px;cursor:pointer;color:#fff;backdrop-filter:blur(4px)}"+
+".gh-btn{background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(255,255,255,.08));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:6px 5px;display:flex;align-items:center;gap:5px;cursor:pointer;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 8px rgba(0,0,0,.15)}"+
 ".gh-btn.sel{background:linear-gradient(145deg,#ff2d55,#c4002e);border-color:#fff;box-shadow:0 0 10px rgba(255,45,85,.5)}"+
 ".gh-btn b{font-size:10px;display:block;line-height:1}.gh-btn small{font-size:6px;color:rgba(255,255,255,.85);letter-spacing:.5px}"+
 ".gh-btn .gh-ic{width:20px;height:20px;min-width:20px;background:rgba(0,0,0,.30);border-radius:6px;display:flex;align-items:center;justify-content:center}"+
 ".gh-foot{padding:0 7px 7px;display:flex;gap:5px}"+
-".gh-next{flex:1;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:8px;color:#fff;font-weight:900;padding:7px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;gap:4px}"+
+".gh-next{flex:1;background:linear-gradient(135deg,rgba(255,255,255,.30) 0%,#ff2d55 30%,#ff5e3a 100%);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.50);border-radius:10px;color:#fff;font-weight:900;padding:7px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 4px 14px rgba(255,45,85,.35)}"+
 ".gh-back{width:50px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;font-size:10px}"+
 ".gh-sig{margin:6px 7px 0;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;font-weight:900;color:#fff}"+
-".gh-sig.up{background:linear-gradient(145deg,rgba(0,200,83,.85),rgba(0,150,36,.85))}"+
-".gh-sig.down{background:linear-gradient(145deg,rgba(255,23,68,.9),rgba(213,0,43,.9))}"+
+".gh-sig.up{background:linear-gradient(135deg,rgba(255,255,255,.30),rgba(0,200,83,.75) 35%,rgba(0,150,36,.85));backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}"+
+".gh-sig.down{background:linear-gradient(135deg,rgba(255,255,255,.30),rgba(255,23,68,.75) 35%,rgba(213,0,43,.85));backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}"+
 ".gh-sig.wait{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:10px}"+
 ".gh-sig.off{background:rgba(0,0,0,.45);border:1px solid rgba(255,45,85,.6);font-size:10px}"+
 ".gh-meta{font-size:8px;color:rgba(255,255,255,.80);text-align:center;padding:4px 0 1px;text-shadow:0 1px 2px rgba(0,0,0,.6)}"+
