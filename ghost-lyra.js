@@ -63,7 +63,9 @@ css.innerHTML=
 ".gh-vlang-btn.active{background:#ff2d55;border-color:#fff;box-shadow:0 0 8px rgba(255,45,85,.6)}"+
 ".gh-voice-select{background:rgba(0,0,0,.30);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:8px;padding:2px;cursor:pointer}"+
 ".gh-voice-label{opacity:.8}"+
-".gh-hidden{display:none}"+
+".gh-hidden{display:none !important}"+
+".gh-sig-wrap.gh-hidden{display:none !important}"+
+".gh-card-hidden{display:none !important}"+
 ".gh-card-hidden{display:none}"+
 ".gh-analysis{display:none;margin:6px 7px 0;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px;font-size:8px;line-height:1.4;color:#fff}"+
 ".gh-sig-wrap{display:block}"+
@@ -77,7 +79,7 @@ box.innerHTML=
 '<div class="gh-card gh-card-hidden" id="gh-card">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
 '<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div>'+
-'<div class="gh-sig-wrap" id="gh-sig-wrap"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div class="gh-analysis" id="gh-analysis"></div></div>'+
+'<div class="gh-sig-wrap gh-hidden" id="gh-sig-wrap"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div class="gh-analysis" id="gh-analysis"></div></div>'+
 ''+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
 '</div>';
@@ -202,6 +204,15 @@ function ghUnlockVoice(){
 }
 function render(){
   document.getElementById('gh-step-label').textContent='0'+state.step+' / 03';
+  // FIX: Screenshot e Step 1 e WAIT dekhacchilo - karon sig-wrap lukano chilo na
+  // Step 1/2/3 te sig-wrap lukano thakbe, sudhu Session Start hole dekhabe
+  try{
+    var _sw = document.getElementById('gh-sig-wrap');
+    if(_sw){
+      if(session.active) _sw.classList.remove('gh-hidden');
+      else _sw.classList.add('gh-hidden');
+    }
+  }catch(e){}
   var body=document.getElementById('gh-body');
   if(state.step===1){
     body.innerHTML='<div class="gh-step"><p class="gh-title">Trade Duration</p><p class="gh-sub">Choose candle expiry timeframe</p><div class="gh-grid">'+
