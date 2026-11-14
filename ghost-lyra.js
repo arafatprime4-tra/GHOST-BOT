@@ -1,713 +1,194 @@
 
 (function(){
-if(document.getElementById('ghost-lyra')){ document.getElementById('ghost-lyra').classList.remove('gh-hidden'); return; }
-// ===== GHOST - Screenshot Moto CHOTO, All Red, Transparent, SVG Only =====
-// Bookmark khulle prothome sudhu CHOTO Ghost Orb asbe (60px)
-// Orb e click korle baki option asbe (Step 1/2/3 Panel)
-// No emoji, all SVG
-var ICON = {
-  ghost: '<svg viewBox="0 0 64 64" width="100%" height="100%" fill="none"><path d="M32 4C18 4 8 15 8 30v18c0 3 2 4 4 3 2-1 3-3 4-5 1 2 3 4 5 5 2 1 4 0 5-2 1 2 3 3 6 3s5-1 6-3c1 2 3 3 5 2 2-1 4-3 5-5 1 2 2 4 4 5 2 1 4 0 4-3V30C56 15 46 4 32 4Z" fill="#fff" opacity="0.95"/><circle cx="23" cy="30" r="5" fill="#000"/><circle cx="41" cy="30" r="5" fill="#000"/><circle cx="24.5" cy="28.5" r="1.8" fill="#fff"/><circle cx="42.5" cy="28.5" r="1.8" fill="#fff"/><path d="M27 40c3 2 7 2 10 0" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>',
-  close: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>',
-  voiceOn: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z" fill="#fff" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
-  voiceOff: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M11 5 6 9H2v6h4l5 4V5Z" fill="#fff" stroke="none"/><line x1="16" y1="9" x2="22" y2="15"/><line x1="22" y1="9" x2="16" y2="15"/></svg>',
-  up: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>',
-  down: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>',
-  wait: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="14"/></svg>',
-  check: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
-  edit: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"/></svg>',
-  stop: '<svg viewBox="0 0 24 24" width="13" height="13" fill="#fff"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
-  bolt: '<svg viewBox="0 0 24 24" width="14" height="14" fill="#ffd166"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>',
-  fire: '<svg viewBox="0 0 24 24" width="14" height="14" fill="#ff6b35"><path d="M12 2c1 4-2 5-2 8a4 4 0 0 0 8 0c0-1-.5-2-1-3 2 1 3 3 3 5a6 6 0 1 1-12 0c0-3 2-6 4-10Z"/></svg>',
-  clock: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-  trend: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
-  macro: '<svg viewBox="0 0 24 24" width="14" height="14" fill="#38bdf8"><circle cx="12" cy="12" r="9" fill="none" stroke="#38bdf8" stroke-width="2"/><circle cx="12" cy="12" r="3"/></svg>',
-  ext: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-  arrowR: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
-  arrowL: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>',
-  play: '<svg viewBox="0 0 24 24" width="13" height="13" fill="#fff"><path d="M6 4l14 8-14 8V4Z"/></svg>'
-};
-var css=document.createElement("style");
-css.innerHTML=
-"#ghost-lyra{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:280px;font-family:Inter,sans-serif;user-select:none}"+
-".gh-orb{width:44px;height:44px;margin:0 auto 4px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.45),rgba(255,80,80,.65) 30%,rgba(180,0,30,.75) 65%,rgba(90,0,0,.60));backdrop-filter:blur(12px) saturate(180%);-webkit-backdrop-filter:blur(12px) saturate(180%);border:1px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.30),inset 0 2px 4px rgba(255,255,255,.60),inset 0 -2px 4px rgba(0,0,0,.20),0 0 22px rgba(255,30,30,.55);animation:ghPulse 2.2s infinite}"+
-".gh-orb svg{width:42px;height:42px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}"+
-"@keyframes ghPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}"+
-".gh-card{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.12) 30%,rgba(255,255,255,.06) 60%,rgba(255,45,85,.18) 100%);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.45);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -1px 0 rgba(255,255,255,.15),0 0 28px rgba(255,45,85,.28);overflow:hidden}"+
-".gh-h{padding:9px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.12);cursor:move}"+
-".gh-h b{font-size:12px;color:#fff;letter-spacing:1px}.gh-h b span{color:#ff2d55}"+
-".gh-h .gh-right{display:flex;gap:6px;align-items:center}"+
-".gh-voice{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:12px;padding:3px 7px;font-size:9px;cursor:pointer;display:flex;align-items:center;gap:4px}"+
-".gh-step-badge{font-size:8px;color:#fff;background:rgba(255,45,85,.45);padding:2px 6px;border-radius:10px}"+
-".gh-close{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}"+
-".gh-step{padding:11px}"+
-".gh-title{font-size:13px;font-weight:900;color:#fff;margin:0 0 2px}"+
-".gh-sub{font-size:9px;color:rgba(255,255,255,.75);margin:0 0 10px}"+
-".gh-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}"+
-".gh-btn{background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,45,85,.18));border:1px solid rgba(255,255,255,.18);border-radius:11px;padding:9px 7px;display:flex;align-items:center;gap:7px;cursor:pointer;color:#fff}"+
-".gh-btn.sel{background:linear-gradient(145deg,#ff2d55,#c4002e);border-color:#fff;box-shadow:0 0 14px rgba(255,45,85,.6)}"+
-".gh-btn b{font-size:12px;display:block;line-height:1}.gh-btn small{font-size:7px;color:rgba(255,255,255,.85);letter-spacing:.5px}"+
-".gh-btn .gh-ic{width:26px;height:26px;min-width:26px;background:rgba(0,0,0,.25);border-radius:8px;display:flex;align-items:center;justify-content:center}"+
-".gh-foot{padding:0 11px 11px;display:flex;gap:7px}"+
-".gh-next{flex:1;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:10px;color:#fff;font-weight:900;padding:10px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px}"+
-".gh-back{width:62px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px}"+
-".gh-sig{margin:9px 11px 0;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:900;color:#fff}"+
-".gh-sig.motion{animation:ghSignalMotion 1.2s ease-in-out infinite}"+
-"@keyframes ghSignalMotion{0%{transform:scale(1);box-shadow:0 0 10px rgba(255,45,85,.4)}50%{transform:scale(1.04);box-shadow:0 0 22px rgba(255,45,85,.8)}100%{transform:scale(1);box-shadow:0 0 10px rgba(255,45,85,.4)}}"+
-".gh-sig.up-motion{animation:ghUpMotion 1s ease-in-out infinite}"+
-"@keyframes ghUpMotion{0%{transform:translateY(0)}50%{transform:translateY(-3px)}100%{transform:translateY(0)}}"+
-".gh-sig.down-motion{animation:ghDownMotion 1s ease-in-out infinite}"+
-"@keyframes ghDownMotion{0%{transform:translateY(0)}50%{transform:translateY(3px)}100%{transform:translateY(0)}}"+
-".gh-mic-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:4px 8px;font-size:8px;cursor:pointer;display:flex;align-items:center;gap:4px}"+
-".gh-mic-btn.listening{background:#ff2d55;animation:ghSignalMotion 0.8s ease-in-out infinite}"+
-".gh-sig.up{background:linear-gradient(145deg,rgba(0,200,83,.85),rgba(0,150,36,.85))}"+
-".gh-sig.down{background:linear-gradient(145deg,rgba(255,23,68,.9),rgba(213,0,43,.9))}"+
-".gh-sig.wait{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px}"+
-".gh-sig.off{background:rgba(0,0,0,.55);border:1px solid rgba(255,45,85,.6);font-size:11px}"+
-".gh-meta{font-size:9px;color:rgba(255,255,255,.7);text-align:center;padding:6px 0 2px}"+
-".gh-hint{font-size:8px;color:rgba(255,255,255,.55);text-align:center;padding:0 0 8px}"+
-".gh-close-bar{margin:0 11px 11px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;padding:8px;text-align:center;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}"+
-".gh-voice-set{display:flex;gap:4px;align-items:center;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.10);font-size:8px;color:#fff}"+
-".gh-vlang-btn{flex:1;padding:4px 2px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer;font-weight:600}"+
-".gh-vlang-btn.active{background:#ff2d55;border-color:#fff;box-shadow:0 0 8px rgba(255,45,85,.6)}"+
-".gh-voice-select{background:rgba(0,0,0,.30);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:8px;padding:2px;cursor:pointer}"+
-".gh-voice-label{opacity:.8}"+
-".gh-hidden{display:none !important}"+
-".gh-sig-wrap.gh-hidden{display:none !important}"+
-".gh-card-hidden{display:none !important}"+
-".gh-card-hidden{display:none}"+
-".gh-analysis{display:none;margin:6px 7px 0;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px;font-size:8px;line-height:1.4;color:#fff}"+
-".gh-sig-wrap{display:block}"+
-".gh-card{display:block}";
+if(document.getElementById('ghost-lyra')){ document.getElementById('ghost-lyra').style.display='block'; return; }
+// ===== GHOST LYRA-STYLE UI - Red Glass + Ghost Orb + 3 Steps =====
+// Video er moto: Step 1 Trade Duration, Step 2 Investment Stake, Step 3 Execution Count
+// Auto-trade NA - Signal only, user manually Buy/Sell (account safe)
+let css=document.createElement("style");
+css.innerHTML=`
+#ghost-lyra{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:300px;font-family:Inter,sans-serif;user-select:none}
+.gh-lyra-orb{width:90px;height:90px;margin:0 auto 8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,60,60,.9),rgba(180,0,0,.7) 45%,rgba(80,0,0,.4) 70%,transparent);display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 0 30px rgba(255,30,30,.6),0 0 60px rgba(255,0,0,.3);animation:ghOrbPulse 2.2s infinite;cursor:move}
+@keyframes ghOrbPulse{0%,100%{transform:scale(1);box-shadow:0 0 30px rgba(255,30,30,.6)}50%{transform:scale(1.06);box-shadow:0 0 50px rgba(255,30,30,.9)}}
+.gh-lyra-card{background:linear-gradient(145deg,rgba(40,0,0,.92),rgba(15,0,0,.95));backdrop-filter:blur(14px);border:1px solid rgba(255,45,85,.5);border-radius:16px;box-shadow:0 0 30px rgba(255,0,0,.35),0 12px 30px #000c;overflow:hidden}
+.gh-lyra-h{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,45,85,.25);cursor:move}
+.gh-lyra-h b{font-size:13px;color:#fff;letter-spacing:1px}
+.gh-lyra-h b span{color:#ff2d55}
+.gh-lyra-h small{font-size:9px;color:#ff8fa3;background:rgba(255,45,85,.2);padding:2px 6px;border-radius:10px}
+.gh-lyra-step{padding:12px}
+.gh-lyra-title{font-size:13px;font-weight:900;color:#fff;margin:0 0 2px}
+.gh-lyra-sub{font-size:10px;color:#ff8fa3;margin:0 0 10px}
+.gh-lyra-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gh-lyra-btn{background:linear-gradient(145deg,rgba(255,45,85,.25),rgba(120,0,20,.35));border:1px solid rgba(255,45,85,.45);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;color:#fff;transition:all .15s}
+.gh-lyra-btn:hover{background:linear-gradient(145deg,rgba(255,45,85,.5),rgba(200,0,40,.5));transform:scale(1.03)}
+.gh-lyra-btn.sel{background:linear-gradient(145deg,#ff2d55,#c4002e);border-color:#fff;box-shadow:0 0 15px rgba(255,45,85,.6)}
+.gh-lyra-btn b{font-size:13px;display:block}
+.gh-lyra-btn small{font-size:8px;color:#ffd1dc;letter-spacing:.5px}
+.gh-lyra-foot{padding:0 12px 12px;display:flex;gap:8px}
+.gh-lyra-next{flex:1;background:linear-gradient(90deg,#ff2d55,#ff5e3a);border:none;border-radius:10px;color:#fff;font-weight:900;padding:11px;cursor:pointer;font-size:12px}
+.gh-lyra-back{width:70px;background:#1a0a0a;border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;cursor:pointer}
+.gh-lyra-sig{margin:10px 12px 0;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;letter-spacing:1px}
+.gh-lyra-sig.up{background:linear-gradient(145deg,#00c853,#009624);color:#fff}
+.gh-lyra-sig.down{background:linear-gradient(145deg,#ff1744,#d5002b);color:#fff}
+.gh-lyra-sig.wait{background:#141a2a;color:#5a6f8a;border:1px solid #1e2d4a}
+.gh-lyra-sig.off{background:#330000;color:#ffb3c2;border:1px solid rgba(255,45,85,.5)}
+.gh-lyra-meta{font-size:10px;color:#8a9ab5;text-align:center;margin:8px 0;line-height:1.5}
+.gh-lyra-close{margin:0 12px 12px;height:28px;background:#13151e;border:1px solid #1e2d4a;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:11px;cursor:pointer}
+.gh-lyra-hint{font-size:9px;color:#5a6f8a;text-align:center;padding:0 12px 8px}
+`;
 document.head.appendChild(css);
-var box=document.createElement("div");
-box.id="ghost-lyra";
-// Prothome CHOTO - sudhu Orb dekhabe, Panel lukano thakbe
-box.innerHTML=
-'<div class="gh-orb" id="gh-orb">'+ICON.ghost+'</div>'+
-'<div class="gh-card gh-card-hidden" id="gh-card">'+
-'<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
-'<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><button class="gh-mic-btn" id="gh-mic-btn">Mic</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.0">Fast</option><option value="1.1">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.0">High</option><option value="1.05">Very High</option></select></div>'+
-'<div id="gh-body"></div>'+
-'<div class="gh-sig-wrap gh-hidden" id="gh-sig-wrap"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div class="gh-analysis" id="gh-analysis"></div></div>'+
-'<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
-'</div>';
+let box=document.createElement("div");box.id="ghost-lyra";
+box.innerHTML=`
+<div class="gh-lyra-orb" id="gh-lyra-orb">👻</div>
+<div class="gh-lyra-card">
+<div class="gh-lyra-h" id="gh-lyra-h"><b>GHOST <span>AI</span></b><div style="display:flex;gap:6px;align-items:center"><button id="gh-voice-btn" style="background:rgba(255,45,85,.35);border:1px solid #ff2d55;color:#fff;border-radius:12px;padding:3px 9px;font-size:10px;cursor:pointer">🔊 Tap for Voice</button><small id="gh-lyra-step-label">Step 1</small></div></div>
+<div id="gh-lyra-body"></div>
+<div id="gh-lyra-sig-wrap" style="display:none"><div class="gh-lyra-sig wait" id="gh-lyra-sig">◉ WAIT</div><div class="gh-lyra-meta" id="gh-lyra-meta">Pair: -- • Duration: -- • Stake: -- • Left: --</div></div>
+<div class="gh-lyra-hint" id="gh-lyra-hint">Tap Orb to Configure • Drag to Reposition</div>
+<div class="gh-lyra-close" id="gh-lyra-close">✕ Close</div>
+</div>`;
 document.body.appendChild(box);
-// OLD SYSTEM: Protyek bar Step 1 theke shuru - Resume bad - Saved step use korbo na
-try{ localStorage.removeItem("ghost_lyra"); }catch(e){}
-var state={duration:60,durationLabel:"1 Min",stake:5,stakeLabel:"$5",count:1,step:1,voice:true};
-var session={active:false,left:0};
-var lastSpoken=""; var voiceUnlocked=false;
-function save(){ try{ localStorage.setItem("ghost_lyra_voice", JSON.stringify({voice:state.voice})); }catch(e){} }
-// === VOICE SYSTEM - CSS + JavaScript Language Fix ===
-window.__gh_voices = window.__gh_voices || [];
-function ghLoadVoices(){
-  try{
-    var vs = window.speechSynthesis.getVoices() || [];
-    if(vs.length>0) window.__gh_voices = vs;
-  }catch(e){}
-}
-try{
-  ghLoadVoices();
-  if('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = ghLoadVoices;
-}catch(e){}
-function ghGetVoiceLang(){ try{ return localStorage.getItem('ghost_voice_lang') || 'bn'; }catch(e){ return 'bn'; } }
-function ghGetVoiceRate(){ try{ var v=parseFloat(localStorage.getItem('ghost_voice_rate') || '0.88'); if(v>1.15) v=1.0; if(v<0.7) v=0.95; return v; }catch(e){ return 0.88; } }
-function ghGetVoicePitch(){ try{ var v=parseFloat(localStorage.getItem('ghost_voice_pitch') || '0.95'); if(v>1.1) v=1.0; if(v<0.8) v=1.0; return v; }catch(e){ return 1.0; } }
-function ghFindVoice(lang){
-  var vs = window.__gh_voices && window.__gh_voices.length ? window.__gh_voices : [];
-  try{ var live = window.speechSynthesis.getVoices() || []; if(live.length>vs.length) vs = live; }catch(e){}
-  if(!vs.length) return null;
-  var code = lang==='hi' ? 'hi' : lang==='en' ? 'en' : 'bn';
-  // LYRA STYLE: Google voice age nibo - Android TTS robotic lage, Google human lage
-  // Age Google + lang, tarpor lang, tarpor default
-  var v = vs.find(function(x){ return x.name && x.name.toLowerCase().indexOf('google')>=0 && x.lang && x.lang.toLowerCase().indexOf(code)===0 && (x.name.toLowerCase().indexOf('female')>=0 || x.name.toLowerCase().indexOf('natural')>=0); });
-  if(!v) v = vs.find(function(x){ return x.name && x.name.toLowerCase().indexOf('google')>=0 && x.lang && x.lang.toLowerCase().indexOf(code)===0; });
-  if(!v) v = vs.find(function(x){ return x.lang && x.lang.toLowerCase().indexOf(code)===0 && x.name && x.name.toLowerCase().indexOf('natural')>=0; });
-  if(!v) v = vs.find(function(x){ return x.lang && x.lang.toLowerCase().indexOf(code)===0; });
-  if(!v && code==='bn') v = vs.find(function(x){ return x.name && (x.name.toLowerCase().indexOf('bengali')>=0 || x.name.toLowerCase().indexOf('bangla')>=0); });
-  if(!v && code==='hi') v = vs.find(function(x){ return x.name && x.name.toLowerCase().indexOf('hindi')>=0; });
-  if(!v) v = vs.find(function(x){ return x.default; });
-  return v || null;
-}
-function ghBuildVoiceText(j, lang){
-  var dir = j.signal || j.direction || 'CALL';
-  var isUp = (dir==='CALL' || dir==='UP');
-  var pair = ghFormatPairForDisplay(j.pair || 'EURUSD');
-  var conf = j.confidence || 0;
-  var entry = j.entry_type || 'opening';
-  if(lang==='hi'){
-    var dirHi = isUp ? 'UP' : 'DOWN';
-    var entryHi = 'opening se entry lunga';
-    if(entry.indexOf('wick')>=0) entryHi = 'wick rejection se entry lunga, opening se nahi. Price support se wapas gaya hai';
-    else if(entry.indexOf('liquidity')>=0) entryHi = 'liquidity grab hua hai, trap tha, isliye reversal se entry lunga';
-    else if(entry.indexOf('order')>=0) entryHi = 'order block se entry lunga';
-    else if(entry.indexOf('gap')>=0) entryHi = 'gap fill ho raha hai, gap se entry lunga';
-    else if(entry.indexOf('break')>=0) entryHi = 'break of structure hua hai, breakout se entry lunga';
-    return 'Bhai suno, ' + pair + ' me ek accha ' + dirHi + ' entry mila hai. ' + entryHi + '. Confidence ' + conf + ' percent hai. Abhi entry lo, deri mat karo.';
-  } else if(lang==='en'){
-    // ENGLISH NATIVE: Rate English e English er moto bolbe - proper fluent English
-    var dirEn = isUp ? 'UP' : 'DOWN';
-    var entryEn = 'I will take the entry from the opening.';
-    if(entry.indexOf('wick')>=0) entryEn = 'I checked the wick rejection carefully. The price bounced strongly from support. So I will take the entry from the wick rejection, not from the opening.';
-    else if(entry.indexOf('liquidity')>=0) entryEn = 'I saw a liquidity grab. It was a trap. So I will take a reversal entry.';
-    else if(entry.indexOf('order')>=0) entryEn = 'The price is holding at the order block. I will take the entry from the order block.';
-    else if(entry.indexOf('gap')>=0) entryEn = 'The gap is filling. I will take the entry from the gap.';
-    else if(entry.indexOf('break')>=0) entryEn = 'Break of structure happened. I will take the breakout entry.';
-    return 'Hey, listen. I found a strong ' + dirEn + ' entry on ' + pair + '. ' + entryEn + ' Confidence is ' + conf + ' percent. Take the entry now, within the first thirty seconds.';
-  } else {
-    var dirBn = isUp ? 'UP' : 'DOWN';
-    // Bengali script e bolbe - Roman Bangla TTS robotic lage, Bengali script natural lage (LYRA er moto)
-    var reasonBn = 'উইক রিজেকশন কনফার্ম।';
-    if(entry.indexOf('wick')>=0) reasonBn = 'উইক রিজেকশন কনফার্ম।';
-    else if(entry.indexOf('liquidity')>=0) reasonBn = 'লিকুইডিটি গ্র্যাব। ট্র্যাপ ছিলো।';
-    else if(entry.indexOf('order')>=0) reasonBn = 'অর্ডার ব্লক হোল্ডিং।';
-    else if(entry.indexOf('gap')>=0) reasonBn = 'গ্যাপ ফিলিং।';
-    else if(entry.indexOf('break')>=0) reasonBn = 'ব্রেক অফ স্ট্রাকচার।';
-    return 'ভাই শুনো। ' + pair + ', ' + dirBn + ' এন্ট্রি। ' + reasonBn + ' কনফিডেন্স ' + conf + ' পারসেন্ট। এখনই এন্ট্রি নাও।';
-  }
-}
-// === NEW FEATURES: English Native + Chart Time + 30 Sec Window + Voice Chat + Motion Signal ===
-// 1. CHART TIME: Quotex chart er time porbe - UTC time + Countdown theke
-function ghGetChartTime(){
-  try{
-    var t = document.body.innerText || "";
-    // FIX: Chart Time - UTC diye hisab kortam, tai Quotex er End of trade er shathe milto na
-    // Quotex candle UTC minute e shuru hoy na, End of trade countdown diye hisab korte hobe
-    // Video te: End of trade 00:25, Countdown 00:29 - 2 ta alada, End of trade ta-i thik
-    var endMatch = t.match(/End of trade[\s\S]{0,30}?(\d{1,2}):(\d{2})/i);
-    var utc = t.match(/(\d{2}):(\d{2}):(\d{2})/);
-    var countdown = null;
-    if(endMatch){
-      var em = parseInt(endMatch[1],10), es = parseInt(endMatch[2],10);
-      var remainingEnd = em*60 + es;
-      var dur = 60; try{ dur = state.duration || 60; }catch(e){}
-      var elapsedEnd = dur - remainingEnd;
-      // Elapsed 0-60 er vitore thakle End of trade tai use korbo
-      if(elapsedEnd>=0 && elapsedEnd<=dur){
-        return {utcSec: es, remaining: remainingEnd, elapsed: elapsedEnd, source: 'end-of-trade', endText: endMatch[0]};
-      }
-    }
-    countdown = t.match(/00:(\d{2})/);
-    var result = {utcSec: -1, remaining: -1, elapsed: -1, source: 'none'};
-    if(utc){
-      var hh = parseInt(utc[1],10), mm = parseInt(utc[2],10), ss = parseInt(utc[3],10);
-      result.utcSec = ss;
-      result.utcMin = mm;
-      result.utcHour = hh;
-      result.source = 'utc';
-      // 1 Min candle: elapsed = ss, 5 Min: elapsed = (mm % 5)*60 + ss, 2 Min: (mm % 2)*60 + ss
-      var dur = 60;
-      try{ dur = state.duration || 60; }catch(e){}
-      if(dur===60) result.elapsed = ss;
-      else if(dur===300) result.elapsed = (mm % 5)*60 + ss;
-      else if(dur===120) result.elapsed = (mm % 2)*60 + ss;
-      else if(dur===600) result.elapsed = (mm % 10)*60 + ss;
-      else if(dur===30) result.elapsed = ss % 30;
-      else if(dur===5) result.elapsed = ss % 5;
-      else result.elapsed = ss;
-    }
-    if(countdown){
-      result.remaining = parseInt(countdown[1],10);
-      // Countdown is time remaining in trade - if 00:53, remaining 53, elapsed for 1 Min = 60-53=7
-      // Use countdown as more accurate if available
-      try{
-        var d = state.duration || 60;
-        if(d===60) result.elapsed = 60 - result.remaining;
-      }catch(e){}
-      result.source = result.source + '+countdown';
-    }
-    return result;
-  }catch(e){ return {elapsed:-1, remaining:-1, utcSec:-1}; }
-}
-function ghIsEntryWindow(){
-  var ct = ghGetChartTime();
-  // 25-30 Sec Window: Prothom 25-30 sec er vitore entry, 30 sec pore entry na
-  if(ct.elapsed===-1) return {ok:true, elapsed:-1, reason:'no-time'};
-  if(ct.elapsed <= 30) return {ok:true, elapsed:ct.elapsed, reason:'in-window'};
-  return {ok:false, elapsed:ct.elapsed, reason:'late'};
-}
-// 2. VOICE CHAT: User Banglay bolle bujhe, English e answer dibe (selected lang e)
-var ghListening = false;
-var ghRecognition = null;
-function ghStartListening(){
-  try{
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR){
-      ghSpeak("Bhai, ei browser e voice sunar system nai. Chrome e try koro.");
-      return;
-    }
-    if(ghListening){
-      window.__gh_wantListen = false;
-      window.__gh_micSpeakingBlock = false;
-      try{ ghRecognition.stop(); }catch(e){}
-      ghListening = false;
-      var _mb = document.getElementById('gh-mic-btn'); if(_mb){ _mb.classList.remove('listening'); _mb.textContent = 'Mic'; }
-      // Mic OFF hole pending kotha bolbe
-      if(window.__gh_pendingSpeak){ var _p = window.__gh_pendingSpeak; window.__gh_pendingSpeak = null; setTimeout(function(){ ghSpeak(_p); }, 300); }
-      return;
-    }
-    // MIC PERMISSION CHECK: Age getUserMedia diye permission nibo, nahole Chrome auto off kore dey
-    // XRecorder cholle ekhanei fail korbe, agei bujha jabe
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-      navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-        try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
-        ghStartRecognitionNow(SR, micBtn);
-      }).catch(function(err){
-        ghListening = false; window.__gh_wantListen = false;
-        if(micBtn) micBtn.classList.remove('listening');
-        ghSpeak("Mic permission dao. Chrome e Mic allow koro. XRecorder cholle Stop koro.");
-        return;
-      });
-      return;
-    }
-    ghStartRecognitionNow(SR, micBtn);
-    return;
-  }catch(e){ ghListening = false; }
-}
-function ghStartRecognitionNow(SR, micBtn){
-  try{
-    ghRecognition = new SR();
-    ghRecognition.lang = 'bn-BD';
-    ghRecognition.interimResults = true;
-    ghRecognition.continuous = true;
-    ghRecognition.maxAlternatives = 1;
-    ghListening = true;
-    window.__gh_wantListen = true;
-    window.__gh_micSpeakingBlock = true;
-    // Mic ON hole Ghost er TTS bondho - nahole Mic auto off hoy
-    try{ window.speechSynthesis.cancel(); window.__gh_speakQueue = []; window.__gh_speaking = false; }catch(e){}
-    var micBtn = document.getElementById('gh-mic-btn');
-    if(micBtn){ micBtn.classList.add('listening'); micBtn.textContent = 'Listening...'; }
-    // FIX: Age ghSpeak() age boltam, tai TTS Mic ke block kore auto off hoye jeto
-    // Ekhon age Mic start korbo, tarpor 300ms pore bolbo - Mic age on hobe
-    // ghSpeak ekhon queue te jabe, Mic ke block korbe na
-    ghRecognition.onresult = function(ev){
-      try{
-        // Final result holei answer dibo, interim hole wait korbo - nahole half kotha bujhe answer dibe
-        var res = ev.results[ev.results.length-1];
-        if(!res.isFinal) return;
-        var txt = res[0].transcript || "";
-        if(!txt.trim()) return;
-        // Answer dibe, kintu Mic ON thakbe - auto off hobe na, abar bolte parba
-        ghAnswerUser(txt);
-      }catch(e){}
-    };
-        ghRecognition.onerror = function(ev){
-      // no-speech / audio-capture hole auto off hobe na, 800ms pore abar start hobe - jodi user Mic ON rakhte chay
-      if(ev && (ev.error==='no-speech' || ev.error==='aborted')){
-        if(window.__gh_wantListen){
-          setTimeout(function(){ try{ ghRecognition.start(); }catch(e){} }, 800);
-          return;
-        }
-      }
-      if(ev && (ev.error==='not-allowed' || ev.error==='audio-capture')){
-        // XRecorder Mic use kortese - ekbar bolbe, bar bar popup dibe na
-        ghListening = false; window.__gh_wantListen = false;
-        if(micBtn) micBtn.classList.remove('listening');
-        try{ ghSpeak("Mic busy. XRecorder bondho kore abar Mic chap dao."); }catch(e){}
-        return;
-      }
-      ghListening = false; window.__gh_wantListen = false;
-      if(micBtn) micBtn.classList.remove('listening');
-    };
-    ghRecognition.onend = function(){
-      // Auto Off bondho: User jodi Mic ON rakhte chay, auto restart hobe
-      if(window.__gh_wantListen && ghListening){
-        setTimeout(function(){ try{ ghRecognition.start(); }catch(e){} }, 500);
-        return;
-      }
-      ghListening = false;
-      if(micBtn) micBtn.classList.remove('listening');
-    };
-    ghRecognition.start();
-  }catch(e){
-    ghListening = false;
-  }
-}
-function ghAnswerUser(userText){
-  try{
-    var lang = ghGetVoiceLang();
-    var lower = (userText||"").toLowerCase();
-    var lastSig = window.__gh_lastSig || null;
-    var answer = "";
-    // Intent detection - Bangla + English both
-    if(lower.indexOf('entry')>=0 || lower.indexOf('entri')>=0 || lower.indexOf('nibo')>=0 || lower.indexOf('nebo')>=0){
-      var ct = ghGetChartTime();
-      if(lastSig){
-        var dir = (lastSig.signal||'CALL')==='CALL' ? 'UP' : 'DOWN';
-        if(lang==='en'){
-          answer = "Yes, take " + dir + " entry now. Wick rejection confirmed, confidence " + (lastSig.confidence||0) + " percent. Candle time " + (ct.elapsed>=0 ? ct.elapsed + " seconds" : "is good") + ".";
-        } else if(lang==='hi'){
-          answer = "Haan bhai, abhi " + dir + " entry lo. Wick rejection confirm hai, confidence " + (lastSig.confidence||0) + " percent hai.";
-        } else {
-          answer = "Haan bhai, ekhon " + dir + " entry nao. Wick rejection confirm hoiche, confidence " + (lastSig.confidence||0) + " percent.";
-        }
-      } else {
-        answer = lang==='en' ? "Wait, no signal yet. I am analyzing. Wick rejection dekhchi." : "Ektu wait koro, ekhono signal ashe nai. Ami analysis kortesi.";
-      }
-    } else if(lower.indexOf('confidence')>=0 || lower.indexOf('confi')>=0){
-      answer = lang==='en' ? "Confidence is " + (lastSig? lastSig.confidence||0 : 0) + " percent. Wick rejection is strong." : "Confidence " + (lastSig? lastSig.confidence||0 : 0) + " percent. Wick rejection valo.";
-    } else if(lower.indexOf('time')>=0 || lower.indexOf('somoy')>=0 || lower.indexOf('kotokhon')>=0){
-      var ct2 = ghGetChartTime();
-      if(ct2.elapsed>=0){
-        if(ct2.elapsed>30){
-          answer = lang==='en' ? "30 seconds already passed, " + ct2.elapsed + " seconds. Do not take entry now, wait for next candle." : "30 second par hoye geche, " + ct2.elapsed + " second. Ekhon entry nio na, porer candle er jonno wait koro.";
-        } else {
-          answer = lang==='en' ? "Candle time is " + ct2.elapsed + " seconds. You are in the entry window, first 30 seconds. Take entry now." : "Candle time " + ct2.elapsed + " second. Tumi entry window er vitore acho, prothom 30 second. Ekhon entry nao.";
-        }
-      } else {
-        answer = lang==='en' ? "I cannot read chart time right now." : "Chart time porte partesi na ekhon.";
-      }
-    } else if(lower.indexOf('hello')>=0 || lower.indexOf('hi')>=0 || lower.indexOf('kemon')>=0 || lower.indexOf('assalam')>=0){
-      answer = lang==='en' ? "Hello brother, I am listening. Ask me about entry, confidence, or time." : "Haan bhai, ami shunchi. Entry, confidence, ba time niye jigges koro.";
-    } else {
-      // General - answer in selected lang (English if English selected)
-      if(lang==='en'){
-        answer = "I understood you. I am analyzing with SMC and Price Action, looking for wick rejection. Ask me about entry.";
-      } else if(lang==='hi'){
-        answer = "Main samajh gaya bhai. Main SMC aur Price Action se analysis kar raha hoon, wick rejection dekh raha hoon.";
-      } else {
-        answer = "Bujhsi bhai. Ami SMC ar Price Action diya analysis kortesi, wick rejection dekhtesi. Entry niye jigges koro.";
-      }
-    }
-    // Answer in selected lang - if English selected, English e bolbe, Bangla bolleo English e answer
-    window.__gh_lastVoice = "";
-    lastSpoken = "";
-    ghSpeak(answer);
-    // Force speak in selected lang - ghSpeak uses ghGetVoiceLang, so it will be English if English selected
-    // But ghSpeak uses lastSpoken check, we cleared it, so it will speak
-    try{
-      var u = new SpeechSynthesisUtterance(answer);
-      u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD';
-      u.rate = ghGetVoiceRate(); u.pitch = ghGetVoicePitch();
-      var v = ghFindVoice(lang); if(v) u.voice = v;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-    }catch(e){}
-  }catch(e){}
-}
-
-function ghSpeak(text, sigData){
+// State
+let state={duration:60,durationLabel:"1 Min",stake:5,stakeLabel:"$5",count:1,step:1,voice:true};
+let lastSpoken=""; let voiceUnlocked=false;
+function ghSpeak(text){
+  // Kotha bolbe - Chrome mobile e TAP chara TTS block hoy, tai voiceUnlocked lagbe
+  // bn-BD voice English text bolte pare na, tai en-US use koro
   try{
     if(!state.voice) return;
     if(!voiceUnlocked) return;
-    // MIC ON thakle TTS pause - Chrome e Mic + TTS ekshathe cholle Mic auto off hoye jay
-    // Eita-i asol karon: Ghost jokhon bolte thake, tokhon Mic sunte pare na
-    // Tai Mic ON thakle signal er kotha queue te rakhbo, Mic OFF hole bolbo
-    if(window.__gh_wantListen && window.__gh_micSpeakingBlock){
-      window.__gh_pendingSpeak = text;
-      return;
-    }
-    var lang = ghGetVoiceLang();
-    var rate = ghGetVoiceRate();
-    var pitch = ghGetVoicePitch();
-    var speakText = text;
-    if(sigData && typeof sigData==='object'){
-      speakText = ghBuildVoiceText(sigData, lang);
-    } else if(lang==='hi' && window.__gh_lastSig){
-      speakText = ghBuildVoiceText(window.__gh_lastSig, 'hi');
-    } else if(lang==='en' && window.__gh_lastSig){
-      speakText = ghBuildVoiceText(window.__gh_lastSig, 'en');
-    }
-    if(speakText===lastSpoken && !sigData) return;
-    lastSpoken=speakText;
+    if(text===lastSpoken) return;
+    lastSpoken=text;
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    var doSpeak = function(){
-      var u=new SpeechSynthesisUtterance(speakText);
-      u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD';
-      u.rate = rate; u.pitch = pitch; u.volume = 1;
-      var v = ghFindVoice(lang);
-      if(v) u.voice = v;
-      window.speechSynthesis.speak(u);
-    };
-    if(window.__gh_voices.length===0){
-      ghLoadVoices();
-      setTimeout(doSpeak, 180);
-    } else {
-      doSpeak();
-    }
+    let u=new SpeechSynthesisUtterance(text);
+    u.lang='en-US'; u.rate=1; u.pitch=1; u.volume=1;
+    try{ let vs=window.speechSynthesis.getVoices(); let en=vs.find(v=>v.lang && v.lang.toLowerCase().startsWith('en')); if(en) u.voice=en; }catch(e){}
+    window.speechSynthesis.speak(u);
   }catch(e){}
 }
 function ghUnlockVoice(){
   try{
-    voiceUnlocked=true; state.voice=true; save();
-    if(!('speechSynthesis' in window)) return;
+    voiceUnlocked=true; state.voice=true;
+    if(!('speechSynthesis' in window)){ alert('Ei browser e voice nai - Chrome use koro'); return; }
     window.speechSynthesis.cancel();
-    var lang = ghGetVoiceLang();
-    var rate = ghGetVoiceRate();
-    var pitch = ghGetVoicePitch();
-    var txt = lang==='hi' ? 'Bhai, Ghost ready. Main Hindi me bolunga, fast aur high pitch me.' : lang==='en' ? 'Brother, Ghost ready. I will speak in English.' : 'Bhai shuno, Ghost ready. Ami Banglay bolbo.';
-    var u=new SpeechSynthesisUtterance(txt);
-    u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD'; u.rate=rate; u.pitch=pitch;
-    var v = ghFindVoice(lang); if(v) u.voice=v;
-    window.speechSynthesis.speak(u);
-    var vb=document.getElementById('gh-voice-btn'); if(vb) vb.innerHTML=ICON.voiceOn+'<span>Voice: ON</span>';
+    let u=new SpeechSynthesisUtterance('Voice on. Ghost AI ready.');
+    u.lang='en-US'; window.speechSynthesis.speak(u);
+    let vb=document.getElementById('gh-voice-btn'); if(vb) vb.textContent='🔊 Voice: ON';
   }catch(e){}
 }
+let saved=JSON.parse(localStorage.getItem('ghost_lyra_config')||'{}');
+if(saved.duration) state={...state,...saved};
+function save(){ localStorage.setItem('ghost_lyra_config',JSON.stringify(state)); }
 function render(){
-  document.getElementById('gh-step-label').textContent='0'+state.step+' / 03';
-  // FIX: Screenshot e Step 1 e WAIT dekhacchilo - karon sig-wrap lukano chilo na
-  // Step 1/2/3 te sig-wrap lukano thakbe, sudhu Session Start hole dekhabe
-  try{
-    var _sw = document.getElementById('gh-sig-wrap');
-    if(_sw){
-      if(session.active) _sw.classList.remove('gh-hidden');
-      else _sw.classList.add('gh-hidden');
-    }
-  }catch(e){}
-  var body=document.getElementById('gh-body');
+  let body=document.getElementById('gh-lyra-body');
+  let label=document.getElementById('gh-lyra-step-label');
+  label.textContent="Step "+state.step+" / 3";
   if(state.step===1){
-    body.innerHTML='<div class="gh-step"><p class="gh-title">Trade Duration</p><p class="gh-sub">Choose candle expiry timeframe</p><div class="gh-grid">'+
-    '<div class="gh-btn '+(state.duration===5?'sel':'')+'" data-d="5" data-l="5 Sec"><div class="gh-ic">'+ICON.bolt+'</div><div><b>5 Sec</b><small>ULTRA FAST</small></div></div>'+
-    '<div class="gh-btn '+(state.duration===30?'sel':'')+'" data-d="30" data-l="30 Sec"><div class="gh-ic">'+ICON.fire+'</div><div><b>30 Sec</b><small>MOMENTUM</small></div></div>'+
-    '<div class="gh-btn '+(state.duration===60?'sel':'')+'" data-d="60" data-l="1 Min"><div class="gh-ic">'+ICON.clock+'</div><div><b>1 Min</b><small>STANDARD</small></div></div>'+
-    '<div class="gh-btn '+(state.duration===120?'sel':'')+'" data-d="120" data-l="2 Min"><div class="gh-ic">'+ICON.trend+'</div><div><b>2 Min</b><small>TREND</small></div></div>'+
-    '<div class="gh-btn '+(state.duration===300?'sel':'')+'" data-d="300" data-l="5 Min"><div class="gh-ic">'+ICON.macro+'</div><div><b>5 Min</b><small>MACRO</small></div></div>'+
-    '<div class="gh-btn '+(state.duration===600?'sel':'')+'" data-d="600" data-l="10 Min"><div class="gh-ic">'+ICON.ext+'</div><div><b>10 Min</b><small>EXTENDED</small></div></div>'+
-    '</div></div><div class="gh-foot"><button class="gh-next" id="gh-next">Next '+ICON.arrowR+'</button></div>';
-  } else if(state.step===2){
-    body.innerHTML='<div class="gh-step"><p class="gh-title">Investment Stake</p><p class="gh-sub">How much per trade?</p><div class="gh-grid">'+
-    '<div class="gh-btn '+(state.stake===1?'sel':'')+'" data-s="1" data-sl="$1"><div class="gh-ic">$</div><div><b>$1</b><small>SAFE</small></div></div>'+
-    '<div class="gh-btn '+(state.stake===3?'sel':'')+'" data-s="3" data-sl="$3"><div class="gh-ic">$</div><div><b>$3</b><small>LOW</small></div></div>'+
-    '<div class="gh-btn '+(state.stake===5?'sel':'')+'" data-s="5" data-sl="$5"><div class="gh-ic">$</div><div><b>$5</b><small>STANDARD</small></div></div>'+
-    '<div class="gh-btn '+(state.stake===10?'sel':'')+'" data-s="10" data-sl="$10"><div class="gh-ic">$</div><div><b>$10</b><small>MEDIUM</small></div></div>'+
-    '<div class="gh-btn '+(state.stake===50?'sel':'')+'" data-s="50" data-sl="$50"><div class="gh-ic">$</div><div><b>$50</b><small>HIGH</small></div></div>'+
-    '<div class="gh-btn '+(state.stake===100?'sel':'')+'" data-s="100" data-sl="$100"><div class="gh-ic">$</div><div><b>$100</b><small>PRO</small></div></div>'+
-    '</div></div><div class="gh-foot"><button class="gh-back" id="gh-back">'+ICON.arrowL+' Back</button><button class="gh-next" id="gh-next">Next '+ICON.arrowR+'</button></div>';
-  } else if(state.step===3){
-    body.innerHTML='<div class="gh-step"><p class="gh-title">Execution Count</p><p class="gh-sub">How many trades?</p><div class="gh-grid">'+
-    '<div class="gh-btn '+(state.count===1?'sel':'')+'" data-c="1"><div class="gh-ic">1</div><div><b>1 Trade</b><small>SINGLE</small></div></div>'+
-    '<div class="gh-btn '+(state.count===2?'sel':'')+'" data-c="2"><div class="gh-ic">2</div><div><b>2 Trades</b><small>DOUBLE</small></div></div>'+
-    '<div class="gh-btn '+(state.count===3?'sel':'')+'" data-c="3"><div class="gh-ic">3</div><div><b>3 Trades</b><small>TRIPLE</small></div></div>'+
-    '<div class="gh-btn '+(state.count===5?'sel':'')+'" data-c="5"><div class="gh-ic">5</div><div><b>5 Trades</b><small>SESSION</small></div></div>'+
-    '<div class="gh-btn '+(state.count===10?'sel':'')+'" data-c="10"><div class="gh-ic">10</div><div><b>10 Trades</b><small>LONG</small></div></div>'+
-    '<div class="gh-btn '+(state.count===20?'sel':'')+'" data-c="20"><div class="gh-ic">20</div><div><b>20 Trades</b><small>EXTENDED</small></div></div>'+
-    '</div></div><div class="gh-foot"><button class="gh-back" id="gh-back">'+ICON.arrowL+' Back</button><button class="gh-next" id="gh-start">'+ICON.play+' Start Session</button></div>';
+    body.innerHTML=`<div class="gh-lyra-step"><p class="gh-lyra-title">Trade Duration</p><p class="gh-lyra-sub">Choose candle expiry timeframe</p><div class="gh-lyra-grid">
+    <div class="gh-lyra-btn ${state.duration===5?'sel':''}" data-d="5" data-l="5 Sec"><b>5 Sec</b><small>ULTRA FAST</small></div>
+    <div class="gh-lyra-btn ${state.duration===30?'sel':''}" data-d="30" data-l="30 Sec"><b>30 Sec</b><small>MOMENTUM</small></div>
+    <div class="gh-lyra-btn ${state.duration===60?'sel':''}" data-d="60" data-l="1 Min"><b>1 Min</b><small>STANDARD</small></div>
+    <div class="gh-lyra-btn ${state.duration===120?'sel':''}" data-d="120" data-l="2 Min"><b>2 Min</b><small>TREND</small></div>
+    <div class="gh-lyra-btn ${state.duration===300?'sel':''}" data-d="300" data-l="5 Min"><b>5 Min</b><small>MACRO</small></div>
+    <div class="gh-lyra-btn ${state.duration===600?'sel':''}" data-d="600" data-l="10 Min"><b>10 Min</b><small>EXTENDED</small></div>
+    </div></div><div class="gh-lyra-foot"><button class="gh-lyra-next" id="gh-next">Next → Stake</button></div>`;
+  }else if(state.step===2){
+    body.innerHTML=`<div class="gh-lyra-step"><p class="gh-lyra-title">Investment Stake</p><p class="gh-lyra-sub">Select capital per trade (info only - you set in Quotex)</p><div class="gh-lyra-grid">
+    <div class="gh-lyra-btn ${state.stake===1?'sel':''}" data-s="1" data-sl="$1"><b>$1</b><small>STARTER</small></div>
+    <div class="gh-lyra-btn ${state.stake===3?'sel':''}" data-s="3" data-sl="$3"><b>$3</b><small>SAFE</small></div>
+    <div class="gh-lyra-btn ${state.stake===5?'sel':''}" data-s="5" data-sl="$5"><b>$5</b><small>BALANCED</small></div>
+    <div class="gh-lyra-btn ${state.stake===10?'sel':''}" data-s="10" data-sl="$10"><b>$10</b><small>GROWTH</small></div>
+    <div class="gh-lyra-btn ${state.stake===50?'sel':''}" data-s="50" data-sl="$50"><b>$50</b><small>PRO</small></div>
+    <div class="gh-lyra-btn ${state.stake===100?'sel':''}" data-s="100" data-sl="$100"><b>$100</b><small>MAX</small></div>
+    </div></div><div class="gh-lyra-foot"><button class="gh-lyra-back" id="gh-back">← Back</button><button class="gh-lyra-next" id="gh-next">Next → Count</button></div>`;
+  }else{
+    body.innerHTML=`<div class="gh-lyra-step"><p class="gh-lyra-title">Execution Count</p><p class="gh-lyra-sub">How many signals in this session? (Signal only)</p><div class="gh-lyra-grid">
+    <div class="gh-lyra-btn ${state.count===1?'sel':''}" data-c="1"><b>1 Trade</b><small>SINGLE</small></div>
+    <div class="gh-lyra-btn ${state.count===2?'sel':''}" data-c="2"><b>2 Trades</b><small>DUO</small></div>
+    <div class="gh-lyra-btn ${state.count===3?'sel':''}" data-c="3"><b>3 Trades</b><small>SERIES</small></div>
+    <div class="gh-lyra-btn ${state.count===5?'sel':''}" data-c="5"><b>5 Trades</b><small>AUTO</small></div>
+    <div class="gh-lyra-btn ${state.count===10?'sel':''}" data-c="10"><b>10 Trades</b><small>SESSION</small></div>
+    <div class="gh-lyra-btn ${state.count===20?'sel':''}" data-c="20"><b>20 Trades</b><small>DEEP AUTO</small></div>
+    </div></div><div class="gh-lyra-foot"><button class="gh-lyra-back" id="gh-back">← Back</button><button class="gh-lyra-next" id="gh-start">▶ Start Session</button></div>`;
   }
-  // PROTTEK PAGE E VOICE - Kivabe analysis korbe, ki diya korbe - Sudhu mukhe bolbe, page e likhbe na - Clean page
-  try{
-    if(window.__gh_lastStep !== state.step){
-      window.__gh_lastStep = state.step;
-      if(state.step===1) ghSpeak("ভাই, স্টেপ ওয়ান। ডিউরেশন সিলেক্ট করো।");
-      else if(state.step===2) ghSpeak("ভাই, স্টেপ টু। স্টেক সিলেক্ট করো।");
-      else if(state.step===3) ghSpeak("ভাই, স্টেপ থ্রি। কয়টা ট্রেড নিবা, সিলেক্ট করো।");
-    }
-  }catch(e){}
-  body.querySelectorAll('[data-d]').forEach(function(el){ el.addEventListener('click',function(){ state.duration=+el.dataset.d; state.durationLabel=el.dataset.l; save(); ghSpeak("Bhai, " + el.dataset.l + " select korcho, bhalo. Ekhon Next chap dao."); render(); }); });
-  body.querySelectorAll('[data-s]').forEach(function(el){ el.addEventListener('click',function(){ state.stake=+el.dataset.s; state.stakeLabel=el.dataset.sl; save(); ghSpeak("Bhai, " + el.dataset.sl + " dollar stake select korcho. Ekhon Next chap dao."); render(); }); });
-  body.querySelectorAll('[data-c]').forEach(function(el){ el.addEventListener('click',function(){ state.count=+el.dataset.c; save(); ghSpeak("Bhai, " + el.dataset.c + " ta trade select korcho. Ekhon Start Session chap dao."); render(); }); });
-  var nx=document.getElementById('gh-next'); if(nx) nx.addEventListener('click',function(){ state.step=Math.min(3,state.step+1); save(); render(); });
-  var bk=document.getElementById('gh-back'); if(bk) bk.addEventListener('click',function(){ state.step=Math.max(1,state.step-1); save(); render(); });
-  var st=document.getElementById('gh-start'); if(st) st.addEventListener('click',function(){ startSession(); });
+  // Bind
+  body.querySelectorAll('[data-d]').forEach(el=>el.addEventListener('click',()=>{ state.duration=+el.dataset.d; state.durationLabel=el.dataset.l; save(); render(); }));
+  body.querySelectorAll('[data-s]').forEach(el=>el.addEventListener('click',()=>{ state.stake=+el.dataset.s; state.stakeLabel=el.dataset.sl; save(); render(); }));
+  body.querySelectorAll('[data-c]').forEach(el=>el.addEventListener('click',()=>{ state.count=+el.dataset.c; save(); render(); }));
+  let nx=document.getElementById('gh-next'); if(nx) nx.addEventListener('click',()=>{ state.step=Math.min(3,state.step+1); save(); render(); });
+  let bk=document.getElementById('gh-back'); if(bk) bk.addEventListener('click',()=>{ state.step=Math.max(1,state.step-1); save(); render(); });
+  let st=document.getElementById('gh-start'); if(st) st.addEventListener('click',()=>{ startSession(); });
+  updateMeta();
 }
+let session={left:0,active:false};
 function startSession(){
-  session.active=true; session.left=state.count; save();
-  ghSpeak("Bhai, session start hoiche. Ami " + getPair() + " market analysis kortesi. Signal pailei bolbo, tumi sudhu shuno.");
-  document.getElementById('gh-body').innerHTML='<div class="gh-step"><p class="gh-title">'+ICON.check+' Session Started</p><p class="gh-sub">'+state.durationLabel+' | '+state.stakeLabel+' | '+state.count+' Trades</p><div class="gh-foot"><button class="gh-back" id="gh-edit">'+ICON.edit+' Edit</button><button class="gh-next" id="gh-stop">'+ICON.stop+' Stop</button></div></div>';
-  document.getElementById('gh-edit').addEventListener('click',function(){ state.step=1; render(); });
-  document.getElementById('gh-stop').addEventListener('click',function(){ session.active=false; session.left=0; state.step=1; render(); document.getElementById('gh-sig-wrap').classList.add('gh-hidden'); });
-  document.getElementById('gh-sig-wrap').classList.remove('gh-hidden');
-
+  session.left=state.count; session.active=true;
+  document.getElementById('gh-lyra-sig-wrap').style.display='block';
+  document.getElementById('gh-lyra-body').innerHTML=`<div class="gh-lyra-step"><p class="gh-lyra-title">✅ Session Started</p><p class="gh-lyra-sub">${state.durationLabel} • ${state.stakeLabel} • ${state.count} Trades • Signal Only - Manually Buy/Sell in Quotex</p><div class="gh-lyra-foot"><button class="gh-lyra-back" id="gh-edit">✏️ Edit</button><button class="gh-lyra-next" id="gh-stop">⏹ Stop</button></div></div>`;
+  document.getElementById('gh-edit').addEventListener('click',()=>{ state.step=1; render(); });
+  document.getElementById('gh-stop').addEventListener('click',()=>{ session.active=false; session.left=0; state.step=1; render(); document.getElementById('gh-lyra-sig-wrap').style.display='none'; });
+  updateMeta();
+  // Load original GHOST signal logic (fetch from backend) - reuse same /api/signal
   fetchSignalLyra();
 }
 function updateMeta(){
-  var m=document.getElementById('gh-meta'); if(m){ var _ct=ghGetChartTime(); var _timeTxt = _ct.remaining>=0 ? ' | Time Left: '+_ct.remaining+'s' : ''; m.textContent='Pair: '+ghFormatPairForDisplay(window.__gh_currentPair)+' | Duration: '+state.durationLabel+' | Stake: '+state.stakeLabel+' | Left: '+(session.active?session.left+'/'+state.count:'--')+_timeTxt; }
-}
-function getPair(){
-  try{
-    var t=document.body.innerText||"";
-    var pairs = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD","BTCUSD","ETHUSD"];
-    for(var i=0;i<pairs.length;i++){
-      var p=pairs[i];
-      var pSlash=p.slice(0,3)+"/"+p.slice(3);
-      var re1 = new RegExp(pSlash.replace("/","\\/") + "\\s*(\\(OTC\\)|OTC)?", "i");
-      var re2 = new RegExp(p + "\\s*(\\(OTC\\)|OTC)?", "i");
-      var m = t.match(re1) || t.match(re2);
-      if(m){
-        var idx = t.indexOf(m[0]);
-        var around = t.slice(Math.max(0,idx-10), idx+40);
-        var isOTC = /OTC/i.test(around);
-        window.__gh_isOTC = isOTC;
-        window.__gh_basePair = p;
-        return p; // Base pair only - OTC flag alada, display te (OTC) add hobe - duplicate hobe na
-      }
-    }
-    if(/OTC/i.test(t) && window.__gh_currentPair){
-      window.__gh_isOTC = true;
-      return window.__gh_currentPair.replace(/OTC/gi,'');
-    }
-  }catch(e){}
-  return window.__gh_currentPair||'EURUSD';
-}
-// CSS+JS: Pair format - Display te USD/CHF (OTC) dekhabe, API te USDCHFOTC pathabe
-function ghFormatPairForDisplay(pair){
-  if(!pair) return '--';
-  var base = pair.replace(/OTC/gi,'');
-  var isOTC = window.__gh_isOTC || /OTC/i.test(pair);
-  var formatted = base.slice(0,3) + '/' + base.slice(3);
-  return isOTC ? formatted + ' (OTC)' : formatted;
-}
-function ghFormatPairForAPI(pair){
-  if(!pair) return 'EURUSD';
-  var base = pair.replace(/OTC/gi,'');
-  return window.__gh_isOTC ? base + 'OTC' : base;
+  let m=document.getElementById('gh-lyra-meta'); if(!m) return;
+  m.textContent=`Pair: ${window.__gh_currentPair||'--'} • Duration: ${state.durationLabel} • Stake: ${state.stakeLabel} • Left: ${session.active?session.left+'/'+state.count:'--'}`;
 }
 function fetchSignalLyra(){
-  if(!session.active) return;
-  var pair=getPair();
+  // Use same backend as GHOST - pair from current Quotex pair button
+  let pair="GBPUSD";
+  try{
+    let all=document.querySelectorAll('div, span, button, a');
+    for(let el of all){
+      if(el.closest && el.closest('#ghost-lyra')) continue;
+      let txt=(el.innerText||'').trim();
+      if(!txt||txt.length>40||txt.toUpperCase().includes('GHOST')) continue;
+      if(!txt.includes('%')) continue;
+      let mm=txt.match(/^([A-Z]{3})\s*\/\s*([A-Z]{3})/);
+      if(mm){ pair=mm[1]+mm[2]; if(txt.toUpperCase().includes('OTC')) pair+='OTC'; break; }
+    }
+  }catch(e){}
   window.__gh_currentPair=pair;
-  var token=localStorage.getItem('ghost_premium_token')||'';
-  var apiPair = ghFormatPairForAPI(pair);
-  var url="https://giogram-backend.onrender.com/api/signal?pair="+apiPair+"&mode=SAFE&ver=LYRA-V3";
+  let token=localStorage.getItem('ghost_premium_token')||'';
+  let url="https://giogram-backend.onrender.com/api/signal?pair="+pair+"&mode=SAFE&ver=LYRA-V3"; // NEW version - old bookmarklet er signal bondho
   if(token) url+="&token="+encodeURIComponent(token);
-  fetch(url).then(function(r){ return r.json(); }).then(function(j){
-    var sigEl=document.getElementById('gh-sig'); if(!sigEl) return;
-    // FRONTEND FLICKER LOCK: Backend purano holeo 1 Min e 1 ta signal lock thakbe
-    // Video te UP 80% -> DOWN 88% -> UP 85% 1 sec por por paltaitesilo - karon backend proti call e notun random signal dito
-    // Ekhon: Prothom signal ta 50 sec lock thakbe, tar moddhe notun direction asle ignore korbe
-    var nowMin = new Date().getMinutes();
-    var lockedDir = window.__gh_lockedDir;
-    var lockedMin = window.__gh_lockedMin;
-    var newDir = j.signal||j.direction;
-    if(lockedDir && lockedMin === nowMin && newDir !== "WAIT" && lockedDir !== "WAIT" && newDir !== lockedDir){
-      // Same minute, different direction - FLICKER, ignore - purano signal e thako
-      // Time left update koro, signal paltaio na
-      updateMeta();
+  fetch(url).then(r=>r.json()).then(j=>{
+    let sigEl=document.getElementById('gh-lyra-sig'); if(!sigEl) return;
+    let dir=j.signal||j.direction;
+    if(j.status==="OLD_VERSION"||j.blocked && j.reason && j.reason.includes("OLD")){
+      let se=document.getElementById('gh-lyra-sig'); if(se){ se.className="gh-lyra-sig off"; se.textContent="⛔ OLD - NEW LINK NAO"; }
       return;
     }
-    if(!lockedDir || lockedMin !== nowMin){
-      window.__gh_lockedDir = newDir;
-      window.__gh_lockedMin = nowMin;
-      window.__gh_lockedAt = Date.now();
-    }
-    // New signal_id asle lastSpoken reset koro - nahole notun signal bolbe na
-    if(j.signal_id && j.signal_id !== window.__gh_lastSignalId){
-      window.__gh_lastSignalId = j.signal_id;
-      lastSpoken = "";
-    }
-    var dir=j.signal||j.direction;
-    if(j.status==="OLD_VERSION" || (j.blocked && j.reason && j.reason.indexOf("OLD")>=0)){
-      sigEl.className="gh-sig off"; sigEl.innerHTML=ICON.wait+'<span>OLD - NEW LINK NAO</span>';
-      ghSpeak("Old bookmarklet expired. Get new link.");
-      return;
-    }
-    // LYRA-style voice: j.voice_text thakle full analysis bolbe - Wick rejection naki opening, confidence, entry
-    // BANGLA FRONTEND FIX: Jodi backend purano hoye English voice_text dey, tahole frontend e Bangla banay dao
-    window.__gh_lastSig = j;
-    var voiceToSpeak = ghBuildVoiceText(j, ghGetVoiceLang());
-    window.__gh_lastVoice = voiceToSpeak;
-    window.__gh_lastDirBn = (dir==="CALL"||dir==="UP") ? "UP" : "DOWN";
-    window.__gh_lastConf = (j.confidence||0);
-    // 30 SEC WINDOW: Chart time porbe - Prothom 25-30 sec er vitore entry, 30 sec pore entry na
-    var _win = ghIsEntryWindow();
-    if((dir==="CALL"||dir==="UP"||dir==="PUT"||dir==="DOWN") && !_win.ok && _win.elapsed>30){
-      // 30 sec par hoye geche - Entry nio na, WAIT dekhabe + bolbe
-      sigEl.className="gh-sig wait motion";
-      sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
-      var _lang = ghGetVoiceLang();
-      var _msg = _lang==='en' ? "Thirty seconds passed. Do not take entry now. Wait for next candle." : _lang==='hi' ? "Tees second par ho gaya. Abhi entry mat lo. Agle candle ka wait karo." : "ত্রিশ সেকেন্ড পার হয়ে গেছে। এখন এন্ট্রি নিও না। পরের ক্যান্ডেলের জন্য অপেক্ষা করো।";
-      ghSpeak(_msg);
-      updateMeta();
-      return;
-    }
-    // SIGNAL BUTTON MOTION: CSS + JS - UP/DOWN button e motion animation
-    if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up motion up-motion"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
-    else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down motion down-motion"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
-    else{ sigEl.className="gh-sig wait motion"; sigEl.innerHTML=ICON.wait+'<span>WAIT - '+(j.reason||"Analyzing...")+'</span>'; }
+    if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-lyra-sig up"; sigEl.textContent="▲ UP - "+(j.confidence||0)+"%"; ghSpeak("Up signal, confidence " + (j.confidence||0) + " percent"); }
+    else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-lyra-sig down"; sigEl.textContent="▼ DOWN - "+(j.confidence||0)+"%"; ghSpeak("Down signal, confidence " + (j.confidence||0) + " percent"); }
+    else{ sigEl.className="gh-lyra-sig wait"; sigEl.textContent="◉ WAIT - "+(j.reason||"Analyzing..."); if(j.reason && j.reason.includes("OLD")) ghSpeak("Old bookmarklet expired. Get new link."); }
     updateMeta();
-  }).catch(function(){});
-  if(session.active) setTimeout(fetchSignalLyra, 8000);
+  }).catch(()=>{});
+  if(session.active) setTimeout(fetchSignalLyra, 4000);
 }
-// --- Orb Tap = Expand / Collapse - FIX: Mobile e click ase na karon Drag preventDefault click ke block kore ---
-// Tai Tap Detection: Move na korle Tap dhore Panel khulbe, Move korle Drag dhore Panel khulbe na
-var card=document.getElementById('gh-card');
-var orb=document.getElementById('gh-orb');
-var lastToggleAt=0;
-function toggleCard(){
-  var now=Date.now();
-  if(now - lastToggleAt < 400) return;
-  lastToggleAt=now;
-  var isHidden = card.classList.contains('gh-card-hidden');
-  card.classList.toggle('gh-card-hidden', !isHidden); if(isHidden) card.classList.remove('gh-card-hidden'); else card.classList.add('gh-card-hidden');
-  if(isHidden){
-    render();
-    // VOICE FIX: Video te tumi Tap for Voice button e tap koro nai, tai kotha bole nai
-    // Ekhon Orb e Tap korlei Voice Auto Unlock hobe, ar bolbe Ghost AI ready
-    if(!voiceUnlocked){
-      try{ ghUnlockVoice(); }catch(e){}
-    }
-  }
-}
-// Desktop click only - Mobile e touchend diye handle hobe, click ignore hobe debounce diye
-orb.addEventListener('click',function(e){
-  // Jodi eita touch theke asa click hoy (touchend er 400ms er moddhe), debounce e block hobe
-  toggleCard();
-});
-// Drag + Tap
-var isDrag=false,sx=0,sy=0,il=0,it=0,moved=false;
-function getPos(){ var r=box.getBoundingClientRect(); return {left:r.left,top:r.top}; }
-function ds(e){ if(e.target.closest('#gh-lyra-close')||e.target.closest('#gh-close-bar')||e.target.closest('#gh-voice-btn')) return; isDrag=true; moved=false; window.__gh_moved=false; var cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; sx=cx; sy=cy; var p=getPos(); il=p.left; it=p.top; box.style.left=p.left+"px"; box.style.right="auto"; box.style.bottom="auto"; box.style.transform="none"; }
-function dm(e){ if(!isDrag) return; var cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; var dx=cx-sx, dy=cy-sy; if(Math.abs(dx)>8 || Math.abs(dy)>8){ moved=true; window.__gh_moved=true; } box.style.left=(il+dx)+"px"; box.style.top=(it+dy)+"px"; if(moved) e.preventDefault(); }
-function de(e){
-  var wasMoved=moved;
-  isDrag=false; moved=false;
-  // Mobile Tap: touchend e jodi move na hoy, tahole Toggle koro - karon click event mobile e block hoy
-  if(e && e.type==='touchend' && !wasMoved){
-    var t=e.target;
-    var isOrb = t && (t.closest && t.closest('#gh-orb'));
-    if(isOrb){
-      // Touchend e toggle - Click er toggle debounce diye block hobe
-      toggleCard();
-    }
-  }
-}
-var hd=document.getElementById('gh-h');
+// Drag
+let isDrag=false,sx=0,sy=0,il=0,it=0;
+function getPos(){let r=box.getBoundingClientRect();return{left:r.left,top:r.top};}
+function ds(e){ if(e.target.closest('#gh-lyra-close')) return; isDrag=true; let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY; sx=cx; sy=cy; let p=getPos(); il=p.left; it=p.top; box.style.left=p.left+"px"; box.style.right="auto"; box.style.bottom="auto"; box.style.transform="none"; e.preventDefault(); }
+function dm(e){ if(!isDrag) return; let cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY; box.style.left=(il+cx-sx)+"px"; box.style.top=(it+cy-sy)+"px"; e.preventDefault(); }
+function de(){ isDrag=false; }
+let hd=document.getElementById('gh-lyra-h'); let orb=document.getElementById('gh-lyra-orb');
 hd.addEventListener('mousedown',ds); document.addEventListener('mousemove',dm); document.addEventListener('mouseup',de);
-hd.addEventListener('touchstart',ds,{passive:true}); document.addEventListener('touchmove',dm,{passive:false}); document.addEventListener('touchend',de,{passive:true});
-orb.addEventListener('mousedown',ds); orb.addEventListener('touchstart',ds,{passive:true});
-// TOP X = Minimize - Card lukabe, choto Orb thakbe - CSS class diye
-  document.getElementById('gh-lyra-close').addEventListener('click',function(e){ e.stopPropagation(); var c=document.getElementById('gh-card'); if(c) c.classList.add('gh-card-hidden'); });
-// BOTTOM Close = Full Close + Next bar Step 1 theke shuru hobe
-  document.getElementById('gh-close-bar').addEventListener('click',function(){ try{ localStorage.removeItem('ghost_lyra'); }catch(e){} box.remove(); });
-// Voice button
-setTimeout(function(){
-  var vb=document.getElementById('gh-voice-btn');
-  if(vb) vb.addEventListener('click',function(){
+hd.addEventListener('touchstart',ds,{passive:false}); document.addEventListener('touchmove',dm,{passive:false}); document.addEventListener('touchend',de);
+orb.addEventListener('mousedown',ds); orb.addEventListener('touchstart',ds,{passive:false});
+orb.addEventListener('click',()=>{ let b=document.getElementById('gh-lyra-body'); b.style.display=b.style.display==='none'?'block':'none'; });
+document.getElementById('gh-lyra-close').addEventListener('click',()=>box.remove());
+// Voice button - 1st TAP = unlock + speak, pore TAP = ON/OFF
+setTimeout(()=>{
+  let vb=document.getElementById('gh-voice-btn');
+  if(vb) vb.addEventListener('click',()=>{
     if(!voiceUnlocked){ ghUnlockVoice(); return; }
-    state.voice=!state.voice; save();
-    vb.innerHTML = state.voice ? ICON.voiceOn+'<span>Voice: ON</span>' : ICON.voiceOff+'<span>Voice: OFF</span>';
+    state.voice=!state.voice;
+    vb.textContent = state.voice ? '🔊 Voice: ON' : '🔇 Voice: OFF';
     if(state.voice) ghSpeak('Voice on.');
     else if('speechSynthesis' in window) window.speechSynthesis.cancel();
   });
 },300);
-  try{
-    var _sl = localStorage.getItem('ghost_voice_lang') || 'bn';
-    var _sr = localStorage.getItem('ghost_voice_rate') || '0.88';
-    var _sp = localStorage.getItem('ghost_voice_pitch') || '1';
-    var _rs = document.getElementById('gh-rate'); if(_rs) _rs.value=_sr;
-    var _ps = document.getElementById('gh-pitch'); if(_ps) _ps.value=_sp;
-    document.querySelectorAll('[data-vlang]').forEach(function(b){
-      if(b.dataset.vlang===_sl) b.classList.add('active');
-      b.addEventListener('click',function(){
-        localStorage.setItem('ghost_voice_lang', b.dataset.vlang);
-        document.querySelectorAll('[data-vlang]').forEach(function(x){ x.classList.remove('active'); });
-        b.classList.add('active');
-        var _t = b.dataset.vlang==='hi' ? 'Bhai, Hindi voice select ho gaya. Ab main Hindi me bolunga.' : b.dataset.vlang==='en' ? 'English voice selected.' : 'Bhai, Bangla voice select hoiche.';
-        var _u = new SpeechSynthesisUtterance(_t);
-        _u.lang = b.dataset.vlang==='hi' ? 'hi-IN' : b.dataset.vlang==='en' ? 'en-US' : 'bn-BD';
-        _u.rate = parseFloat(localStorage.getItem('ghost_voice_rate')||'0.95'); _u.pitch = parseFloat(localStorage.getItem('ghost_voice_pitch')||'1');
-        try{ var _vs = window.speechSynthesis.getVoices(); var _v = _vs.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf(b.dataset.vlang)===0; }); if(_v) _u.voice=_v; }catch(e){}
-        window.speechSynthesis.cancel(); window.speechSynthesis.speak(_u);
-      });
-    });
-    if(_rs) _rs.addEventListener('change',function(){ localStorage.setItem('ghost_voice_rate', _rs.value); });
-    if(_ps) _ps.addEventListener('change',function(){ localStorage.setItem('ghost_voice_pitch', _ps.value); });
-  }catch(e){}
-  // Mic Button - Bangla shune English e answer
-  try{
-    var _mic = document.getElementById('gh-mic-btn');
-    if(_mic) _mic.addEventListener('click',function(){ ghStartListening(); });
-  }catch(e){}
-  render();
+render();
 })();
