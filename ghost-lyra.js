@@ -82,14 +82,24 @@ function ghSpeak(text){
   try{
     if(!state.voice) return;
     if(!voiceUnlocked) return;
+    // BANGLA VOICE: bn-BD voice diye Bangla bolbe, normal human er moto
+    // Age en-US chilo, tai English robot er moto bolto
     if(text===lastSpoken) return;
     // LYRA long analysis - jodi same signal er same voice abar ase, tao 1 bar bolbe, pore Speak Again button e bolbe
     lastSpoken=text;
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     var u=new SpeechSynthesisUtterance(text);
-    u.lang='en-US'; u.rate=1; u.pitch=1; u.volume=1;
-    try{ var vs=window.speechSynthesis.getVoices(); var en=vs.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf('en')===0; }); if(en) u.voice=en; }catch(e){}
+    // BANGLA: bn-BD voice, rate 0.95 - normal human er moto speed, robot lagbe na
+    u.lang='bn-BD'; u.rate=0.95; u.pitch=1; u.volume=1;
+    try{
+      var vs=window.speechSynthesis.getVoices();
+      // Bangla voice khujo: Google Bangla, Microsoft Bengali, Samsung Bangla
+      var bn=vs.find(function(v){ return v.lang && (v.lang.toLowerCase().indexOf('bn')===0 || v.lang.toLowerCase().indexOf('ben')===0); });
+      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bengali')>=0; });
+      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bangla')>=0; });
+      if(bn) u.voice=bn;
+    }catch(e){}
     window.speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -98,8 +108,8 @@ function ghUnlockVoice(){
     voiceUnlocked=true; state.voice=true; save();
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    var u=new SpeechSynthesisUtterance('Voice on. Ghost AI ready.');
-    u.lang='en-US'; window.speechSynthesis.speak(u);
+    var u=new SpeechSynthesisUtterance('ভাই, ঘোস্ট রেডি। আমি বাংলায় বলবো।');
+    u.lang='bn-BD'; u.rate=0.95; window.speechSynthesis.speak(u);
     var vb=document.getElementById('gh-voice-btn'); if(vb) vb.innerHTML=ICON.voiceOn+'<span>Voice: ON</span>';
   }catch(e){}
 }
@@ -178,6 +188,24 @@ function fetchSignalLyra(){
   if(token) url+="&token="+encodeURIComponent(token);
   fetch(url).then(function(r){ return r.json(); }).then(function(j){
     var sigEl=document.getElementById('gh-sig'); if(!sigEl) return;
+    // FRONTEND FLICKER LOCK: Backend purano holeo 1 Min e 1 ta signal lock thakbe
+    // Video te UP 80% -> DOWN 88% -> UP 85% 1 sec por por paltaitesilo - karon backend proti call e notun random signal dito
+    // Ekhon: Prothom signal ta 50 sec lock thakbe, tar moddhe notun direction asle ignore korbe
+    var nowMin = new Date().getMinutes();
+    var lockedDir = window.__gh_lockedDir;
+    var lockedMin = window.__gh_lockedMin;
+    var newDir = j.signal||j.direction;
+    if(lockedDir && lockedMin === nowMin && newDir !== "WAIT" && lockedDir !== "WAIT" && newDir !== lockedDir){
+      // Same minute, different direction - FLICKER, ignore - purano signal e thako
+      // Time left update koro, signal paltaio na
+      updateMeta();
+      return;
+    }
+    if(!lockedDir || lockedMin !== nowMin){
+      window.__gh_lockedDir = newDir;
+      window.__gh_lockedMin = nowMin;
+      window.__gh_lockedAt = Date.now();
+    }
     // New signal_id asle lastSpoken reset koro - nahole notun signal bolbe na
     if(j.signal_id && j.signal_id !== window.__gh_lastSignalId){
       window.__gh_lastSignalId = j.signal_id;
@@ -190,16 +218,29 @@ function fetchSignalLyra(){
       return;
     }
     // LYRA-style voice: j.voice_text thakle full analysis bolbe - Wick rejection naki opening, confidence, entry
-    var voiceToSpeak = j.voice_text || ("Ghost here. " + (dir==="CALL"||dir==="UP" ? "Up" : "Down") + " signal, confidence " + (j.confidence||0) + " percent. Entry from " + (j.entry_type||"opening") + ". " + (j.reason||""));
+    // BANGLA FRONTEND FIX: Jodi backend purano hoye English voice_text dey, tahole frontend e Bangla banay dao
+    var voiceToSpeak = j.voice_text || "";
+    if(!voiceToSpeak || voiceToSpeak.indexOf("Ghost here")===0 || voiceToSpeak.indexOf("I see")>=0){
+      // English -> Bangla convert
+      var dirBn = (dir==="CALL"||dir==="UP") ? "আপ" : "ডাউন";
+      var entryBn = (j.entry_type||"opening");
+      if(entryBn.indexOf("wick")>=0) entryBn = "উইক রিজেকশন থেকে এন্ট্রি নিবো, ওপেনিং থেকে না। প্রাইস সাপোর্ট থেকে ঘুরে গেছে";
+      else if(entryBn.indexOf("liquidity")>=0) entryBn = "লিকুইডিটি গ্র্যাব হইছে, ট্র্যাপ ছিলো, তাই রিভার্সাল থেকে এন্ট্রি নিবো";
+      else if(entryBn.indexOf("order")>=0) entryBn = "অর্ডার ব্লক থেকে এন্ট্রি নিবো";
+      else if(entryBn.indexOf("gap")>=0) entryBn = "গ্যাপ ফিল হইতেছে, গ্যাপ থেকে এন্ট্রি নিবো";
+      else if(entryBn.indexOf("break")>=0) entryBn = "ব্রেক অফ স্ট্রাকচার হইছে, ব্রেকআউট থেকে এন্ট্রি নিবো";
+      else entryBn = "ওপেনিং থেকে এন্ট্রি নিবো";
+      voiceToSpeak = "ভাই শুনো, " + (j.pair||"Euro Dollar") + " তে একটা ভালো " + dirBn + " এন্ট্রি পাইছি। " + entryBn + "। কনফিডেন্স " + (j.confidence||0) + " পারসেন্ট। এখনই এন্ট্রি নাও।";
+    }
     // Analysis box e dekhao
-    var anaBox=document.getElementById('gh-analysis'); if(anaBox){ anaBox.style.display='block'; anaBox.innerHTML='<b>Analysis:</b> '+(j.analysis_detail||j.reason||'')+'<br><b>Entry:</b> '+(j.entry_type||'opening')+' | <b>Confidence:</b> '+(j.confidence||0)+'%<br><b>Confluence:</b> '+(j.confluence||1)+' signals | <b>RSI:</b> '+(j.rsi||'--')+' | <b>EMA:</b> '+(j.ema_bias||'--'); }
+    var anaBox=document.getElementById('gh-analysis'); if(anaBox){ anaBox.style.display='block'; anaBox.innerHTML='<b>Analysis:</b> '+(j.analysis_detail||j.reason||'')+'<br><b>Entry:</b> '+(j.entry_type||'opening')+' | <b>Confidence:</b> '+(j.confidence||0)+'%<br><b>Confluence:</b> '+(j.confluence||1)+' signals | <b>RSI:</b> '+(j.rsi||'--')+' | <b>EMA:</b> '+(j.ema_bias||'--')+'<br><b>LOCK:</b> Locked for this minute - Flicker off'; }
     window.__gh_lastVoice = voiceToSpeak;
     if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
     else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
     else{ sigEl.className="gh-sig wait"; sigEl.innerHTML=ICON.wait+'<span>WAIT - '+(j.reason||"Analyzing...")+'</span>'; }
     updateMeta();
   }).catch(function(){});
-  if(session.active) setTimeout(fetchSignalLyra, 4000);
+  if(session.active) setTimeout(fetchSignalLyra, 8000);
 }
 // --- Orb Tap = Expand / Collapse - FIX: Mobile e click ase na karon Drag preventDefault click ke block kore ---
 // Tai Tap Detection: Move na korle Tap dhore Panel khulbe, Move korle Drag dhore Panel khulbe na
