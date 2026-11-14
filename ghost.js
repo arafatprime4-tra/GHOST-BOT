@@ -25,7 +25,7 @@ try{
 let css=document.createElement("style");
 css.innerHTML=`
 /* ===== GHOST FUTURISTIC HUD - v2 FIXED LOSS ===== */
-#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:linear-gradient(135deg,rgba(255,255,255,.25),rgba(255,255,255,.08) 30%,rgba(255,255,255,.05) 60%,rgba(255,255,255,.15));border:1px solid rgba(255,255,255,.55);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.30),inset 0 2px 4px rgba(255,255,255,.60),inset 0 -2px 4px rgba(0,0,0,.20),0 0 22px rgba(255,255,255,.25);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);font-family:'Segoe UI',Inter,sans-serif;color:#e8f0ff;overflow:hidden;user-select:none}
+#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.50);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.60);backdrop-filter:blur(25px) saturate(180%);-webkit-backdrop-filter:blur(25px) saturate(180%);font-family:'Segoe UI',Inter,sans-serif;color:#fff;overflow:hidden;user-select:none}
 #ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#00f0ff,#7b2fff,#00ff88,transparent);animation:ghBorderFlow 2.4s linear infinite;background-size:200% 100%}
 @keyframes ghBorderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
 @keyframes ghPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
@@ -36,7 +36,7 @@ css.innerHTML=`
 @keyframes ghGlowRed{0%,100%{box-shadow:0 0 12px rgba(255,45,85,.55),0 0 32px rgba(255,45,85,.30)}50%{box-shadow:0 0 22px rgba(255,45,85,.85),0 0 48px rgba(255,45,85,.45)}}
 @keyframes ghScan{0%{top:-10%}100%{top:110%}}
 @keyframes ghShine{0%{left:-80%}100%{left:120%}}
-.gh-h{padding:2px 5px;background:linear-gradient(90deg,rgba(0,240,255,.14),rgba(123,47,255,.12),transparent);border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
+.gh-h{padding:2px 5px;background:transparent;border-bottom:1px solid rgba(0,240,255,.18);display:flex;align-items:center;justify-content:space-between;cursor:move;position:relative}
 .gh-h-left{display:flex;align-items:center;gap:6px}
 .gh-dot{width:6px;height:6px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,.6);animation:ghPulse 1.2s infinite}
 .gh-h b{font-size:6.5px;color:#fff;letter-spacing:1.2px;font-weight:900}
@@ -563,10 +563,10 @@ function fetchSignal(forcePair){
     }
     if(lockedSignalId && now<lockedUntil && currentSignal){ updateUI(currentSignal); return; }
     if(j.signal==="WAIT"||!j.signal||j.confidence<40){
-      if(candleHistory.length>=2 && paEnabled){
+      if(candleHistory.length>=1 && paEnabled){
         try{
           let pa=runPAFilter(candleHistory);
-          if(pa && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf>=60){
+          if(pa && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf>=50){
             // STABLE FIX: PA signal er expiry = lock er sathe same (58s), nahole 500ms interval age clear kore flip hoy
             let fake={...pa,market:asset,pair:asset,confidence:pa.conf,expiry_timestamp:now+58000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason,status:"ACTIVE"};
             lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake); return;
