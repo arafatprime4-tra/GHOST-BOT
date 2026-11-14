@@ -185,14 +185,25 @@ function fetchSignalLyra(){
 // Tai Tap Detection: Move na korle Tap dhore Panel khulbe, Move korle Drag dhore Panel khulbe na
 var card=document.getElementById('gh-card');
 var orb=document.getElementById('gh-orb');
+var lastToggleAt=0;
 function toggleCard(){
+  var now=Date.now();
+  if(now - lastToggleAt < 400) return;
+  lastToggleAt=now;
   var isHidden = card.style.display==='none' || card.style.display==='';
   card.style.display = isHidden ? 'block' : 'none';
-  if(isHidden) render();
+  if(isHidden){
+    render();
+    // VOICE FIX: Video te tumi Tap for Voice button e tap koro nai, tai kotha bole nai
+    // Ekhon Orb e Tap korlei Voice Auto Unlock hobe, ar bolbe Ghost AI ready
+    if(!voiceUnlocked){
+      try{ ghUnlockVoice(); }catch(e){}
+    }
+  }
 }
-// Desktop click - Tap hisebe kaj korbe
+// Desktop click only - Mobile e touchend diye handle hobe, click ignore hobe debounce diye
 orb.addEventListener('click',function(e){
-  if(window.__gh_moved) { window.__gh_moved=false; return; }
+  // Jodi eita touch theke asa click hoy (touchend er 400ms er moddhe), debounce e block hobe
   toggleCard();
 });
 // Drag + Tap
@@ -205,13 +216,11 @@ function de(e){
   isDrag=false; moved=false;
   // Mobile Tap: touchend e jodi move na hoy, tahole Toggle koro - karon click event mobile e block hoy
   if(e && e.type==='touchend' && !wasMoved){
-    // Orb te touch holei toggle - Header e touch hole toggle na
     var t=e.target;
     var isOrb = t && (t.closest && t.closest('#gh-orb'));
     if(isOrb){
-      setTimeout(function(){ toggleCard(); }, 10);
-      window.__gh_moved=true;
-      setTimeout(function(){ window.__gh_moved=false; }, 300);
+      // Touchend e toggle - Click er toggle debounce diye block hobe
+      toggleCard();
     }
   }
 }
