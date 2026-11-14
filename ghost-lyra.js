@@ -1,6 +1,6 @@
 
 (function(){
-if(document.getElementById('ghost-lyra')){ document.getElementById('ghost-lyra').style.display='block'; return; }
+if(document.getElementById('ghost-lyra')){ document.getElementById('ghost-lyra').classList.remove('gh-hidden'); return; }
 // ===== GHOST - Screenshot Moto CHOTO, All Red, Transparent, SVG Only =====
 // Bookmark khulle prothome sudhu CHOTO Ghost Orb asbe (60px)
 // Orb e click korle baki option asbe (Step 1/2/3 Panel)
@@ -62,17 +62,22 @@ css.innerHTML=
 ".gh-vlang-btn{flex:1;padding:4px 2px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer;font-weight:600}"+
 ".gh-vlang-btn.active{background:#ff2d55;border-color:#fff;box-shadow:0 0 8px rgba(255,45,85,.6)}"+
 ".gh-voice-select{background:rgba(0,0,0,.30);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:8px;padding:2px;cursor:pointer}"+
-".gh-voice-label{opacity:.8}";
+".gh-voice-label{opacity:.8}"+
+".gh-hidden{display:none}"+
+".gh-card-hidden{display:none}"+
+".gh-analysis{display:none;margin:6px 7px 0;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px;font-size:8px;line-height:1.4;color:#fff}"+
+".gh-sig-wrap{display:block}"+
+".gh-card{display:block}";
 document.head.appendChild(css);
 var box=document.createElement("div");
 box.id="ghost-lyra";
 // Prothome CHOTO - sudhu Orb dekhabe, Panel lukano thakbe
 box.innerHTML=
 '<div class="gh-orb" id="gh-orb">'+ICON.ghost+'</div>'+
-'<div class="gh-card" id="gh-card" style="display:none">'+
+'<div class="gh-card gh-card-hidden" id="gh-card">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
 '<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div>'+
-'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div id="gh-analysis" style="display:none;margin:8px 11px 0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font-size:10px;line-height:1.5;color:#fff"></div></div>'+
+'<div class="gh-sig-wrap" id="gh-sig-wrap"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div class="gh-analysis" id="gh-analysis"></div></div>'+
 ''+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
 '</div>';
@@ -246,8 +251,8 @@ function startSession(){
   ghSpeak("Bhai, session start hoiche. Ami " + getPair() + " market analysis kortesi. Signal pailei bolbo, tumi sudhu shuno.");
   document.getElementById('gh-body').innerHTML='<div class="gh-step"><p class="gh-title">'+ICON.check+' Session Started</p><p class="gh-sub">'+state.durationLabel+' | '+state.stakeLabel+' | '+state.count+' Trades</p><div class="gh-foot"><button class="gh-back" id="gh-edit">'+ICON.edit+' Edit</button><button class="gh-next" id="gh-stop">'+ICON.stop+' Stop</button></div></div>';
   document.getElementById('gh-edit').addEventListener('click',function(){ state.step=1; render(); });
-  document.getElementById('gh-stop').addEventListener('click',function(){ session.active=false; session.left=0; state.step=1; render(); document.getElementById('gh-sig-wrap').style.display='none'; });
-  document.getElementById('gh-sig-wrap').style.display='block';
+  document.getElementById('gh-stop').addEventListener('click',function(){ session.active=false; session.left=0; state.step=1; render(); document.getElementById('gh-sig-wrap').classList.add('gh-hidden'); });
+  document.getElementById('gh-sig-wrap').classList.remove('gh-hidden');
 
   fetchSignalLyra();
 }
@@ -340,8 +345,8 @@ function toggleCard(){
   var now=Date.now();
   if(now - lastToggleAt < 400) return;
   lastToggleAt=now;
-  var isHidden = card.style.display==='none' || card.style.display==='';
-  card.style.display = isHidden ? 'block' : 'none';
+  var isHidden = card.classList.contains('gh-card-hidden');
+  card.classList.toggle('gh-card-hidden', !isHidden); if(isHidden) card.classList.remove('gh-card-hidden'); else card.classList.add('gh-card-hidden');
   if(isHidden){
     render();
     // VOICE FIX: Video te tumi Tap for Voice button e tap koro nai, tai kotha bole nai
