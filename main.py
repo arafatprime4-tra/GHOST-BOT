@@ -101,6 +101,28 @@ def get_tokens_backup_json():
     except:
         return "{}"
 
+@app.route("/api/backup-tokens", methods=["GET"])
+def backup_tokens():
+    # STABLE: Update er age ei URL theke backup JSON download koro - user kokhono harabe na
+    # Usage: https://giogram-backend.onrender.com/api/backup-tokens
+    try:
+        return app.response_class(get_tokens_backup_json(), mimetype="application/json", headers={"Content-Disposition": "attachment; filename=approved_tokens_backup.json"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/restore-tokens", methods=["POST"])
+def restore_tokens():
+    # STABLE: Backup JSON diye restore - jodi kokhono user muche jay
+    try:
+        data = request.get_json(force=True)
+        if isinstance(data, dict) and len(data) > 0:
+            approved_tokens.update(data)
+            save_tokens()
+            return jsonify({"success": True, "total": len(approved_tokens), "message": f"Restored {len(data)} tokens, total now {len(approved_tokens)}"})
+        return jsonify({"success": False, "message": "Empty or invalid backup"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 def create_premium_token(trader_id, user_id, amount):
     token = secrets.token_urlsafe(32)
     approved_tokens[token] = {
@@ -151,30 +173,6 @@ def get_all_premium_users():
     return users
 
 flask_app = Flask(__name__, static_folder='.', static_url_path='')
-
-# STABLE: Backup / Restore endpoints - flask_app er PORE define korte hobe, nahole NameError: app is not defined
-@flask_app.route("/api/backup-tokens", methods=["GET"])
-def backup_tokens():
-    # Update er age ei URL theke backup JSON download koro - user kokhono harabe na
-    # Usage: https://giogram-backend.onrender.com/api/backup-tokens
-    try:
-        return flask_app.response_class(get_tokens_backup_json(), mimetype="application/json", headers={"Content-Disposition": "attachment; filename=approved_tokens_backup.json"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@flask_app.route("/api/restore-tokens", methods=["POST"])
-def restore_tokens():
-    # Backup JSON diye restore - jodi kokhono user muche jay
-    try:
-        data = request.get_json(force=True)
-        if isinstance(data, dict) and len(data) > 0:
-            approved_tokens.update(data)
-            save_tokens()
-            return jsonify({"success": True, "total": len(approved_tokens), "message": f"Restored {len(data)} tokens, total now {len(approved_tokens)}"})
-        return jsonify({"success": False, "message": "Empty or invalid backup"}), 400
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
 @flask_app.after_request
 def after_request(r): 
     r.headers.add('Access-Control-Allow-Origin','*')
