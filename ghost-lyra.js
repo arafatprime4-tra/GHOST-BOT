@@ -57,7 +57,12 @@ css.innerHTML=
 ".gh-sig.off{background:rgba(0,0,0,.55);border:1px solid rgba(255,45,85,.6);font-size:11px}"+
 ".gh-meta{font-size:9px;color:rgba(255,255,255,.7);text-align:center;padding:6px 0 2px}"+
 ".gh-hint{font-size:8px;color:rgba(255,255,255,.55);text-align:center;padding:0 0 8px}"+
-".gh-close-bar{margin:0 11px 11px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;padding:8px;text-align:center;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}";
+".gh-close-bar{margin:0 11px 11px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;padding:8px;text-align:center;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}"+
+".gh-voice-set{display:flex;gap:4px;align-items:center;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.10);font-size:8px;color:#fff}"+
+".gh-vlang-btn{flex:1;padding:4px 2px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer;font-weight:600}"+
+".gh-vlang-btn.active{background:#ff2d55;border-color:#fff;box-shadow:0 0 8px rgba(255,45,85,.6)}"+
+".gh-voice-select{background:rgba(0,0,0,.30);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:8px;padding:2px;cursor:pointer}"+
+".gh-voice-label{opacity:.8}";
 document.head.appendChild(css);
 var box=document.createElement("div");
 box.id="ghost-lyra";
@@ -66,8 +71,8 @@ box.innerHTML=
 '<div class="gh-orb" id="gh-orb">'+ICON.ghost+'</div>'+
 '<div class="gh-card" id="gh-card" style="display:none">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
-'<div id="gh-voice-set" style="display:flex;gap:4px;align-items:center;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.10);font-size:8px;color:#fff"><span style="opacity:.8">Voice:</span><button data-vlang="bn" style="flex:1;padding:3px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer">Bangla</button><button data-vlang="hi" style="flex:1;padding:3px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer">Hindi</button><button data-vlang="en" style="flex:1;padding:3px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:8px;cursor:pointer">English</button><select id="gh-rate" style="background:rgba(0,0,0,.3);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:8px;padding:2px"><option value="0.8">Slow</option><option value="0.95">Normal</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select id="gh-pitch" style="background:rgba(0,0,0,.3);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:8px;padding:2px"><option value="0.8">Low Pitch</option><option value="1">Normal</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div><div id="gh-body"></div>'+
-'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div id="gh-analysis" style="display:none;margin:8px 11px 0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font-size:10px;line-height:1.5;color:#fff"></div><div style="padding:8px 11px 0"><button id="</div></div>'+
+'<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div>'+
+'<div id="gh-sig-wrap" style="display:none"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div id="gh-analysis" style="display:none;margin:8px 11px 0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font-size:10px;line-height:1.5;color:#fff"></div></div>'+
 ''+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
 '</div>';
@@ -78,97 +83,100 @@ if(saved.duration) state={...state,...saved};
 var session={active:false,left:0};
 var lastSpoken=""; var voiceUnlocked=false;
 function save(){ try{ localStorage.setItem("ghost_lyra", JSON.stringify(state)); }catch(e){} }
-function ghSpeak(text){
+// === VOICE SYSTEM - CSS + JavaScript Language Fix ===
+window.__gh_voices = window.__gh_voices || [];
+function ghLoadVoices(){
+  try{
+    var vs = window.speechSynthesis.getVoices() || [];
+    if(vs.length>0) window.__gh_voices = vs;
+  }catch(e){}
+}
+try{
+  ghLoadVoices();
+  if('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = ghLoadVoices;
+}catch(e){}
+function ghGetVoiceLang(){ try{ return localStorage.getItem('ghost_voice_lang') || 'bn'; }catch(e){ return 'bn'; } }
+function ghGetVoiceRate(){ try{ return parseFloat(localStorage.getItem('ghost_voice_rate') || '1.2'); }catch(e){ return 1.2; } }
+function ghGetVoicePitch(){ try{ return parseFloat(localStorage.getItem('ghost_voice_pitch') || '1.3'); }catch(e){ return 1.3; } }
+function ghFindVoice(lang){
+  var vs = window.__gh_voices && window.__gh_voices.length ? window.__gh_voices : [];
+  try{ var live = window.speechSynthesis.getVoices() || []; if(live.length>vs.length) vs = live; }catch(e){}
+  if(!vs.length) return null;
+  var code = lang==='hi' ? 'hi' : lang==='en' ? 'en' : 'bn';
+  var v = vs.find(function(x){ return x.lang && x.lang.toLowerCase().indexOf(code)===0; });
+  if(!v && code==='bn') v = vs.find(function(x){ return x.name && (x.name.toLowerCase().indexOf('bengali')>=0 || x.name.toLowerCase().indexOf('bangla')>=0); });
+  if(!v && code==='hi') v = vs.find(function(x){ return x.name && x.name.toLowerCase().indexOf('hindi')>=0; });
+  if(!v) v = vs.find(function(x){ return x.default; });
+  return v || null;
+}
+function ghBuildVoiceText(j, lang){
+  var dir = j.signal || j.direction || 'CALL';
+  var isUp = (dir==='CALL' || dir==='UP');
+  var pair = j.pair || 'EURUSD';
+  var conf = j.confidence || 0;
+  var entry = j.entry_type || 'opening';
+  if(lang==='hi'){
+    var dirHi = isUp ? 'UP' : 'DOWN';
+    var entryHi = 'opening se entry lunga';
+    if(entry.indexOf('wick')>=0) entryHi = 'wick rejection se entry lunga, opening se nahi. Price support se wapas gaya hai';
+    else if(entry.indexOf('liquidity')>=0) entryHi = 'liquidity grab hua hai, trap tha, isliye reversal se entry lunga';
+    else if(entry.indexOf('order')>=0) entryHi = 'order block se entry lunga';
+    else if(entry.indexOf('gap')>=0) entryHi = 'gap fill ho raha hai, gap se entry lunga';
+    else if(entry.indexOf('break')>=0) entryHi = 'break of structure hua hai, breakout se entry lunga';
+    return 'Bhai suno, ' + pair + ' me ek accha ' + dirHi + ' entry mila hai. ' + entryHi + '. Confidence ' + conf + ' percent hai. Abhi entry lo, deri mat karo.';
+  } else if(lang==='en'){
+    var dirEn = isUp ? 'UP' : 'DOWN';
+    var entryEn = 'I will take entry from opening.';
+    if(entry.indexOf('wick')>=0) entryEn = 'Wick rejection happened, price bounced from support. I will take entry from wick rejection, not from opening.';
+    else if(entry.indexOf('liquidity')>=0) entryEn = 'Liquidity grab happened, it was a trap. I will take reversal entry.';
+    else if(entry.indexOf('order')>=0) entryEn = 'Price is holding at order block. I will take entry from order block.';
+    else if(entry.indexOf('gap')>=0) entryEn = 'Gap is filling. I will take entry from gap.';
+    else if(entry.indexOf('break')>=0) entryEn = 'Break of structure happened. I will take breakout entry.';
+    return 'Brother listen, ' + pair + ' has a good ' + dirEn + ' entry. ' + entryEn + ' Confidence ' + conf + ' percent. Take entry now.';
+  } else {
+    var dirBn = isUp ? 'UP' : 'DOWN';
+    var entryBn = 'opening theke entry nibo.';
+    if(entry.indexOf('wick')>=0) entryBn = 'wick rejection hoiche, price support theke ghure geche. Tai wick theke entry nibo, opening theke na.';
+    else if(entry.indexOf('liquidity')>=0) entryBn = 'liquidity grab hoiche, trap chilo, tai reversal theke entry nibo.';
+    else if(entry.indexOf('order')>=0) entryBn = 'order block theke entry nibo.';
+    else if(entry.indexOf('gap')>=0) entryBn = 'gap fill hoiteche, gap theke entry nibo.';
+    else if(entry.indexOf('break')>=0) entryBn = 'break of structure hoiche, breakout theke entry nibo.';
+    return 'Bhai shuno, ' + pair + ' te ekta valo ' + dirBn + ' entry paichi. ' + entryBn + ' Confidence ' + conf + ' percent. Ekhoni entry nao.';
+  }
+}
+function ghSpeak(text, sigData){
   try{
     if(!state.voice) return;
     if(!voiceUnlocked) return;
-    // BANGLA VOICE: bn-BD voice diye Bangla bolbe, normal human er moto
-    // Age en-US chilo, tai English robot er moto bolto
-    if(text===lastSpoken) return;
-    // LYRA long analysis - jodi same signal er same voice abar ase, tao 1 bar bolbe, pore Speak Again button e bolbe
-    lastSpoken=text;
+    var lang = ghGetVoiceLang();
+    var rate = ghGetVoiceRate();
+    var pitch = ghGetVoicePitch();
+    var speakText = text;
+    if(sigData && typeof sigData==='object'){
+      speakText = ghBuildVoiceText(sigData, lang);
+    } else if(lang==='hi' && window.__gh_lastSig){
+      speakText = ghBuildVoiceText(window.__gh_lastSig, 'hi');
+    } else if(lang==='en' && window.__gh_lastSig){
+      speakText = ghBuildVoiceText(window.__gh_lastSig, 'en');
+    }
+    if(speakText===lastSpoken && !sigData) return;
+    lastSpoken=speakText;
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    var u=new SpeechSynthesisUtterance(text);
-    // BANGLA VOICE FIX: Phone e Bangla voice na thakle Bengali script bujbe na, tai Roman Bangla te bolbe
-    // VOICE FIX: User Hindi select korche, Fast + Pitch diche - age ami jor kore Bangla + 0.95 chapaia ditam, tai tar setting kaj korto na
-    // Ekhon: User er setting manbo - localStorage theke lang/rate/pitch nibo
-    var userLang = 'bn';
-    var userRate = 0.95;
-    var userPitch = 1;
-    try{
-      userLang = localStorage.getItem('ghost_voice_lang') || 'bn';
-      userRate = parseFloat(localStorage.getItem('ghost_voice_rate') || '0.95');
-      userPitch = parseFloat(localStorage.getItem('ghost_voice_pitch') || '1');
-      // Jodi user Hindi select kore thake, tahole Hindi use korbo, Bangla na
-      if(!localStorage.getItem('ghost_voice_lang')){
-        // First time: Phone er default voice check koro - Hindi default hole Hindi nibo
-        var _vs0 = window.speechSynthesis.getVoices()||[];
-        var _def = _vs0.find(function(v){ return v.default; });
-        if(_def && _def.lang && _def.lang.toLowerCase().indexOf('hi')===0) userLang='hi';
-      }
-    }catch(e){}
-    var vs=[];
-    try{ vs=window.speechSynthesis.getVoices(); }catch(e){}
-    // User er lang onujayi voice khujo - Hindi hole Hindi, Bangla hole Bangla, English hole English
-    var bn=null;
-    if(userLang==='hi'){
-      bn=vs.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf('hi')===0; });
-      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('hindi')>=0; });
-    } else if(userLang==='en'){
-      bn=vs.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf('en')===0; });
+    var doSpeak = function(){
+      var u=new SpeechSynthesisUtterance(speakText);
+      u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD';
+      u.rate = rate; u.pitch = pitch; u.volume = 1;
+      var v = ghFindVoice(lang);
+      if(v) u.voice = v;
+      window.speechSynthesis.speak(u);
+    };
+    if(window.__gh_voices.length===0){
+      ghLoadVoices();
+      setTimeout(doSpeak, 180);
     } else {
-      bn=vs.find(function(v){ return v.lang && (v.lang.toLowerCase().indexOf('bn')===0 || v.lang.toLowerCase().indexOf('ben')===0); });
-      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bengali')>=0; });
-      if(!bn) bn=vs.find(function(v){ return v.name && v.name.toLowerCase().indexOf('bangla')>=0; });
+      doSpeak();
     }
-    var hasBanglaVoice = !!bn;
-    // User er rate/pitch use korbo - age 0.95 fixed chilo, ekhon user er ta
-    var speakText = text;
-    if(!hasBanglaVoice){
-      // Bangla voice nai - Bengali script ke Roman Bangla te convert koro, jate English voice o Bangla er moto bole
-      // Example: "ভাই শুনো" -> "Bhai shuno"
-      speakText = text
-        .replace(/ভাই শুনো/g, "Bhai shuno")
-        .replace(/ঘোস্ট রেডি/g, "Ghost ready")
-        .replace(/আমি বাংলায় বলবো/g, "Ami Banglay bolbo")
-        .replace(/ভাই/g, "Bhai")
-        .replace(/শুনো/g, "shuno")
-        .replace(/ভালো/g, "valo")
-        .replace(/আপ/g, "UP")
-        .replace(/ডাউন/g, "DOWN")
-        .replace(/এন্ট্রি পাইছি/g, "entry paichi")
-        .replace(/এন্ট্রি নাও/g, "entry nao")
-        .replace(/এখনই/g, "ekhoni")
-        .replace(/দেরি করো না/g, "deri koro na")
-        .replace(/কনফিডেন্স/g, "confidence")
-        .replace(/পারসেন্ট/g, "percent")
-        .replace(/উইক রিজেকশন/g, "wick rejection")
-        .replace(/লিকুইডিটি গ্র্যাব/g, "liquidity grab")
-        .replace(/অর্ডার ব্লক/g, "order block")
-        .replace(/ব্রেক অফ স্ট্রাকচার/g, "break of structure")
-        .replace(/তে একটা/g, "te ekta")
-        .replace(/তাই/g, "tai")
-        .replace(/থেকে/g, "theke")
-        .replace(/হইছে/g, "hoiche")
-        .replace(/আর/g, "ar")
-        .replace(/আছে/g, "ache");
-      // Jodi ekhono Bengali script thake (convert hoy nai), tahole English fallback
-      if(/[\u0980-\u09FF]/.test(speakText)){
-        // Bengali script roye geche - Roman e full fallback
-        speakText = "Bhai shuno, " + (window.__gh_lastDirBn || "UP") + " entry paichi. Confidence " + (window.__gh_lastConf || "80") + " percent. Ekhoni entry nao.";
-      }
-      // Hindi user: Hindi voice na thakle English voice diye Roman Hindi/Bangla bolbe, but user er rate/pitch manbe
-      u.lang = (userLang==='hi' ? 'hi-IN' : 'en-US'); u.rate=userRate; u.pitch=userPitch; u.volume=1;
-    } else {
-      u.lang = (userLang==='hi' ? 'hi-IN' : userLang==='en' ? 'en-US' : 'bn-BD'); u.rate=userRate; u.pitch=userPitch; u.volume=1;
-      u.voice=bn;
-    }
-    var u2 = u;
-    u.text = speakText;
-    // For debugging: show which voice used
-    window.__gh_voiceMode = hasBanglaVoice ? "BANGLA" : "ROMAN-BANGLA";
-    window.speechSynthesis.speak(u);
   }catch(e){}
 }
 function ghUnlockVoice(){
@@ -176,11 +184,14 @@ function ghUnlockVoice(){
     voiceUnlocked=true; state.voice=true; save();
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    var _ul = 'bn', _ur=0.95, _up=1;
-    try{ _ul=localStorage.getItem('ghost_voice_lang')||'bn'; _ur=parseFloat(localStorage.getItem('ghost_voice_rate')||'0.95'); _up=parseFloat(localStorage.getItem('ghost_voice_pitch')||'1'); }catch(e){}
-    var _txt = _ul==='hi' ? 'Bhai, Ghost ready. Main Hindi me bolunga.' : _ul==='en' ? 'Ghost ready. I will speak in English.' : 'ভাই, ঘোস্ট রেডি। আমি বাংলায় বলবো।';
-    var u=new SpeechSynthesisUtterance(_txt);
-    u.lang = _ul==='hi' ? 'hi-IN' : _ul==='en' ? 'en-US' : 'bn-BD'; u.rate=_ur; u.pitch=_up; window.speechSynthesis.speak(u);
+    var lang = ghGetVoiceLang();
+    var rate = ghGetVoiceRate();
+    var pitch = ghGetVoicePitch();
+    var txt = lang==='hi' ? 'Bhai, Ghost ready. Main Hindi me bolunga, fast aur high pitch me.' : lang==='en' ? 'Brother, Ghost ready. I will speak in English.' : 'Bhai shuno, Ghost ready. Ami Banglay bolbo.';
+    var u=new SpeechSynthesisUtterance(txt);
+    u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD'; u.rate=rate; u.pitch=pitch;
+    var v = ghFindVoice(lang); if(v) u.voice=v;
+    window.speechSynthesis.speak(u);
     var vb=document.getElementById('gh-voice-btn'); if(vb) vb.innerHTML=ICON.voiceOn+'<span>Voice: ON</span>';
   }catch(e){}
 }
@@ -308,21 +319,8 @@ function fetchSignalLyra(){
     }
     // LYRA-style voice: j.voice_text thakle full analysis bolbe - Wick rejection naki opening, confidence, entry
     // BANGLA FRONTEND FIX: Jodi backend purano hoye English voice_text dey, tahole frontend e Bangla banay dao
-    var voiceToSpeak = j.voice_text || "";
-    if(!voiceToSpeak || voiceToSpeak.indexOf("Ghost here")===0 || voiceToSpeak.indexOf("I see")>=0){
-      // English -> Bangla convert
-      var dirBn = (dir==="CALL"||dir==="UP") ? "আপ" : "ডাউন";
-      var entryBn = (j.entry_type||"opening");
-      if(entryBn.indexOf("wick")>=0) entryBn = "উইক রিজেকশন থেকে এন্ট্রি নিবো, ওপেনিং থেকে না। প্রাইস সাপোর্ট থেকে ঘুরে গেছে";
-      else if(entryBn.indexOf("liquidity")>=0) entryBn = "লিকুইডিটি গ্র্যাব হইছে, ট্র্যাপ ছিলো, তাই রিভার্সাল থেকে এন্ট্রি নিবো";
-      else if(entryBn.indexOf("order")>=0) entryBn = "অর্ডার ব্লক থেকে এন্ট্রি নিবো";
-      else if(entryBn.indexOf("gap")>=0) entryBn = "গ্যাপ ফিল হইতেছে, গ্যাপ থেকে এন্ট্রি নিবো";
-      else if(entryBn.indexOf("break")>=0) entryBn = "ব্রেক অফ স্ট্রাকচার হইছে, ব্রেকআউট থেকে এন্ট্রি নিবো";
-      else entryBn = "ওপেনিং থেকে এন্ট্রি নিবো";
-      voiceToSpeak = "ভাই শুনো, " + (j.pair||"Euro Dollar") + " তে একটা ভালো " + dirBn + " এন্ট্রি পাইছি। " + entryBn + "। কনফিডেন্স " + (j.confidence||0) + " পারসেন্ট। এখনই এন্ট্রি নাও।";
-    }
-    // Analysis box e dekhao
-    var anaBox=document.getElementById('gh-analysis'); if(anaBox){ anaBox.style.display='none'; } // SHUDHU BOLBE, LEKHBE NA
+    window.__gh_lastSig = j;
+    var voiceToSpeak = ghBuildVoiceText(j, ghGetVoiceLang());
     window.__gh_lastVoice = voiceToSpeak;
     window.__gh_lastDirBn = (dir==="CALL"||dir==="UP") ? "UP" : "DOWN";
     window.__gh_lastConf = (j.confidence||0);
@@ -400,11 +398,11 @@ setTimeout(function(){
     var _rs = document.getElementById('gh-rate'); if(_rs) _rs.value=_sr;
     var _ps = document.getElementById('gh-pitch'); if(_ps) _ps.value=_sp;
     document.querySelectorAll('[data-vlang]').forEach(function(b){
-      if(b.dataset.vlang===_sl) b.style.background='#ff2d55';
+      if(b.dataset.vlang===_sl) b.classList.add('active');
       b.addEventListener('click',function(){
         localStorage.setItem('ghost_voice_lang', b.dataset.vlang);
-        document.querySelectorAll('[data-vlang]').forEach(function(x){ x.style.background='rgba(255,255,255,.12)'; });
-        b.style.background='#ff2d55';
+        document.querySelectorAll('[data-vlang]').forEach(function(x){ x.classList.remove('active'); });
+        b.classList.add('active');
         var _t = b.dataset.vlang==='hi' ? 'Bhai, Hindi voice select ho gaya. Ab main Hindi me bolunga.' : b.dataset.vlang==='en' ? 'English voice selected.' : 'Bhai, Bangla voice select hoiche.';
         var _u = new SpeechSynthesisUtterance(_t);
         _u.lang = b.dataset.vlang==='hi' ? 'hi-IN' : b.dataset.vlang==='en' ? 'en-US' : 'bn-BD';
