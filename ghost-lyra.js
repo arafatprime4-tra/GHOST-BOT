@@ -239,9 +239,13 @@ function ghStartListening(){
         ghAnswerUser(txt);
       }catch(e){}
     };
-    ghRecognition.onerror = function(){
+    ghRecognition.onerror = function(ev){
       ghListening = false;
       if(micBtn) micBtn.classList.remove('listening');
+      // Mic busy - Screen Recorder use kortese - popup diye block korbo na, voice e bolbo
+      if(ev && ev.error==='not-allowed' || ev && ev.error==='audio-capture'){
+        try{ ghSpeak("Mic busy. Recorder bondho kore abar try koro."); }catch(e){}
+      }
     };
     ghRecognition.onend = function(){
       ghListening = false;
@@ -520,17 +524,56 @@ function fetchSignalLyra(){
     window.__gh_lastVoice = voiceToSpeak;
     window.__gh_lastDirBn = (dir==="CALL"||dir==="UP") ? "UP" : "DOWN";
     window.__gh_lastConf = (j.confidence||0);
-    // 30 SEC WINDOW: Chart time porbe - Prothom 25-30 sec er vitore entry, 30 sec pore entry na
-    var _win = ghIsEntryWindow();
-    if((dir==="CALL"||dir==="UP"||dir==="PUT"||dir==="DOWN") && !_win.ok && _win.elapsed>30){
-      // 30 sec par hoye geche - Entry nio na, WAIT dekhabe + bolbe
-      sigEl.className="gh-sig wait motion";
-      sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
-      var _lang = ghGetVoiceLang();
-      var _msg = _lang==='en' ? "Thirty seconds already passed, " + _win.elapsed + " seconds. Do not take entry now, wait for the next candle. I checked wick rejection, but time is over." : _lang==='hi' ? "Tees second par ho gaya hai, " + _win.elapsed + " second. Abhi entry mat lo, agle candle ka wait karo." : "Tees second par hoye geche, " + _win.elapsed + " second. Ekhon entry nio na, porer candle er jonno wait koro. Ami wick rejection dekhsi, kintu time sesh.";
-      ghSpeak(_msg);
+    // FIX: Video te UP <-> WAIT flicker kortesilo - karon proti 8 sec e UTC time check kore WAIT e flip korto
+    // Thik: Ekbar signal lock hole 30 sec dhore oi signal e thakbe, proti fetch e window check kore flip korbe na
+    // Lock: Same signal_id hole window check korbo na, locked signal dekhabe
+    var _now = Date.now();
+    var _isNewSignal = (j.signal_id && j.signal_id !== window.__gh_lockedId);
+    var _lockExpired = (!_isNewSignal && window.__gh_lockedUntil && _now > window.__gh_lockedUntil);
+    if(!_isNewSignal && window.__gh_lockedId && !_lockExpired){
+      // Same signal, lock active - window check skip, locked signal dekhabe, flicker hobe na
+      if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up motion up-motion"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; }
+      else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down motion down-motion"; sigEl.innerHTML=ICON.down+'<span>DOWN - '+(j.confidence||0)+'%</span>'; }
       updateMeta();
       return;
+    }
+    if(_lockExpired){
+      // Lock sesh - 30 sec par hoye geche, ekbar WAIT dekhabe, tarpor next signal er jonno wait
+      if(window.__gh_30sSpoken !== window.__gh_lockedId){
+        window.__gh_30sSpoken = window.__gh_lockedId;
+        sigEl.className="gh-sig wait motion";
+        sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
+        var _l2 = ghGetVoiceLang();
+        var _m2 = _l2==='en' ? "Thirty seconds passed for this signal. Do not take entry now, wait for the next candle." : _l2==='hi' ? "Is signal ke liye tees second khatam ho gaya. Abhi entry mat lo." : "Ei signal er jonno 30 second sesh. Ekhon entry nio na, porer candle er jonno wait koro.";
+        ghSpeak(_m2);
+      } else {
+        sigEl.className="gh-sig wait motion";
+        sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
+      }
+      window.__gh_lockedId = null;
+      updateMeta();
+      return;
+    }
+    // NEW SIGNAL: Ekhon window check korbo - Prothom 25-30 sec er vitore hole lock korbo, 30 sec pore hole WAIT
+    var _win = ghIsEntryWindow();
+    if((dir==="CALL"||dir==="UP"||dir==="PUT"||dir==="DOWN") && !_win.ok && _win.elapsed>30){
+      sigEl.className="gh-sig wait motion";
+      sigEl.innerHTML=ICON.wait+'<span>WAIT - 30s Over</span>';
+      // Ekbar bolbe, proti fetch e bar bar bolbe na - flicker + voice spam bondho
+      if(window.__gh_30sSpoken !== (j.signal_id||'no-id')){
+        window.__gh_30sSpoken = j.signal_id||'no-id';
+        var _lang = ghGetVoiceLang();
+        var _msg = _lang==='en' ? "Thirty seconds already passed, " + _win.elapsed + " seconds. Do not take entry now, wait for the next candle. I checked wick rejection, but time is over." : _lang==='hi' ? "Tees second par ho gaya hai, " + _win.elapsed + " second. Abhi entry mat lo, agle candle ka wait karo." : "Tees second par hoye geche, " + _win.elapsed + " second. Ekhon entry nio na, porer candle er jonno wait koro. Ami wick rejection dekhsi, kintu time sesh.";
+        ghSpeak(_msg);
+      }
+      updateMeta();
+      return;
+    }
+    // NEW SIGNAL + Window OK: Lock koro 30 sec er jonno - flicker hobe na
+    if(j.signal_id && (dir==="CALL"||dir==="UP"||dir==="PUT"||dir==="DOWN")){
+      window.__gh_lockedId = j.signal_id;
+      window.__gh_lockedUntil = _now + 30000;
+      window.__gh_30sSpoken = null;
     }
     // SIGNAL BUTTON MOTION: CSS + JS - UP/DOWN button e motion animation
     if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up motion up-motion"; sigEl.innerHTML=ICON.up+'<span>UP - '+(j.confidence||0)+'%</span>'; ghSpeak(voiceToSpeak); }
