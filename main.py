@@ -154,6 +154,18 @@ flask_app = Flask(__name__, static_folder='.', static_url_path='')
 
 # STABLE: Backup / Restore - flask_app er PORE define korte hobe, nahole NameError: app is not defined
 @flask_app.route("/api/backup-tokens", methods=["GET"])
+
+# FINAL: Admin Panel HTML - /admin - User list, Suspend, Delete, Backup
+@flask_app.route("/admin")
+def admin_panel():
+    rows = ""
+    for tk, d in list(approved_tokens.items()):
+        st = d.get("status","active")
+        rows += f"<tr><td>{tk[:8]}...</td><td>{d.get('trader_id','-')}</td><td>{st}</td><td><a href='/api/admin/suspend_token?token={tk}'>Suspend</a> | <a href='/api/admin/delete_token?token={tk}'>Delete</a></td></tr>"
+    html = f"""<html><head><title>GHOST Admin</title><style>body{{background:#0a0f23;color:#fff;font-family:sans-serif;padding:20px}}table{{width:100%;border-collapse:collapse}}td,th{{border:1px solid #333;padding:8px}}a{{color:#00f0ff}}</style></head><body><h2>GHOST ADMIN - Total: {len(approved_tokens)}</h2><a href='/api/backup-tokens'>Download Backup</a><table><tr><th>Token</th><th>Trader</th><th>Status</th><th>Action</th></tr>{rows}</table></body></html>"""
+    return html
+
+
 def backup_tokens():
     try:
         return flask_app.response_class(get_tokens_backup_json(), mimetype="application/json", headers={"Content-Disposition": "attachment; filename=approved_tokens_backup.json"})
