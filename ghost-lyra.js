@@ -86,7 +86,7 @@ box.innerHTML=
 '<div class="gh-orb" id="gh-orb">'+ICON.ghost+'</div>'+
 '<div class="gh-card gh-card-hidden" id="gh-card">'+
 '<div class="gh-h" id="gh-h"><b>GHOST <span>AI</span></b><div class="gh-right"><button class="gh-voice" id="gh-voice-btn">'+ICON.voiceOn+'<span>Tap for Voice</span></button><span class="gh-step-badge" id="gh-step-label">01 / 03</span><div class="gh-close" id="gh-lyra-close">'+ICON.close+'</div></div></div>'+
-'<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><button class="gh-mic-btn" id="gh-mic-btn">Mic</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.2">Fast</option><option value="1.4">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.3">High</option><option value="1.5">Very High</option></select></div>'+
+'<div class="gh-voice-set" id="gh-voice-set"><span class="gh-voice-label">Voice:</span><button class="gh-vlang-btn" data-vlang="bn">Bangla</button><button class="gh-vlang-btn" data-vlang="hi">Hindi</button><button class="gh-vlang-btn" data-vlang="en">English</button><button class="gh-mic-btn" id="gh-mic-btn">Mic</button><select class="gh-voice-select" id="gh-rate"><option value="0.8">Slow</option><option value="1.0">Fast</option><option value="1.1">Very Fast</option></select><select class="gh-voice-select" id="gh-pitch"><option value="0.8">Low</option><option value="1.0">High</option><option value="1.05">Very High</option></select></div>'+
 '<div id="gh-body"></div>'+
 '<div class="gh-sig-wrap gh-hidden" id="gh-sig-wrap"><div class="gh-sig wait" id="gh-sig">'+ICON.wait+'<span>WAIT</span></div><div class="gh-meta" id="gh-meta">Pair: -- | Duration: -- | Stake: -- | Left: --</div><div class="gh-analysis" id="gh-analysis"></div></div>'+
 '<div class="gh-close-bar" id="gh-close-bar">'+ICON.close+'<span>Close</span></div>'+
@@ -111,8 +111,8 @@ try{
   if('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = ghLoadVoices;
 }catch(e){}
 function ghGetVoiceLang(){ try{ return localStorage.getItem('ghost_voice_lang') || 'bn'; }catch(e){ return 'bn'; } }
-function ghGetVoiceRate(){ try{ return parseFloat(localStorage.getItem('ghost_voice_rate') || '1.2'); }catch(e){ return 1.2; } }
-function ghGetVoicePitch(){ try{ return parseFloat(localStorage.getItem('ghost_voice_pitch') || '1.3'); }catch(e){ return 1.3; } }
+function ghGetVoiceRate(){ try{ return parseFloat(localStorage.getItem('ghost_voice_rate') || '0.95'); }catch(e){ return 0.95; } }
+function ghGetVoicePitch(){ try{ return parseFloat(localStorage.getItem('ghost_voice_pitch') || '1.0'); }catch(e){ return 1.0; } }
 function ghFindVoice(lang){
   var vs = window.__gh_voices && window.__gh_voices.length ? window.__gh_voices : [];
   try{ var live = window.speechSynthesis.getVoices() || []; if(live.length>vs.length) vs = live; }catch(e){}
@@ -131,33 +131,34 @@ function ghBuildVoiceText(j, lang){
   var conf = j.confidence || 0;
   var entry = j.entry_type || 'opening';
   if(lang==='hi'){
+    // LYRA STYLE: Choto, clear, human - lomba na
     var dirHi = isUp ? 'UP' : 'DOWN';
-    var entryHi = 'opening se entry lunga';
-    if(entry.indexOf('wick')>=0) entryHi = 'wick rejection se entry lunga, opening se nahi. Price support se wapas gaya hai';
-    else if(entry.indexOf('liquidity')>=0) entryHi = 'liquidity grab hua hai, trap tha, isliye reversal se entry lunga';
-    else if(entry.indexOf('order')>=0) entryHi = 'order block se entry lunga';
-    else if(entry.indexOf('gap')>=0) entryHi = 'gap fill ho raha hai, gap se entry lunga';
-    else if(entry.indexOf('break')>=0) entryHi = 'break of structure hua hai, breakout se entry lunga';
-    return 'Bhai suno, ' + pair + ' me ek accha ' + dirHi + ' entry mila hai. ' + entryHi + '. Confidence ' + conf + ' percent hai. Abhi entry lo, deri mat karo.';
+    var reasonHi = 'Wick rejection confirm.';
+    if(entry.indexOf('wick')>=0) reasonHi = 'Wick rejection confirm.';
+    else if(entry.indexOf('liquidity')>=0) reasonHi = 'Liquidity grab. Trap tha.';
+    else if(entry.indexOf('order')>=0) reasonHi = 'Order block holding.';
+    else if(entry.indexOf('gap')>=0) reasonHi = 'Gap filling.';
+    else if(entry.indexOf('break')>=0) reasonHi = 'Break of structure.';
+    return 'Bhai suno. ' + pair + ', ' + dirHi + ' entry. ' + reasonHi + ' Confidence ' + conf + ' percent. Abhi entry lo.';
   } else if(lang==='en'){
-    // ENGLISH NATIVE: Rate English e English er moto bolbe - proper fluent English
+    // LYRA STYLE: Short, clear, human - 2 choto sentence, pause diye - lomba paragraph na, AI er moto lagbe na
     var dirEn = isUp ? 'UP' : 'DOWN';
-    var entryEn = 'I will take the entry from the opening.';
-    if(entry.indexOf('wick')>=0) entryEn = 'I checked the wick rejection carefully. The price bounced strongly from support. So I will take the entry from the wick rejection, not from the opening.';
-    else if(entry.indexOf('liquidity')>=0) entryEn = 'I saw a liquidity grab. It was a trap. So I will take a reversal entry.';
-    else if(entry.indexOf('order')>=0) entryEn = 'The price is holding at the order block. I will take the entry from the order block.';
-    else if(entry.indexOf('gap')>=0) entryEn = 'The gap is filling. I will take the entry from the gap.';
-    else if(entry.indexOf('break')>=0) entryEn = 'Break of structure happened. I will take the breakout entry.';
-    return 'Hey, listen. I found a strong ' + dirEn + ' entry on ' + pair + '. ' + entryEn + ' Confidence is ' + conf + ' percent. Take the entry now, within the first thirty seconds.';
+    var reasonEn = 'Wick rejection confirmed.';
+    if(entry.indexOf('wick')>=0) reasonEn = 'Wick rejection confirmed.';
+    else if(entry.indexOf('liquidity')>=0) reasonEn = 'Liquidity grab. It was a trap.';
+    else if(entry.indexOf('order')>=0) reasonEn = 'Order block holding.';
+    else if(entry.indexOf('gap')>=0) reasonEn = 'Gap filling.';
+    else if(entry.indexOf('break')>=0) reasonEn = 'Break of structure.';
+    return 'Hey, listen. ' + pair + ', ' + dirEn + ' entry. ' + reasonEn + ' Confidence ' + conf + ' percent. Take entry now.';
   } else {
-    var dirBn = isUp ? 'UP' : 'DOWN';
-    var entryBn = 'opening theke entry nibo.';
-    if(entry.indexOf('wick')>=0) entryBn = 'wick rejection hoiche, price support theke ghure geche. Tai wick theke entry nibo, opening theke na.';
-    else if(entry.indexOf('liquidity')>=0) entryBn = 'liquidity grab hoiche, trap chilo, tai reversal theke entry nibo.';
-    else if(entry.indexOf('order')>=0) entryBn = 'order block theke entry nibo.';
-    else if(entry.indexOf('gap')>=0) entryBn = 'gap fill hoiteche, gap theke entry nibo.';
-    else if(entry.indexOf('break')>=0) entryBn = 'break of structure hoiche, breakout theke entry nibo.';
-    return 'Bhai shuno, ' + pair + ' te ekta valo ' + dirBn + ' entry paichi. ' + entryBn + ' Confidence ' + conf + ' percent. Ekhoni entry nao.';
+        var dirBn = isUp ? 'UP' : 'DOWN';
+    var reasonBn = 'Wick rejection confirm.';
+    if(entry.indexOf('wick')>=0) reasonBn = 'Wick rejection confirm.';
+    else if(entry.indexOf('liquidity')>=0) reasonBn = 'Liquidity grab. Trap chilo.';
+    else if(entry.indexOf('order')>=0) reasonBn = 'Order block holding.';
+    else if(entry.indexOf('gap')>=0) reasonBn = 'Gap filling.';
+    else if(entry.indexOf('break')>=0) reasonBn = 'Break of structure.';
+    return 'Bhai shuno. ' + pair + ', ' + dirBn + ' entry. ' + reasonBn + ' Confidence ' + conf + ' percent. Ekhon entry nao.';
   }
 }
 // === NEW FEATURES: English Native + Chart Time + 30 Sec Window + Voice Chat + Motion Signal ===
@@ -302,20 +303,11 @@ function ghAnswerUser(userText){
         answer = "Bujhsi bhai. Ami SMC ar Price Action diya analysis kortesi, wick rejection dekhtesi. Entry niye jigges koro.";
       }
     }
-    // Answer in selected lang - if English selected, English e bolbe, Bangla bolleo English e answer
+    // FIX: Double speak bondho - age ghSpeak + direct speak 2 bar boltachilo, tai ekta kothar vitore arekta dhukto
+    // Ekhon sudhu ghSpeak ekbar bolbe, clear vabe
     window.__gh_lastVoice = "";
     lastSpoken = "";
     ghSpeak(answer);
-    // Force speak in selected lang - ghSpeak uses ghGetVoiceLang, so it will be English if English selected
-    // But ghSpeak uses lastSpoken check, we cleared it, so it will speak
-    try{
-      var u = new SpeechSynthesisUtterance(answer);
-      u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD';
-      u.rate = ghGetVoiceRate(); u.pitch = ghGetVoicePitch();
-      var v = ghFindVoice(lang); if(v) u.voice = v;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-    }catch(e){}
   }catch(e){}
 }
 
@@ -337,21 +329,32 @@ function ghSpeak(text, sigData){
     if(speakText===lastSpoken && !sigData) return;
     lastSpoken=speakText;
     if(!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    var doSpeak = function(){
-      var u=new SpeechSynthesisUtterance(speakText);
-      u.lang = lang==='hi' ? 'hi-IN' : lang==='en' ? 'en-US' : 'bn-BD';
-      u.rate = rate; u.pitch = pitch; u.volume = 1;
-      var v = ghFindVoice(lang);
-      if(v) u.voice = v;
-      window.speechSynthesis.speak(u);
+    // HUMAN VOICE QUEUE: Ekta kotha sesh na hole porer ta shuru hobe na - overlap bondho
+    // Age cancel kore sathe sathe notun ta bolto, tai ekta kothar vitore arekta dhukto
+    window.__gh_speakQueue = window.__gh_speakQueue || [];
+    window.__gh_speaking = window.__gh_speaking || false;
+    window.__gh_speakQueue.push({text: speakText, lang: lang, rate: rate, pitch: pitch});
+    // Jodi ekhon bolte thake, queue te rakho, sesh hole porer ta bolbe
+    if(window.__gh_speaking) return;
+    var doNext = function(){
+      if(!window.__gh_speakQueue.length){ window.__gh_speaking = false; return; }
+      window.__gh_speaking = true;
+      var item = window.__gh_speakQueue.shift();
+      // Ager ta cancel kore 120ms pause diye notun ta bolbe - clear vabe, overlap hobe na
+      window.speechSynthesis.cancel();
+      setTimeout(function(){
+        var u=new SpeechSynthesisUtterance(item.text);
+        u.lang = item.lang==='hi' ? 'hi-IN' : item.lang==='en' ? 'en-US' : 'bn-BD';
+        u.rate = item.rate; u.pitch = item.pitch; u.volume = 1;
+        var v = ghFindVoice(item.lang);
+        if(v) u.voice = v;
+        // LYRA style: Natural pause - sentence sesh hole ektu thambe
+        u.onend = function(){ setTimeout(function(){ window.__gh_speaking = false; doNext(); }, 250); };
+        u.onerror = function(){ window.__gh_speaking = false; doNext(); };
+        window.speechSynthesis.speak(u);
+      }, 120);
     };
-    if(window.__gh_voices.length===0){
-      ghLoadVoices();
-      setTimeout(doSpeak, 180);
-    } else {
-      doSpeak();
-    }
+    doNext();
   }catch(e){}
 }
 function ghUnlockVoice(){
