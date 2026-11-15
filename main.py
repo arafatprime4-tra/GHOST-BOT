@@ -108,7 +108,7 @@ def create_premium_token(trader_id, user_id, amount):
         "user_id": str(user_id),
         "amount": str(amount),
         "created": int(time.time()),
-        "created_human": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "created_human": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + 6*3600)),
         "status": "active",
         "suspended_at": None
     }
