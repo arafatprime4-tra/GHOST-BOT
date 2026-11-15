@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 730 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 733 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -91,7 +91,7 @@ box.innerHTML=`
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
 <div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK • <span id="gh-pa" style="color:#00f0ff;font-size:5.5px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
 <div class="gh-protect" id="gh-protect">🛑 2 LOSS - 30 MIN OFF - NO SIGNAL</div>
-<div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">✅ WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">❌ LOSS</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
+<div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">🟢 WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">🔴 LOSS</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
 <div class="gh-close" id="gh-close">✕ Close</div>
 `;
 if(!box.isConnected){ (document.body || document.documentElement).appendChild(box); }
@@ -630,9 +630,10 @@ function fetchSignal(forcePair){
           let pa=runPAFilter(candleHistory);
           if(pa && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf>=35){
             // STABLE FIX: PA signal er expiry = lock er sathe same (58s), nahole 500ms interval age clear kore flip hoy
-            // PA signal o opening theke na, Safety Margin theke entry
-            if(candleHistory.length<15){
-              let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/15 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
+            // PA signal o opening theke na, Safety Margin theke entry - 8 candle e enough
+            if(candleHistory.length<8 && (now - waitStart < 25000 || !waitStart)){
+              if(!waitStart) waitStart=now;
+              let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/8 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
               updateUI(waitSig); return;
             }
             let fake={...pa,market:asset,pair:asset,confidence:pa.conf,expiry_timestamp:now+58000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason,status:"ACTIVE"};
@@ -657,9 +658,11 @@ function fetchSignal(forcePair){
       updateUI(waitSig); return;
     }
     if(j.status==="ACTIVE"&&(j.signal==="CALL"||j.signal==="PUT")){
-      // FULL MARKET ANALYSIS: candleHistory 15 er kom hoile signal nibo na - age full market dekhe nibo
-      if(candleHistory.length<15){
-        let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/15 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
+      // FULL MARKET ANALYSIS: 8 candle hoilei analysis sesh - 15 chilo beshi, tai 5 min atke thakto
+      // 25 sec er beshi Analyzing hole bypass - getRealPrice fail korleo atke thakbe na
+      if(candleHistory.length<8 && (now - waitStart < 25000 || !waitStart)){
+        if(!waitStart) waitStart=now;
+        let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/8 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
         updateUI(waitSig); return;
       }
       // HUMAN TRADER ENTRY: Opening theke direct entry na, Safety Margin er jonno wait
@@ -671,7 +674,7 @@ function fetchSignal(forcePair){
 }
 setInterval(()=>{
   let rp=getRealPrice();
-  if(rp){ let v=parseFloat(rp); if(v){ priceHistory.push(v); if(priceHistory.length>50) priceHistory.shift(); if(priceHistory.length>=4){ let o=priceHistory[priceHistory.length-4]; let c=priceHistory[priceHistory.length-1]; let h=Math.max(...priceHistory.slice(-4)); let l=Math.min(...priceHistory.slice(-4)); candleHistory.push(new Candle(o,h,l,c)); if(candleHistory.length>100) candleHistory.shift(); } } }
+  if(rp){ let v=parseFloat(rp); if(v){ priceHistory.push(v); if(priceHistory.length>50) priceHistory.shift(); if(priceHistory.length>=2){ let o=priceHistory[priceHistory.length-2]; let c=priceHistory[priceHistory.length-1]; let h=Math.max(...priceHistory.slice(-4)); let l=Math.min(...priceHistory.slice(-4)); candleHistory.push(new Candle(o,h,l,c)); if(candleHistory.length>100) candleHistory.shift(); } } }
 },1000);
 setInterval(()=>{
   // FIX: 2 Loss = DIRECT OFF - interval eo protection check, nahole STOP er majhe UP flicker hoto
