@@ -361,8 +361,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Ghost ID পাঠান: 1234567\nEURUSD লিখে signal\n/start", parse_mode='HTML')
         return
     tid = text
-    if len(tid) < 4 or len(tid) > 12:
-        await update.message.reply_text("❌ ID 4-12 digit")
+    if len(tid) !=8:
+        await update.message.reply_text("❌ ID 8 digit")
         return
     user_trader_map[user.id] = tid
     kb = [
