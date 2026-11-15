@@ -30,7 +30,7 @@ CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
 ACADEMY_LINK = os.getenv("ACADEMY_LINK","https://t.me/premierghos")
 APP_LINK = os.getenv("APP_LINK","https://giogram-backend.onrender.com")
 
-PAIRS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]
+PAIRS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD","USDBRL","EURBRL","GBPBRL","USDMXN","USDINR","USDTRY","USDPKR","USDZAR","USDCOP","USDCLP","USDPEN","USDEGP","USDNGN","USDKES","USDPHP","USDTHB","USDVND","USDMYR","USDIDR","USDCNH","EURMXN"]
 
 pending_custom_msg = {}
 user_trader_map = {}
@@ -192,7 +192,7 @@ def api_signal():
         # Old ghost.js (ghost.js) jara use kore, tader ver param thakbe na -> BLOCKED, kono signal pabe na
         ver = request.args.get('ver','')
         # V3 = newest (voice fix + cache fix), V2 = ager LYRA (grace 1 din), baki sob OLD
-        if ver not in ("LYRA-V2","LYRA-V3"):
+        if ver not in ("LYRA-V2","LYRA-V3","","ghost"):  # ghost.js ver pathay na - khali ver keo allow, nahole shob WAIT hoy
             return jsonify({"signal_id": f"OLD-{int(time.time())}","signal":"WAIT","status":"OLD_VERSION","market":request.args.get('pair','EURUSD'),"pair":request.args.get('pair','EURUSD'),"direction":"WAIT","reason":"OLD BOOKMARKLET EXPIRED - New Link Nao","risk_percent":1,"expiry_timestamp":int((time.time()+60)*1000),"remainingSeconds":60,"time_left":60,"blocked":True})
         mode=request.args.get('mode','SAFE')
         raw_pair=request.args.get('pair','EURUSD')
@@ -201,7 +201,7 @@ def api_signal():
         clean_raw = raw_pair.upper().replace(" OTC","").replace("(OTC)","").replace("OTC","").strip()
         pair=clean_raw.replace("/","").strip()
         # Allow real + OTC pairs
-        REAL = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"]
+        REAL = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD","USDBRL","EURBRL","GBPBRL","USDMXN","USDINR","USDTRY","USDPKR","USDZAR","USDCOP","USDCLP","USDPEN","USDEGP","USDNGN","USDKES","USDPHP","USDTHB","USDVND","USDMYR","USDIDR","USDCNH","EURMXN"]
         if pair not in REAL:
             return jsonify({
                 "signal_id": f"REJECT-INVALID-{int(time.time())}",
@@ -295,16 +295,39 @@ WELCOME = """Ghost <b>GHOST PREMIUM</b> Ghost
 """
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # PREVIOUS FIX: Admin Panel /start e ashe na - karon is_admin check chilo na
+    # main_1.py te chilo, main-STABLE e haray geche - ekhon firano holo
+    user_id = update.effective_user.id
+    is_admin = (user_id == ADMIN_ID)
     kb=[
         [InlineKeyboardButton("Account Create Link", url=AFFILIATE_LINK)],
         [InlineKeyboardButton("🌐 Website", url=WEBSITE_URL), InlineKeyboardButton("❓ Get ID?", callback_data="how_id")],
         [InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("👨‍💼 Admin", url="https://t.me/ghostsupportbd")]
     ]
+    if is_admin:
+        kb.append([InlineKeyboardButton("🔧 Admin Panel", callback_data="admin_panel")])
+        kb.append([InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")])
+        kb.append([InlineKeyboardButton("📊 Stats / Tokens", callback_data="admin_stats")])
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+
+async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # FIX: Admin Panel ashe na - karon ADMIN_ID vul hole is_admin=False hoy
+    # Ekhon /admin dilei bujha jabe ADMIN_ID thik ache kina
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(f"❌ Admin only\n\nTomar ID: <code>{update.effective_user.id}</code>\nRender e ADMIN_ID: <code>{ADMIN_ID}</code>\n\n2 ta na mille Panel asbe na.\nRender → Environment → ADMIN_ID = Tomar ID diye dao, tarpor Clear build cache & Deploy.", parse_mode='HTML')
+        return
+    kb=[
+        [InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")],
+        [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
+        [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")],
+        [InlineKeyboardButton("📋 List All Tokens", callback_data="list_all_tokens")]
+    ]
+    await update.message.reply_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
-    await update.message.reply_text(f"🆔 Your ID: <code>{u.id}</code> @{u.username or 'N/A'} Admin:{ADMIN_ID}", parse_mode='HTML')
+    match = "✅ Tumi Admin - /start e Panel asbe" if u.id == ADMIN_ID else "❌ Tumi Admin na - ADMIN_ID vul. Render e ADMIN_ID = ei ID dao"
+    await update.message.reply_text(f"🆔 Your ID: <code>{u.id}</code>\n@{u.username or 'N/A'}\nRender ADMIN_ID: <code>{ADMIN_ID}</code>\n\n{match}", parse_mode='HTML')
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
@@ -464,6 +487,37 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.edit_message_text(f" Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"❌ {e}")
+    elif d == "admin_panel":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        kb=[
+            [InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")],
+            [InlineKeyboardButton("📊 Stats / Tokens", callback_data="admin_stats")],
+            [InlineKeyboardButton("📋 List All Tokens", callback_data="list_all_tokens")],
+            [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")]
+        ]
+        await q.edit_message_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}\n\nToken shoho sob user ekhane dekhabe.", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    elif d == "admin_stats":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        users = get_all_premium_users()
+        active = len([u for u in users if u.get("status")=="active"])
+        susp = len([u for u in users if u.get("status")=="suspended"])
+        await q.edit_message_text(f"📊 <b>STATS</b>\n\nTotal Tokens: {len(approved_tokens)}\nActive: {active}\nSuspended: {susp}\nAdmin: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="admin_panel")]]), parse_mode='HTML')
+    elif d == "list_all_tokens":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("❌ Admin only", show_alert=True)
+            return
+        users = get_all_premium_users()
+        if not users:
+            await q.edit_message_text("👥 No premium users yet - Token nai, tai khali dekhay.\n\nBackup theke restore korte /api/restore-tokens use koro.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="admin_panel")]]))
+            return
+        txt = f"📋 <b>All Tokens ({len(users)})</b>\n\n"
+        for idx,u in enumerate(users[:15]):
+            txt += f"{idx+1}. Trader:{u.get('trader_id','-')} | User:{u.get('user_id','-')} | ${u.get('amount','-')} | {u.get('status','-')} | {u['token'][:8]}...\n"
+        await q.edit_message_text(txt, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="admin_panel")]]), parse_mode='HTML')
     elif d == "manage_premium":
         if q.from_user.id != ADMIN_ID:
             await q.answer("❌ Admin only", show_alert=True)
@@ -643,19 +697,30 @@ def run_flask():
     flask_app.run(host="0.0.0.0", port=port, use_reloader=False)
 
 def run_bot():
+    # FIX: Deploy Failed - Telegram Timeout hole Bot crash kore Exited with status 1 hoy
+    # Ekhon Timeout hole 5 sec wait kore abar try korbe, Render Deploy Failed hobe na
     if not BOT_TOKEN:
         logging.error("BOT_TOKEN missing")
         return
-    app=ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("myid", myid))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.add_handler(MessageHandler(filters.PHOTO, handle_media))
-    app.add_handler(MessageHandler(filters.Sticker.ALL, handle_media))
-    app.add_handler(MessageHandler(filters.Document.ALL, handle_media))
-    app.add_handler(CallbackQueryHandler(callbacks))
-    logging.info(f"Bot polling ADMIN_ID={ADMIN_ID}")
-    app.run_polling()
+    import time as _time
+    while True:
+        try:
+            app=ApplicationBuilder().token(BOT_TOKEN).build()
+            app.add_handler(CommandHandler("start", start))
+            app.add_handler(CommandHandler("admin", admin_command))
+            app.add_handler(CommandHandler("myid", myid))
+            app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+            app.add_handler(MessageHandler(filters.PHOTO, handle_media))
+            app.add_handler(MessageHandler(filters.Sticker.ALL, handle_media))
+            app.add_handler(MessageHandler(filters.Document.ALL, handle_media))
+            app.add_handler(CallbackQueryHandler(callbacks))
+            logging.info(f"Bot polling ADMIN_ID={ADMIN_ID}")
+            app.run_polling(drop_pending_updates=True, allowed_updates=["message","callback_query"])
+            break
+        except Exception as e:
+            logging.error(f"Bot polling crash (Timeout/Conflict), 5s por retry: {e}")
+            _time.sleep(5)
+            continue
 
 if __name__=="__main__":
     # FIX: BOT_TOKEN na thakle age run_bot() return kore dito, daemon Flask thread more jeto, Render Exited with status 1 dito
