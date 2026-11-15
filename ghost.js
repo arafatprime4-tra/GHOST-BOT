@@ -389,7 +389,7 @@ function getCurrentMarket(){
   try{
     // FIX: Pair list khola thakle switch koro na - user list browse kortese
     if((document.body.innerText||"").includes("Select trade pair")) return currentPair;
-    let valid=["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD"];
+    let valid=["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD","USDBRL","EURBRL","GBPBRL","USDMXN","USDINR","USDTRY","USDPKR","USDZAR","USDCOP","USDCLP","USDPEN","USDEGP","USDNGN","USDKES","USDPHP","USDTHB","USDVND","USDMYR","USDIDR","USDCNH","EURMXN","GBP MXN".replace(" ","")];
     let all=document.querySelectorAll('div, span, button, a');
     // PASS 1: Selected pair button - bottom-left, Pair + % (e.g. GBP/JPY 66%) - eitai REAL selected pair
     // VIDEO 2 FIX: GBP/JPY / CAD/JPY thakleo bot EUR/JPY OTC dekhaito karon:
