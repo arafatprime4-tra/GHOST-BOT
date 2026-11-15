@@ -655,7 +655,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
-                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK]
+                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK)]
             ]
             msg = f"""🎉 CONGRATULATIONS PREMIUM APPROVED 🎉
 
