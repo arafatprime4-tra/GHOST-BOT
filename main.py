@@ -283,15 +283,15 @@ def api_admin_suspend_token():
 def health(): 
     return f"GHOST LIVE ADMIN={ADMIN_ID} TOKENS={len(approved_tokens)} OK"
 
-WELCOME = """Ghost <b>GHOST PREMIUM</b> Ghost
+WELCOME = """<b>GHOST TRADER BOT</b>
 
-<b>বটটা ফ্রি, কিন্তু সঠিক পথে। কোনো সেল না।</b>
+<b>🤖🆓️Our bot is free—please don’t try to sell it, and never pay for bots like this.🚫💸</b>
 
 ✨ <b>কিভাবে শুরু?</b>
-1️⃣ <b>Account Create Link থেকে অ্যাকাউন্ট করে যেকোনো অ্যামাউন্ট ডিপোজিট করুন</b>
-2️⃣ <b>প্রোফাইল থেকে Trader ID কপি করুন (শুধু নাম্বার, # ছাড়া)</b>
+1️⃣ <b>Account Create Link থেকে অ্যাকাউন্ট করে যেকোনো অ্যামাউন্ট ডিপোজিট করুন।</b>
+2️⃣ <b>প্রোফাইল থেকে Trader ID কপি করুন। (শুধু নাম্বার, # ছাড়া)</b>
 
-⚠️ <b>কোনো বট ১০০% উইন দেয় না - আমরা ১% রিস্কে সেফ থাকতে শেখাই</b>
+⚠️ <b>কোনো বট ১০০% উইন দেয় না - আমরা ১% রিস্কে সেফ থাকতে শেখাই।</b>
 """
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -366,7 +366,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     user_trader_map[user.id] = tid
     kb = [
-        [InlineKeyboardButton(" হ্যাঁ, ডিপোজিট করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("❌ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
+        [InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("❌ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
         [InlineKeyboardButton("📸 Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
     ]
     await update.message.reply_text(f" ID <code>{tid}</code> Received!\n💰 <b>ডিপোজিট করেছেন?</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
@@ -395,7 +395,7 @@ async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"❌ {e}")
         return
     tid = user_trader_map.get(user.id, "N/A")
-    kb = [[InlineKeyboardButton(" হ্যাঁ, ডিপোজিট করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না", callback_data=f"dpnM_{user.id}_{tid}")]]
+    kb = [[InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না", callback_data=f"dpnM_{user.id}_{tid}")]]
     await update.message.reply_text(f"📸 Received ID {tid}\n💰 ডিপোজিট করেছেন?", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     try:
         if ADMIN_ID != 0:
@@ -454,7 +454,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if user.id != ADMIN_ID:
             return
         kb_custom = [
-            [InlineKeyboardButton("❌ Deposit nai", callback_data=f"cmdep_{uid}"), InlineKeyboardButton("❌ Link theke na", callback_data=f"cmnolink_{uid}")],
+            [InlineKeyboardButton("❌ Deposit nai", callback_data=f"cmdep_{uid}"), InlineKeyboardButton("🚫 Link theke na", callback_data=f"cmnolink_{uid}")],
             [InlineKeyboardButton("📸 Screenshot chai", callback_data=f"cmscreen_{uid}"), InlineKeyboardButton("✍️ Nije likhbo", callback_data=f"cmwrite_{uid}")],
             [InlineKeyboardButton("⬅️ Back", callback_data=f"ap_{uid}_N/A")]
         ]
@@ -473,7 +473,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.edit_message_text(f"❌ {e}")
     elif d.startswith("cmnolink_"):
         uid = d.split("_")[1]
-        msg = f"❌ Link theke na\nNew account khulun: {AFFILIATE_LINK}"
+        msg = f"🚫 Link theke na\nNew account khulun: {AFFILIATE_LINK}"
         try:
             await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
             await q.edit_message_text(f" Sent to {uid}")
@@ -537,7 +537,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text += f"{idx+1}. ID:{trader} | User:{user_id} | ${amount} | {status} | {token_short}...\n"
             # Add delete/suspend buttons per user
             kb.append([
-                InlineKeyboardButton(f"❌ Del {trader}", callback_data=f"delprem_{u['token'][:16]}"),
+                InlineKeyboardButton(f"❌ Delete {trader}", callback_data=f"delprem_{u['token'][:16]}"),
                 InlineKeyboardButton(f"⏸️ Suspend {trader}" if status=="active" else f"▶️ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
             ])
         kb.append([InlineKeyboardButton("🔄 Refresh", callback_data="manage_premium"), InlineKeyboardButton("🗑️ Delete All", callback_data="del_all_premium")])
@@ -655,13 +655,13 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
-                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK)]
+                [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK]
             ]
             msg = f"""🎉 CONGRATULATIONS PREMIUM APPROVED 🎉
 
 Trader ID: <code>{trader_id}</code>
 Deposit: ${amount}
-Status:  ACTIVE
+Status:  🟢 ACTIVE
 
 🔓 YOUR SPECIAL LINK:
 <code>{premium_link}</code>
