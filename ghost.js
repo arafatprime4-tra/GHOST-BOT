@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 738 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 745 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -552,7 +552,7 @@ function startSafetyMarginEntry(sig, asset, now){
   try{
     let curPrice = priceHistory.length ? priceHistory[priceHistory.length-1] : (parseFloat(getRealPrice())||0);
     if(!curPrice) curPrice = sig.price||0;
-    let margin = 0.00015; // VIDEO FIX: 0.00035 beshi boro chilo, EUR/USD 1.10176 theke 1.10211 jay nai, tai WAIT e atke chilo. 0.00015 = 1.5 pips, sohoje touch hoy
+    let margin = 0.00010; // VIDEO 2 FIX: 0.00015 o boro chilo, EUR/USD 1.10185 theke touch hoy nai, 0.00010 = 1 pip, sohoje touch hoy
     // JPY pair hole margin boro, COP er moto boro price er pair hole margin price onujayi
     if(asset && asset.includes("JPY")) margin = 0.015;
     if(curPrice>100) margin = curPrice*0.0004;
@@ -567,13 +567,9 @@ function startSafetyMarginEntry(sig, asset, now){
 }
 function checkSafetyMarginEntry(now){
   if(!pendingTrade) return false;
-  // VIDEO FIX: 20 sec e margin touch na hoile cancel na, current price e entry - nahole sarajibon WAIT thake
-  if(now - pendingTrade.since > 20000){
-    let fake2={signal:pendingTrade.dir, confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Margin na asay Current Price Entry", price_action_type: "Safety Margin • Timeout Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
-    pendingTrade=null; pendingSince=0;
-    lockedSignalId=fake2.signal_id; lockedUntil=now+58000; currentSignal=fake2; updateUI(fake2);
-    return true;
-  }
+  // VIDEO 2 FIX: Timeout hole entry dibe na, cancel korbe - age Timeout Entry diye DOWN disilo kintu market UP gese, loss hoito
+  // Margin touch na hoile entry na, WAIT e fire jabe, vul entry theke loss kombe
+  if(now - pendingTrade.since > 20000){ pendingTrade=null; pendingSince=0; return false; }
   let cur = priceHistory.length ? priceHistory[priceHistory.length-1] : 0;
   if(!cur) return false;
   if(cur>pendingTrade.maxPriceSeen) pendingTrade.maxPriceSeen=cur;
@@ -669,6 +665,17 @@ function fetchSignal(forcePair){
         if(!waitStart) waitStart=now;
         let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/5 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
         updateUI(waitSig); return;
+      }
+      // VIDEO 2 FIX: Backend er signal real chart er sathe milay dekho - backend vul DOWN dile kintu real chart UP thakle entry dibe na
+      if(candleHistory.length>=5 && paEnabled){
+        try{
+          let _paCheck = runPAFilter(candleHistory);
+          if(_paCheck && _paCheck.signal && _paCheck.signal!==j.signal && _paCheck.conf>=60){
+            // Backend DOWN, kintu real chart UP - backend vul, WAIT
+            let waitSig={signal:"WAIT",confidence:0,reason:"Backend "+j.signal+" vs Real Chart "+_paCheck.signal+" - Milse na, WAIT",price_action_type:"Backend vs Chart Mismatch",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"MISMATCH-"+now,status:"WAITING"};
+            updateUI(waitSig); return;
+          }
+        }catch(e){}
       }
       // HUMAN TRADER ENTRY: Opening theke direct entry na, Safety Margin er jonno wait
       waitStart=0;
