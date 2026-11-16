@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 855 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 863 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -85,7 +85,7 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 855</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 863</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
@@ -386,7 +386,8 @@ let TOKEN="";try{
 }catch(e){}
 let currentSignal=null;let currentPair="GBPUSD";let priceHistory=[];let candleHistory=[];let lockedSignalId="";let lockedUntil=0;let waitStart=0;
 let pendingTrade=null;let pendingSince=0;let fullMarketChecked=0;
-let confirmDir=null, confirmCandle=-1, confirmTime=0, nextCandleOpen=0, nextMarginTarget=0, confirmAsset=""; // CONFIRM + NEXT CANDLE
+let confirmDir=null, confirmCandle=-1, confirmTime=0, nextCandleOpen=0, nextMarginTarget=0, confirmAsset="";
+let holdDir=null, holdUntil=0, holdSignal=null; // HOLD: DOWN/UP 55 sec dhore rakhbe, WAIT overwrite korte parbe na // CONFIRM + NEXT CANDLE
 function getCurrentMarket(){
   try{
     // FIX: Pair list khola thakle switch koro na - user list browse kortese
@@ -518,6 +519,14 @@ function showSTOP(){
   updateLossUI();
 }
 function updateUI(j){
+  // HOLD FIX: DOWN/UP dekhale 55 sec WAIT dibo na - Video te DOWN 1 sec por WAIT hoye jaito, eitai asol dosh chilo
+  // Fetch race, pair misread, autoDetect - joto karon e hok, HOLD thakle WAIT asbe na
+  try{
+    if(j && (j.signal==="WAIT"||j.direction==="WAIT") && holdUntil && Date.now()<holdUntil && holdSignal){
+      // HOLD er signal tai dekhau, WAIT na
+      j = holdSignal;
+    }
+  }catch(e){}
   // FLICKER FIX: Locked DOWN/UP thakle WAIT diye overwrite korbe na - Video te DOWN WAIT DOWN WAIT flicker er main karon eita chilo
   // Ekbar DOWN/UP lock hoile WAIT asleo DOWN/UP e thakbe, 1 sec por por paltaabe na
   try{
@@ -653,7 +662,7 @@ function checkSafetyMarginEntry(now){
         let _fake={signal: pendingTrade.dir, confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Trending Entry - Margin na asleo trend strong", price_action_type: "Trending • Direct Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
         let _a = pendingTrade.asset;
         pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
-        lockedSignalId=_fake.signal_id; lockedUntil=now+58000; currentSignal=_fake; updateUI(_fake);
+        lockedSignalId=_fake.signal_id; lockedUntil=now+58000; currentSignal=_fake; holdDir=_fake.signal; holdUntil=now+55000; holdSignal=_fake; updateUI(_fake);
         return true;
       }
       // LATE FIX: Dam already 0.00040 er beshi ulta dike chole gese, ekhon entry dile half market e entry hobe, loss hobe - cancel
@@ -691,7 +700,7 @@ function checkSafetyMarginEntry(now){
     if(cur >= pendingTrade.targetPrice){
       let fake={signal:"PUT", confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Margin Touch " + pendingTrade.targetPrice.toFixed(5) + " - Onuman Profit", price_action_type: "Safety Margin DOWN • Margin Touch Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
       pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
-      lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake);
+      lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; holdDir=fake.signal; holdUntil=now+55000; holdSignal=fake; updateUI(fake);
       return true;
     }
   }
@@ -700,7 +709,7 @@ function checkSafetyMarginEntry(now){
     if(cur <= pendingTrade.targetPrice){
       let fake={signal:"CALL", confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Margin Touch " + pendingTrade.targetPrice.toFixed(5) + " - Onuman Profit", price_action_type: "Safety Margin UP • Margin Touch Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
       pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
-      lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake);
+      lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; holdDir=fake.signal; holdUntil=now+55000; holdSignal=fake; updateUI(fake);
       return true;
     }
   }
@@ -711,6 +720,8 @@ function checkSafetyMarginEntry(now){
 }
 function fetchSignal(forcePair){
   let now=Date.now();
+  // HOLD FIX: DOWN/UP hold thakle fetch korbo na, HOLD signal e dekhau - nahole fetch race e WAIT overwrite kore
+  if(holdUntil && now<holdUntil && holdSignal){ updateUI(holdSignal); return; }
   let prot=check_loss_protection();
   if(!prot.allowed){
     // FIX: DIRECT OFF - purano signal clear, nahole 500ms interval purano UP abar dekhaito
@@ -796,11 +807,14 @@ setInterval(()=>{
   // FIX: 2 Loss = DIRECT OFF - interval eo protection check, nahole STOP er majhe UP flicker hoto
   let protI=check_loss_protection();
   if(!protI.allowed){ showSTOP(); return; }
+  // HOLD FIX: HOLD thakle pending check o korbo na, HOLD signal e dekhau
+  if(holdUntil && Date.now()<holdUntil && holdSignal){ updateUI(holdSignal); return; }
   // SAFETY MARGIN CHECK: pending trade thakle age oita check - pending thakle currentSignal update korbo na, nahole WAIT ar UP nachanachi kore
   if(pendingTrade){ checkSafetyMarginEntry(Date.now()); return; }
   // STABLE FIX: Lock thakle autoDetectMarket call korbo na - lock clear hoye flip hoy
   if(!(lockedSignalId && Date.now()<lockedUntil && currentSignal) && !pendingTrade) autoDetectMarket();
   if(!currentSignal){ let secEl=document.getElementById("gh-sec"); if(secEl){let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";} return; }
+  if(holdUntil && Date.now()>=holdUntil){ holdDir=null; holdUntil=0; holdSignal=null; }
   let rem=Math.max(0,Math.ceil((currentSignal.expiry_timestamp-Date.now())/1000));
   let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=rem+"s";
   if(rem<=0){ /* FLICKER FIX: rem 0 hoileo 2 sec grace, nahole DOWN 1 sec por WAIT hoye jay */ if(Date.now()-lockedUntil>2000){ currentSignal=null; lockedSignalId=""; lockedUntil=0; } } else updateUI(currentSignal);
