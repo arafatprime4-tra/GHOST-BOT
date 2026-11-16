@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 863 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 860 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -85,7 +85,7 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 863</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 870</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
@@ -782,20 +782,17 @@ function fetchSignal(forcePair){
       // VIDEO 2 FIX: Backend er signal real chart er sathe milay dekho - backend vul DOWN dile kintu real chart UP thakle entry dibe na
       // FLICKER FIX: Locked signal thakle fetchSignal WAIT dibe na
       if(lockedSignalId && Date.now()<lockedUntil && currentSignal && (currentSignal.signal==="CALL"||currentSignal.signal==="UP"||currentSignal.signal==="PUT"||currentSignal.signal==="DOWN")){ return; }
-      if(candleHistory.length>=5 && paEnabled){
-        try{
-          let _paCheck = runPAFilter(candleHistory);
-          if(_paCheck && _paCheck.signal && _paCheck.signal!==j.signal && _paCheck.conf>=60){
-            // Backend DOWN, kintu real chart UP - backend vul, WAIT
-            let waitSig={signal:"WAIT",confidence:0,reason:"Backend "+j.signal+" vs Real Chart "+_paCheck.signal+" - Milse na, WAIT",price_action_type:"Backend vs Chart Mismatch",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"MISMATCH-"+now,status:"WAITING"};
-            updateUI(waitSig); return;
-          }
-        }catch(e){}
-      }
-      // HUMAN TRADER ENTRY: Opening theke direct entry na, Safety Margin er jonno wait
+      // PA MISMATCH BAD - candleHistory 1 sec e banano, PA proti second paltae, tai DOWN 1 sec por WAIT hoye jaito. Backend kei biswas korbo, PA check bad.
+      // SIMPLE DIRECT: Backend ACTIVE asle direct DOWN/UP, pending/margin er jotil logic bad - eitai flicker kortasilo
+      // User bolse margin 100% na, trending thekeo dibe, tai direct e thik. DOWN asle 55 sec DOWN ei thakbe, WAIT asbe na
+      // Margin ta backend e already hisab kora - backend er signal e margin included, frontend e abar margin lagbe na
       waitStart=0;
-      if(pendingTrade && pendingTrade.asset===asset){ return; } // VIDEO FIX: Pending thakle notun banabe na, nahole timer reset hoye WAIT e atke thake
-      startSafetyMarginEntry(j, asset, now); return;
+      if(pendingTrade && pendingTrade.asset===asset){ return; }
+      // Direct lock + HOLD
+      let _direct = {signal: j.signal, confidence: j.confidence||75, reason: j.reason||"Backend Confirm", price_action_type: j.price_action_type||"Backend", market: asset, pair: asset, expiry_timestamp: now+58000, signal_id: j.signal_id|| (asset+"-DIRECT-"+now), status:"ACTIVE"};
+      pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
+      lockedSignalId=_direct.signal_id; lockedUntil=now+58000; currentSignal=_direct; holdDir=_direct.signal; holdUntil=now+55000; holdSignal=_direct;
+      updateUI(_direct); return;
     }
   }).catch(()=>{});
 }
