@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 827 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 855 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -556,6 +556,9 @@ function updateUI(j){
 // DOWN er jonno: candle ektu upore gele upor theke entry, rejection kheye niche jabe. UP er jonno ulta: candle ektu niche gele niche theke entry.
 function startSafetyMarginEntry(sig, asset, now){
   try{
+    // DANCE FIX: Notun Confirm asle purano UP/DOWN clear - nahole purano UP ar notun WAIT 500ms por por palta palti kore, eitai nachanachi chilo
+    // User thik bolse: Confirm Next Candle Wait lekha ta sthir thakbe, UP WAIT UP korbe na
+    currentSignal=null; lockedSignalId=""; lockedUntil=0;
     // CONFIRM + NEXT CANDLE: Jodi already confirm ache, notun confirm banabe na, nahole WAIT UP WAIT flicker hoy
     if(confirmDir && confirmCandle>=0){
       let curC = Math.floor(now/60000);
@@ -638,6 +641,31 @@ function checkSafetyMarginEntry(now){
     }
     pendingTrade.targetPrice = nextMarginTarget;
     pendingTrade.openPrice = nextCandleOpen;
+  }
+  // TRENDING FIX: User bolse margin 100% na, kokhono trending thekei dibe. Porer candle e dam jodi margin er ulta dike 0.00030 chole jay (strong trend), tahole margin er jonno ar wait korbo na, trend thekei entry dibo
+  // Jemon DOWN confirm, porer candle e dam niche 0.00030 chole gese, margin upore asbe na, tokhon trend thekei DOWN
+  // Ar UP confirm, porer candle e dam upore 0.00030 chole gese, tokhon trend thekei UP
+  {
+    let _curT = priceHistory.length ? priceHistory[priceHistory.length-1] : 0;
+    if(_curT && nextCandleOpen){
+      let _move = pendingTrade.dir==="PUT" ? (nextCandleOpen - _curT) : (_curT - nextCandleOpen);
+      if(_move >= 0.00030){
+        let _fake={signal: pendingTrade.dir, confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Trending Entry - Margin na asleo trend strong", price_action_type: "Trending • Direct Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
+        let _a = pendingTrade.asset;
+        pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
+        lockedSignalId=_fake.signal_id; lockedUntil=now+58000; currentSignal=_fake; updateUI(_fake);
+        return true;
+      }
+      // LATE FIX: Dam already 0.00040 er beshi ulta dike chole gese, ekhon entry dile half market e entry hobe, loss hobe - cancel
+      // User bolse: Market half e chole gele tokhon trade dey, eta kon confirmation
+      let _late = pendingTrade.dir==="PUT" ? (_curT - nextCandleOpen) : (nextCandleOpen - _curT);
+      if(_late >= 0.00040){
+        let _a2 = pendingTrade.asset;
+        pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
+        let _w={signal:"WAIT", confidence:0, reason:"Late Entry Cancel - Market half chole gese, ekhon entry nile loss", price_action_type:"Late Cancel", market:_a2, pair:_a2, expiry_timestamp: now+5000, signal_id:"LATE-"+now, status:"WAITING"};
+        updateUI(_w); return false;
+      }
+    }
   }
   let cur = priceHistory.length ? priceHistory[priceHistory.length-1] : 0;
   if(!cur) return false;
@@ -774,8 +802,8 @@ setInterval(()=>{
   // FIX: 2 Loss = DIRECT OFF - interval eo protection check, nahole STOP er majhe UP flicker hoto
   let protI=check_loss_protection();
   if(!protI.allowed){ showSTOP(); return; }
-  // SAFETY MARGIN CHECK: pending trade thakle age oita check - pullback + rejection hoile entry
-  if(pendingTrade){ checkSafetyMarginEntry(Date.now()); }
+  // SAFETY MARGIN CHECK: pending trade thakle age oita check - pending thakle currentSignal update korbo na, nahole WAIT ar UP nachanachi kore
+  if(pendingTrade){ checkSafetyMarginEntry(Date.now()); return; }
   // STABLE FIX: Lock thakle autoDetectMarket call korbo na - lock clear hoye flip hoy
   if(!(lockedSignalId && Date.now()<lockedUntil && currentSignal) && !pendingTrade) autoDetectMarket();
   if(!currentSignal){ let secEl=document.getElementById("gh-sec"); if(secEl){let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";} return; }
