@@ -1,5 +1,5 @@
-// NACHANACHI OFF - 1 BOT ONLY: Purano bot er interval maro, nahole 2 ta bot ek sathe DOWN WAIT DOWN WAIT kore
-try{ for(let _i=1;_i<2000;_i++){ try{clearInterval(_i); clearTimeout(_i);}catch(e){} } let _o=document.getElementById('ghost-bot'); if(_o) _o.remove(); }catch(e){}
+// NACHANACHI OFF - 1 BOT ONLY: Shob purano panel maro, 1 ta e thakbe - getElementById 1 ta mare, querySelectorAll shob mare, tai 2 ta panel ghost hoye chilo
+try{ for(let _i=1;_i<10000;_i++){ try{clearInterval(_i); clearTimeout(_i);}catch(e){} } document.querySelectorAll('#ghost-bot').forEach(e=>e.remove()); document.querySelectorAll('[id="ghost-bot"]').forEach(e=>e.remove()); }catch(e){}
 // GHOST v5 - Glass .10 + Safety Margin Touch Entry - 860 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
@@ -87,7 +87,7 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 872</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 873</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
