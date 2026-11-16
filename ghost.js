@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 752 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 794 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -557,11 +557,41 @@ function startSafetyMarginEntry(sig, asset, now){
   try{
     let curPrice = priceHistory.length ? priceHistory[priceHistory.length-1] : (parseFloat(getRealPrice())||0);
     if(!curPrice) curPrice = sig.price||0;
-    let margin = 0.00010; // VIDEO 2 FIX: 0.00015 o boro chilo, EUR/USD 1.10185 theke touch hoy nai, 0.00010 = 1 pip, sohoje touch hoy
-    // JPY pair hole margin boro, COP er moto boro price er pair hole margin price onujayi
+    let margin = 0.00010;
     if(asset && asset.includes("JPY")) margin = 0.015;
     if(curPrice>100) margin = curPrice*0.0004;
-    let target = sig.signal==="PUT" ? curPrice + margin : curPrice - margin;
+    // HUMAN TRADER FIX: User thik bolse - market niche namar por DOWN dile confirm loss, eita paltu trader er moto.
+    // Asol trader Support e UP dey, Resistance e DOWN dey. Margin ekhon Support/Resistance theke, curPrice+1pip theke na.
+    let support = 0, resistance = 0;
+    try{
+      if(candleHistory && candleHistory.length>=3){
+        let lows = candleHistory.slice(-5).map(c=>c.low);
+        let highs = candleHistory.slice(-5).map(c=>c.high);
+        support = Math.min(...lows);
+        resistance = Math.max(...highs);
+      }
+    }catch(e){}
+    // DOWN chaile kintu price Support er kache (1 pip er moddhe) - DOWN dibo na, WAIT dibo, karon support theke dam upore uthbe
+    if(sig.signal==="PUT" && support && Math.abs(curPrice - support) <= 0.00010){
+      let w={signal:"WAIT", confidence:0, reason:"Support "+support.toFixed(5)+" e DOWN na - Support theke dam upore uthbe, DOWN nile confirm loss. WAIT", price_action_type:"Support Block • DOWN Reject", market:asset, pair:asset, expiry_timestamp: now+5000, signal_id:"SUPPORT-BLOCK-"+now, status:"WAITING"};
+      updateUI(w); return;
+    }
+    // UP chaile kintu price Resistance er kache - UP dibo na, WAIT dibo
+    if(sig.signal==="CALL" && resistance && Math.abs(curPrice - resistance) <= 0.00010){
+      let w2={signal:"WAIT", confidence:0, reason:"Resistance "+resistance.toFixed(5)+" e UP na - Resistance theke dam niche nambe, UP nile confirm loss. WAIT", price_action_type:"Resistance Block • UP Reject", market:asset, pair:asset, expiry_timestamp: now+5000, signal_id:"RES-BLOCK-"+now, status:"WAITING"};
+      updateUI(w2); return;
+    }
+    // Margin = Support / Resistance, curPrice+margin na
+    let target;
+    if(sig.signal==="PUT"){
+      // DOWN er margin = Resistance - 1 pip, dam upore Resistance e uthle DOWN
+      if(resistance && resistance > curPrice && (resistance - curPrice) <= 0.00040) target = resistance - 0.00002;
+      else target = curPrice + margin;
+    }else{
+      // UP er margin = Support + 1 pip, dam niche Support e namle UP
+      if(support && support < curPrice && (curPrice - support) <= 0.00040) target = support + 0.00002;
+      else target = curPrice - margin;
+    }
     pendingTrade = {dir: sig.signal, asset: asset, openPrice: curPrice, targetPrice: target, margin: margin, reason: sig.reason||"", conf: sig.confidence||75, pa: sig.price_action_type||"", signal_id: sig.signal_id|| (asset+"-SAFE-"+now), since: now, maxPriceSeen: curPrice, minPriceSeen: curPrice, touched: false};
     pendingSince = now;
     // UI te Waiting Pullback dekhau - entry na, analysis sesh, ekhon margin er jonno wait
@@ -582,8 +612,20 @@ function checkSafetyMarginEntry(now){
   // VIDEO FIX: Rejection er jonno wait korbo na - margin touch korlei entry
   // Trader video te jemon korse: 1.11436 margin e aslei trade nise, rejection candle er jonno bose thake nai
   // Karon onuman agei kora sesh - BOS + OB + FVG diye agei bujha gese ei margin theke profit hobe, tai touch korlei entry
-  // DOWN er jonno: price upor e margin e touch korlei DOWN entry
+  // HUMAN FIX: DOWN entry er age check - price jodi Support er kache chole ase, DOWN dibo na, cancel
   if(pendingTrade.dir==="PUT"){
+    try{
+      if(candleHistory && candleHistory.length>=3){
+        let sup = Math.min(...candleHistory.slice(-5).map(c=>c.low));
+        if(sup && Math.abs(cur - sup) <= 0.00008){
+          let _asset = pendingTrade.asset;
+          pendingTrade=null; pendingSince=0;
+          let wb={signal:"WAIT", confidence:0, reason:"Support "+sup.toFixed(5)+" e DOWN cancel - Support theke bounce hobe, DOWN nile loss", price_action_type:"Support Block", market:_asset, pair:_asset, expiry_timestamp: now+5000, signal_id:"SUP-CANCEL-"+now, status:"WAITING"};
+          updateUI(wb); return false;
+        }
+      }
+    }catch(e){}
+    // DOWN er jonno: price upor e margin e touch korlei DOWN entry
     if(cur >= pendingTrade.targetPrice){
       let fake={signal:"PUT", confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Margin Touch " + pendingTrade.targetPrice.toFixed(5) + " - Onuman Profit", price_action_type: "Safety Margin DOWN • Margin Touch Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
       pendingTrade=null; pendingSince=0;
