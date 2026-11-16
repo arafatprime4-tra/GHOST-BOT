@@ -85,7 +85,7 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM v4 GLASS</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 855</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
@@ -740,11 +740,8 @@ function fetchSignal(forcePair){
           if(pa && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf>=35){
             // STABLE FIX: PA signal er expiry = lock er sathe same (58s), nahole 500ms interval age clear kore flip hoy
             // PA signal o opening theke na, Safety Margin theke entry - 8 candle e enough
-            if(candleHistory.length<5 && (now - waitStart < 15000 || !waitStart)){
-              if(!waitStart) waitStart=now;
-              let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/5 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
-              updateUI(waitSig); return;
-            }
+            // ANALYSIS WAIT BAD - User notun file bosaileo WAIT UP WAIT kortasilo karon candleHistory 5 hoy nai, waitStart bar bar reset hoito. Ekhon analysis er jonno WAIT dibo na, direct signal e jabo
+            if(false){}
             let fake={...pa,market:asset,pair:asset,confidence:pa.conf,expiry_timestamp:now+58000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason,status:"ACTIVE"};
             startSafetyMarginEntry(fake, asset, now); return;
           }
@@ -759,7 +756,7 @@ function fetchSignal(forcePair){
         if(first && last && _move>0.0004){
           let dir = last>first ? "CALL" : "PUT";
           let fake={signal:dir,confidence:58,reason:"Momentum • "+(dir==="CALL"?"Uptrend":"Downtrend"),price_action_type:"Momentum",market:asset,pair:asset,expiry_timestamp:now+58000,signal_id:asset+"-MOM-"+now,status:"ACTIVE"};
-          waitStart=0; startSafetyMarginEntry(fake, asset, now); return;
+          startSafetyMarginEntry(fake, asset, now); return; // waitStart reset bad, WAIT UP WAIT loop hoy
         }
       }
       // PA signal na pele WAIT, kintu waitStart track rakho
@@ -769,11 +766,8 @@ function fetchSignal(forcePair){
     if(j.status==="ACTIVE"&&(j.signal==="CALL"||j.signal==="PUT")){
       // FULL MARKET ANALYSIS: 8 candle hoilei analysis sesh - 15 chilo beshi, tai 5 min atke thakto
       // 25 sec er beshi Analyzing hole bypass - getRealPrice fail korleo atke thakbe na
-      if(candleHistory.length<5 && (now - waitStart < 15000 || !waitStart)){
-        if(!waitStart) waitStart=now;
-        let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/5 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
-        updateUI(waitSig); return;
-      }
+      // ANALYSIS WAIT BAD - Same karon, candleHistory 5 na hoile WAIT e atke thakto, tarpor UP 1 sec diye abar WAIT. Ekhon direct backend signal e jabo
+      if(false){}
       // VIDEO 2 FIX: Backend er signal real chart er sathe milay dekho - backend vul DOWN dile kintu real chart UP thakle entry dibe na
       // FLICKER FIX: Locked signal thakle fetchSignal WAIT dibe na
       if(lockedSignalId && Date.now()<lockedUntil && currentSignal && (currentSignal.signal==="CALL"||currentSignal.signal==="UP"||currentSignal.signal==="PUT"||currentSignal.signal==="DOWN")){ return; }
