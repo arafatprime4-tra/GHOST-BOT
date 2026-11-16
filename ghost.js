@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 794 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 827 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -386,6 +386,7 @@ let TOKEN="";try{
 }catch(e){}
 let currentSignal=null;let currentPair="GBPUSD";let priceHistory=[];let candleHistory=[];let lockedSignalId="";let lockedUntil=0;let waitStart=0;
 let pendingTrade=null;let pendingSince=0;let fullMarketChecked=0;
+let confirmDir=null, confirmCandle=-1, confirmTime=0, nextCandleOpen=0, nextMarginTarget=0, confirmAsset=""; // CONFIRM + NEXT CANDLE
 function getCurrentMarket(){
   try{
     // FIX: Pair list khola thakle switch koro na - user list browse kortese
@@ -555,6 +556,13 @@ function updateUI(j){
 // DOWN er jonno: candle ektu upore gele upor theke entry, rejection kheye niche jabe. UP er jonno ulta: candle ektu niche gele niche theke entry.
 function startSafetyMarginEntry(sig, asset, now){
   try{
+    // CONFIRM + NEXT CANDLE: Jodi already confirm ache, notun confirm banabe na, nahole WAIT UP WAIT flicker hoy
+    if(confirmDir && confirmCandle>=0){
+      let curC = Math.floor(now/60000);
+      if(curC <= confirmCandle+1){ return; }
+      // 2 candle par hoye gese, purano confirm clear
+      confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
+    }
     let curPrice = priceHistory.length ? priceHistory[priceHistory.length-1] : (parseFloat(getRealPrice())||0);
     if(!curPrice) curPrice = sig.price||0;
     let margin = 0.00010;
@@ -581,30 +589,56 @@ function startSafetyMarginEntry(sig, asset, now){
       let w2={signal:"WAIT", confidence:0, reason:"Resistance "+resistance.toFixed(5)+" e UP na - Resistance theke dam niche nambe, UP nile confirm loss. WAIT", price_action_type:"Resistance Block • UP Reject", market:asset, pair:asset, expiry_timestamp: now+5000, signal_id:"RES-BLOCK-"+now, status:"WAITING"};
       updateUI(w2); return;
     }
-    // Margin = Support / Resistance, curPrice+margin na
-    let target;
-    if(sig.signal==="PUT"){
-      // DOWN er margin = Resistance - 1 pip, dam upore Resistance e uthle DOWN
-      if(resistance && resistance > curPrice && (resistance - curPrice) <= 0.00040) target = resistance - 0.00002;
-      else target = curPrice + margin;
-    }else{
-      // UP er margin = Support + 1 pip, dam niche Support e namle UP
-      if(support && support < curPrice && (curPrice - support) <= 0.00040) target = support + 0.00002;
-      else target = curPrice - margin;
-    }
+    // CONFIRM + NEXT CANDLE: Ekhon entry na, sudhu CONFIRM save. Entry hobe PORER candle e margin theke, opening theke na.
+    // Jemon tumi video te bolso: DOWN confirm asle porer candle e dam ektu upore uthle (margin) oi upore theke DOWN, niche theke DOWN na.
+    // UP confirm asle porer candle e dam ektu niche namle (margin) oi niche theke UP, upore theke UP na.
+    confirmDir = sig.signal;
+    confirmCandle = Math.floor(now/60000);
+    confirmTime = now;
+    confirmAsset = asset;
+    nextCandleOpen = 0; nextMarginTarget = 0;
+    // pendingTrade ekhon banabo na, porer candle e banabo - nahole same candle e opening theke entry hoye jay
+    let target = 0; // porer candle e set hobe
+    // Old pendingTrade create bad - ekhon sudhu confirm, pendingTrade null rakhi
+    pendingTrade = {dir: sig.signal, asset: asset, openPrice: curPrice, targetPrice: 0, margin: margin, reason: sig.reason||"", conf: sig.confidence||75, pa: sig.price_action_type||"", signal_id: sig.signal_id|| (asset+"-CONFIRM-"+now), since: now, maxPriceSeen: curPrice, minPriceSeen: curPrice, touched: false, isConfirm: true, confirmCandle: confirmCandle, support: support, resistance: resistance};
     pendingTrade = {dir: sig.signal, asset: asset, openPrice: curPrice, targetPrice: target, margin: margin, reason: sig.reason||"", conf: sig.confidence||75, pa: sig.price_action_type||"", signal_id: sig.signal_id|| (asset+"-SAFE-"+now), since: now, maxPriceSeen: curPrice, minPriceSeen: curPrice, touched: false};
     pendingSince = now;
-    // UI te Waiting Pullback dekhau - entry na, analysis sesh, ekhon margin er jonno wait
-    let waitSig = {signal:"WAIT", confidence: sig.confidence||0, reason: (sig.signal==="PUT" ? "DOWN Confirm - Upor theke Entry er jonno Wait" : "UP Confirm - Niche theke Entry er jonno Wait") + " • Pullback: " + target.toFixed(5), price_action_type: "Safety Margin Wait • " + (sig.price_action_type||""), market: asset, pair: asset, expiry_timestamp: now+30000, signal_id: "PENDING-"+now, status:"WAITING"};
+    // UI te Confirm dekhau - stable, flicker korbe na, remain second dibo na
+    let waitSig = {signal:"WAIT", confidence: sig.confidence||0, reason: (sig.signal==="PUT" ? "DOWN Confirm • Porer Candle e Upor theke Margin e Entry" : "UP Confirm • Porer Candle e Niche theke Margin e Entry") + " • Confirm Candle: " + confirmCandle, price_action_type: "Confirm • Next Candle Margin Wait", market: asset, pair: asset, expiry_timestamp: now+60000, signal_id: "PENDING-"+now, status:"WAITING"};
     updateUI(waitSig);
     console.log("GHOST SAFETY MARGIN: " + sig.signal + " open " + curPrice + " target " + target);
   }catch(e){ pendingTrade=null; }
 }
 function checkSafetyMarginEntry(now){
   if(!pendingTrade) return false;
-  // VIDEO 2 FIX: Timeout hole entry dibe na, cancel korbe - age Timeout Entry diye DOWN disilo kintu market UP gese, loss hoito
-  // Margin touch na hoile entry na, WAIT e fire jabe, vul entry theke loss kombe
-  if(now - pendingTrade.since > 20000){ pendingTrade=null; pendingSince=0; return false; }
+  // CONFIRM + NEXT CANDLE: Same candle e entry na, porer candle e margin theke entry
+  let curCandle = Math.floor(now/60000);
+  let confCandle = pendingTrade.confirmCandle!==undefined ? pendingTrade.confirmCandle : Math.floor(pendingTrade.since/60000);
+  // Ekhono confirm candle e achi - entry na, porer candle er jonno WAIT, stable UI
+  if(curCandle <= confCandle){
+    let w={signal:"WAIT", confidence: pendingTrade.conf, reason: (pendingTrade.dir==="PUT" ? "DOWN Confirm • Porer Candle e Upor Margin Wait" : "UP Confirm • Porer Candle e Niche Margin Wait"), price_action_type:"Confirm • Next Candle Wait", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+60000, signal_id:"PENDING-"+pendingTrade.since, status:"WAITING"};
+    updateUI(w); return false;
+  }
+  // Porer candle er poreo margin na asle (2 candle par) - cancel, chase korbo na
+  if(curCandle > confCandle+1){ pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0; return false; }
+  // Porer candle e dhuklam - ekhon margin set koro: DOWN er jonno Next Candle Open + margin, UP er jonno Next Candle Open - margin
+  // Opening theke na, margin theke - jemon tumi bolso: DOWN confirm asle dam ektu upore uthle oi upore theke DOWN
+  if(!nextCandleOpen){
+    let _cur = priceHistory.length ? priceHistory[priceHistory.length-1] : 0;
+    if(!_cur) return false;
+    nextCandleOpen = _cur;
+    let _m = pendingTrade.margin||0.00010;
+    // Support/Resistance thakle oi khane margin, nahole Next Open +/- margin
+    if(pendingTrade.dir==="PUT"){
+      if(pendingTrade.resistance && pendingTrade.resistance > nextCandleOpen && (pendingTrade.resistance - nextCandleOpen) <= 0.00040) nextMarginTarget = pendingTrade.resistance - 0.00002;
+      else nextMarginTarget = nextCandleOpen + _m;
+    }else{
+      if(pendingTrade.support && pendingTrade.support < nextCandleOpen && (nextCandleOpen - pendingTrade.support) <= 0.00040) nextMarginTarget = pendingTrade.support + 0.00002;
+      else nextMarginTarget = nextCandleOpen - _m;
+    }
+    pendingTrade.targetPrice = nextMarginTarget;
+    pendingTrade.openPrice = nextCandleOpen;
+  }
   let cur = priceHistory.length ? priceHistory[priceHistory.length-1] : 0;
   if(!cur) return false;
   if(cur>pendingTrade.maxPriceSeen) pendingTrade.maxPriceSeen=cur;
@@ -628,7 +662,7 @@ function checkSafetyMarginEntry(now){
     // DOWN er jonno: price upor e margin e touch korlei DOWN entry
     if(cur >= pendingTrade.targetPrice){
       let fake={signal:"PUT", confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Margin Touch " + pendingTrade.targetPrice.toFixed(5) + " - Onuman Profit", price_action_type: "Safety Margin DOWN • Margin Touch Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
-      pendingTrade=null; pendingSince=0;
+      pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
       lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake);
       return true;
     }
@@ -637,14 +671,13 @@ function checkSafetyMarginEntry(now){
   if(pendingTrade.dir==="CALL"){
     if(cur <= pendingTrade.targetPrice){
       let fake={signal:"CALL", confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Margin Touch " + pendingTrade.targetPrice.toFixed(5) + " - Onuman Profit", price_action_type: "Safety Margin UP • Margin Touch Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
-      pendingTrade=null; pendingSince=0;
+      pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
       lockedSignalId=fake.signal_id; lockedUntil=now+58000; currentSignal=fake; updateUI(fake);
       return true;
     }
   }
-  // Ekhono pullback ase nai - Waiting UI update rakho
-  let remain = Math.max(0, Math.ceil((30000-(now-pendingTrade.since))/1000));
-  let waitSig2={signal:"WAIT", confidence: pendingTrade.conf, reason: (pendingTrade.dir==="PUT" ? "DOWN Confirm - Upor theke Entry Wait " : "UP Confirm - Niche theke Entry Wait ") + "• Target " + pendingTrade.targetPrice.toFixed(5) + " • " + remain + "s • Price " + cur.toFixed(5), price_action_type: "Safety Margin Wait", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+5000, signal_id: "PENDING-"+pendingTrade.since, status:"WAITING"};
+  // Ekhono margin ase nai - Waiting UI stable, remain second dibo na, nahole proti second text palte WAIT UP WAIT flicker hoy
+  let waitSig2={signal:"WAIT", confidence: pendingTrade.conf, reason: (pendingTrade.dir==="PUT" ? "DOWN Confirm • Upor Margin Wait Target " : "UP Confirm • Niche Margin Wait Target ") + pendingTrade.targetPrice.toFixed(5), price_action_type: "Next Candle Margin Wait", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+60000, signal_id: "PENDING-"+pendingTrade.since, status:"WAITING"};
   updateUI(waitSig2);
   return false;
 }
