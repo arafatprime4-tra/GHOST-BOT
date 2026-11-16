@@ -533,9 +533,9 @@ function updateUI(j){
     if(dir==="CALL"||dir==="UP"){ sigEl.className="gh-sig up"; txtEl.textContent="▲ UP"; if(arrowEl) arrowEl.textContent="▲"; if(reasonEl) reasonEl.textContent=j.reason||""; }
     else if(dir==="PUT"||dir==="DOWN"){ sigEl.className="gh-sig down"; txtEl.textContent="▼ DOWN"; if(arrowEl) arrowEl.textContent="▼"; if(reasonEl) reasonEl.textContent=j.reason||""; }
     else{ sigEl.className="gh-sig wait"; txtEl.textContent="◉ WAIT"; if(arrowEl) arrowEl.textContent="◉"; if(reasonEl) reasonEl.textContent=j.reason||"Analyzing..."; } }
-    if(paEl) paEl.textContent=j.price_action_type||"Momentum";
-    if(confEl) confEl.textContent=(j.confidence||0)+"% CONF";
-    if(barEl){ let rem=j.expiry_timestamp?Math.max(0,Math.ceil((j.expiry_timestamp-Date.now())/1000)):0; let pct=rem>0?Math.max(4,(rem/60)*100):0; barEl.style.width=pct+'%'; }
+    if(paEl){ let _pa=j.price_action_type||"Momentum"; if(paEl.textContent!==_pa) paEl.textContent=_pa; }
+    if(confEl){ let _cf=(j.confidence||0)+"% CONF"; if(confEl.textContent!==_cf) confEl.textContent=_cf; }
+    if(barEl){ let rem=j.expiry_timestamp?Math.max(0,Math.ceil((j.expiry_timestamp-Date.now())/1000)):0; let pct=rem>0?Math.max(4,(rem/60)*100):0; let _w=pct+'%'; if(barEl.style.width!==_w) barEl.style.width=_w; }
   }
   updateLossUI();
 }
