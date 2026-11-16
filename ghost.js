@@ -85,13 +85,13 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM v4 GLASS</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
 <div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK • <span id="gh-pa" style="color:#00f0ff;font-size:5.5px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
 <div class="gh-protect" id="gh-protect">🛑 2 LOSS - 30 MIN OFF - NO SIGNAL</div>
-<div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">✅ WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">❌ LOSS</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
+<div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">🟢 WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">🔴 LOSS</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
 <div class="gh-close" id="gh-close">✕ Close</div>
 `;
 if(!box.isConnected){ (document.body || document.documentElement).appendChild(box); }
@@ -161,7 +161,7 @@ function register_loss(src){
   localStorage.setItem('ghost_loss_count', String(loss_count));
   localStorage.setItem('ghost_consecutive_losses', String(consecutive_losses));
   localStorage.setItem('ghost_last_loss_ts', String(last_loss_ts));
-  console.log('❌ LOSS via '+src+': '+consecutive_losses+'/2 total '+loss_count);
+  console.log('🔴 LOSS via '+src+': '+consecutive_losses+'/2 total '+loss_count);
   try{ if(navigator.vibrate) navigator.vibrate([100,50,100]); }catch(e){}
   updateLossUI();
   if(consecutive_losses>=2){
@@ -169,16 +169,16 @@ function register_loss(src){
     currentSignal=null; lockedSignalId=""; lockedUntil=0;
     showSTOP();
   }
-  showToast('❌ LOSS '+consecutive_losses+'/2', consecutive_losses>=2 ? '30 MIN OFF - NO SIGNAL' : 'Continue');
+  showToast('🔴 LOSS '+consecutive_losses+'/2', consecutive_losses>=2 ? '30 MIN OFF - NO SIGNAL' : 'Continue');
 }
 function register_win(src){
   let _nowW = Date.now();
   if(_nowW - (window.__last_win_ts||0) < 800 && src==='MANUAL') return;
   window.__last_win_ts = _nowW;
-  console.log('✅ WIN via '+src+' - resetting');
+  console.log('🟢 WIN via '+src+' - resetting');
   if(consecutive_losses>0){ consecutive_losses=0; localStorage.setItem('ghost_consecutive_losses','0'); }
   updateLossUI();
-  showToast('✅ WIN - Losses reset', '0/2');
+  showToast('🟢 WIN - Losses reset', '0/2');
 }
 function showToast(title, subtitle){
   try{
