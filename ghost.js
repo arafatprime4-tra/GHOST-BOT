@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 733 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 738 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -91,7 +91,7 @@ box.innerHTML=`
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
 <div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK • <span id="gh-pa" style="color:#00f0ff;font-size:5.5px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
 <div class="gh-protect" id="gh-protect">🛑 2 LOSS - 30 MIN OFF - NO SIGNAL</div>
-<div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">🟢 WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">🔴 LOSS</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
+<div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">✅ WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">❌ LOSS</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
 <div class="gh-close" id="gh-close">✕ Close</div>
 `;
 if(!box.isConnected){ (document.body || document.documentElement).appendChild(box); }
@@ -552,9 +552,9 @@ function startSafetyMarginEntry(sig, asset, now){
   try{
     let curPrice = priceHistory.length ? priceHistory[priceHistory.length-1] : (parseFloat(getRealPrice())||0);
     if(!curPrice) curPrice = sig.price||0;
-    let margin = 0.00035;
+    let margin = 0.00015; // VIDEO FIX: 0.00035 beshi boro chilo, EUR/USD 1.10176 theke 1.10211 jay nai, tai WAIT e atke chilo. 0.00015 = 1.5 pips, sohoje touch hoy
     // JPY pair hole margin boro, COP er moto boro price er pair hole margin price onujayi
-    if(asset && asset.includes("JPY")) margin = 0.035;
+    if(asset && asset.includes("JPY")) margin = 0.015;
     if(curPrice>100) margin = curPrice*0.0004;
     let target = sig.signal==="PUT" ? curPrice + margin : curPrice - margin;
     pendingTrade = {dir: sig.signal, asset: asset, openPrice: curPrice, targetPrice: target, margin: margin, reason: sig.reason||"", conf: sig.confidence||75, pa: sig.price_action_type||"", signal_id: sig.signal_id|| (asset+"-SAFE-"+now), since: now, maxPriceSeen: curPrice, minPriceSeen: curPrice, touched: false};
@@ -567,8 +567,13 @@ function startSafetyMarginEntry(sig, asset, now){
 }
 function checkSafetyMarginEntry(now){
   if(!pendingTrade) return false;
-  // 30 sec er moddhe pullback na asle cancel - late entry nibo na
-  if(now - pendingTrade.since > 30000){ pendingTrade=null; pendingSince=0; return false; }
+  // VIDEO FIX: 20 sec e margin touch na hoile cancel na, current price e entry - nahole sarajibon WAIT thake
+  if(now - pendingTrade.since > 20000){
+    let fake2={signal:pendingTrade.dir, confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Margin na asay Current Price Entry", price_action_type: "Safety Margin • Timeout Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
+    pendingTrade=null; pendingSince=0;
+    lockedSignalId=fake2.signal_id; lockedUntil=now+58000; currentSignal=fake2; updateUI(fake2);
+    return true;
+  }
   let cur = priceHistory.length ? priceHistory[priceHistory.length-1] : 0;
   if(!cur) return false;
   if(cur>pendingTrade.maxPriceSeen) pendingTrade.maxPriceSeen=cur;
@@ -631,9 +636,9 @@ function fetchSignal(forcePair){
           if(pa && (pa.signal==="CALL"||pa.signal==="PUT") && pa.conf>=35){
             // STABLE FIX: PA signal er expiry = lock er sathe same (58s), nahole 500ms interval age clear kore flip hoy
             // PA signal o opening theke na, Safety Margin theke entry - 8 candle e enough
-            if(candleHistory.length<8 && (now - waitStart < 25000 || !waitStart)){
+            if(candleHistory.length<5 && (now - waitStart < 15000 || !waitStart)){
               if(!waitStart) waitStart=now;
-              let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/8 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
+              let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/5 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
               updateUI(waitSig); return;
             }
             let fake={...pa,market:asset,pair:asset,confidence:pa.conf,expiry_timestamp:now+58000,signal_id:asset+"-PA-"+now,price_action_type:pa.pa_type||pa.reason,status:"ACTIVE"};
@@ -660,14 +665,14 @@ function fetchSignal(forcePair){
     if(j.status==="ACTIVE"&&(j.signal==="CALL"||j.signal==="PUT")){
       // FULL MARKET ANALYSIS: 8 candle hoilei analysis sesh - 15 chilo beshi, tai 5 min atke thakto
       // 25 sec er beshi Analyzing hole bypass - getRealPrice fail korleo atke thakbe na
-      if(candleHistory.length<8 && (now - waitStart < 25000 || !waitStart)){
+      if(candleHistory.length<5 && (now - waitStart < 15000 || !waitStart)){
         if(!waitStart) waitStart=now;
-        let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/8 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
+        let waitSig={signal:"WAIT",confidence:0,reason:"Full Market Analysis... "+candleHistory.length+"/5 Candle",price_action_type:"Analyzing Full Market",market:asset,pair:asset,expiry_timestamp:now+5000,signal_id:"ANALYZE-"+now,status:"WAITING"};
         updateUI(waitSig); return;
       }
       // HUMAN TRADER ENTRY: Opening theke direct entry na, Safety Margin er jonno wait
       waitStart=0;
-      if(pendingTrade && pendingTrade.asset===asset && pendingTrade.dir===j.signal){ return; }
+      if(pendingTrade && pendingTrade.asset===asset){ return; } // VIDEO FIX: Pending thakle notun banabe na, nahole timer reset hoye WAIT e atke thake
       startSafetyMarginEntry(j, asset, now); return;
     }
   }).catch(()=>{});
