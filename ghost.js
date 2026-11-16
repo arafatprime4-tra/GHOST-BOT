@@ -87,7 +87,7 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 871</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM FINAL 872</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
@@ -653,14 +653,14 @@ function checkSafetyMarginEntry(now){
     pendingTrade.targetPrice = nextMarginTarget;
     pendingTrade.openPrice = nextCandleOpen;
   }
-  // TRENDING FIX: User bolse margin 100% na, kokhono trending thekei dibe. Porer candle e dam jodi margin er ulta dike 0.00030 chole jay (strong trend), tahole margin er jonno ar wait korbo na, trend thekei entry dibo
+  // TRENDING FIX: User bolse margin 100% na, kokhono trending thekei dibe. Porer candle e dam jodi margin er ulta dike 0.00010 chole jay (trend) ba 12 sec wait korle, tahole margin er jonno ar wait korbo na, trend thekei entry dibo
   // Jemon DOWN confirm, porer candle e dam niche 0.00030 chole gese, margin upore asbe na, tokhon trend thekei DOWN
   // Ar UP confirm, porer candle e dam upore 0.00030 chole gese, tokhon trend thekei UP
   {
     let _curT = priceHistory.length ? priceHistory[priceHistory.length-1] : 0;
     if(_curT && nextCandleOpen){
       let _move = pendingTrade.dir==="PUT" ? (nextCandleOpen - _curT) : (_curT - nextCandleOpen);
-      if(_move >= 0.00030){
+      if(_move >= 0.00010 || (Date.now()-pendingTrade.since>12000 && _move>=0.00005)){
         let _fake={signal: pendingTrade.dir, confidence: pendingTrade.conf, reason: pendingTrade.reason + " • Trending Entry - Margin na asleo trend strong", price_action_type: "Trending • Direct Entry", market: pendingTrade.asset, pair: pendingTrade.asset, expiry_timestamp: now+58000, signal_id: pendingTrade.signal_id, status:"ACTIVE"};
         let _a = pendingTrade.asset;
         pendingTrade=null; pendingSince=0; confirmDir=null; confirmCandle=-1; nextCandleOpen=0; nextMarginTarget=0;
