@@ -1,4 +1,4 @@
-// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 745 LINES - Margin Touch No Rejection Wait
+// GHOST v5 - Glass .10 + Safety Margin Touch Entry - 752 LINES - Margin Touch No Rejection Wait
 (function(){
 if(window.__GHOST_LOADED__){
   // FIX: 2nd tap e box DELETE na - jodi box ache, show koro. Jodi Close kora thake (box nai), abar banate dao.
@@ -517,6 +517,11 @@ function showSTOP(){
   updateLossUI();
 }
 function updateUI(j){
+  // FLICKER FIX: Locked DOWN/UP thakle WAIT diye overwrite korbe na - Video te DOWN WAIT DOWN WAIT flicker er main karon eita chilo
+  // Ekbar DOWN/UP lock hoile WAIT asleo DOWN/UP e thakbe, 1 sec por por paltaabe na
+  try{
+    if(j && (j.signal==="WAIT"||j.direction==="WAIT") && lockedSignalId && Date.now()<lockedUntil && currentSignal && (currentSignal.signal==="CALL"||currentSignal.signal==="UP"||currentSignal.signal==="PUT"||currentSignal.signal==="DOWN")){ return; }
+  }catch(e){}
   // FIX: 2 Loss = DIRECT OFF - kono signal na. updateUI teo protection check, nahole purano UP abar chole ashto (video te STOP <-> UP flicker)
   let prot0=check_loss_protection();
   if(!prot0.allowed){ showSTOP(); return; }
@@ -667,6 +672,8 @@ function fetchSignal(forcePair){
         updateUI(waitSig); return;
       }
       // VIDEO 2 FIX: Backend er signal real chart er sathe milay dekho - backend vul DOWN dile kintu real chart UP thakle entry dibe na
+      // FLICKER FIX: Locked signal thakle fetchSignal WAIT dibe na
+      if(lockedSignalId && Date.now()<lockedUntil && currentSignal && (currentSignal.signal==="CALL"||currentSignal.signal==="UP"||currentSignal.signal==="PUT"||currentSignal.signal==="DOWN")){ return; }
       if(candleHistory.length>=5 && paEnabled){
         try{
           let _paCheck = runPAFilter(candleHistory);
@@ -699,7 +706,7 @@ setInterval(()=>{
   if(!currentSignal){ let secEl=document.getElementById("gh-sec"); if(secEl){let sec=60-new Date().getSeconds();if(sec===60) sec=0;secEl.textContent=sec+"s";} return; }
   let rem=Math.max(0,Math.ceil((currentSignal.expiry_timestamp-Date.now())/1000));
   let secEl=document.getElementById("gh-sec");if(secEl) secEl.textContent=rem+"s";
-  if(rem<=0){ currentSignal=null; lockedSignalId=""; lockedUntil=0; } else updateUI(currentSignal);
+  if(rem<=0){ /* FLICKER FIX: rem 0 hoileo 2 sec grace, nahole DOWN 1 sec por WAIT hoye jay */ if(Date.now()-lockedUntil>2000){ currentSignal=null; lockedSignalId=""; lockedUntil=0; } } else updateUI(currentSignal);
 },500);
 setInterval(()=>{ if(!(lockedSignalId && Date.now()<lockedUntil && currentSignal)) autoDetectMarket(); },1500);
 setInterval(()=>fetchSignal(),3000);
