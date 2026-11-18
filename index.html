@@ -182,7 +182,7 @@ body{ padding-bottom:84px; }
 <body class="premium-locked">
 <header>
   <div class="container nav">
-    <a class="brand" href="#home">GHOST <span>PREMIUM</span><small>TRADE SMART</small></a>
+    <a class="brand" href="#home">GHOST <span>PREMIUM</span><small>TRADE SMART - v2 UNLOCK FIX</small></a>
     <button class="btn menu-toggle" id="menuToggle"><span class="css-menu-icon"><span></span><span></span><span></span></span></button>
     <nav class="navlinks" id="navlinks">
       <a href="#home">Home</a>
@@ -207,6 +207,15 @@ body{ padding-bottom:84px; }
     <a class="btn" href="https://t.me/ghostsupportbd" target="_blank">Admin</a>
   </div>
   <p style="font-size:11px;color:var(--muted);margin-top:18px">Already approved? Apnar special link ta check korun — format: giogram-backend.onrender.com/?access=TOKEN</p>
+  <!-- APPROVED KINTU LOCK FIX: Link harai gele / notun browser e token paste kore unlock -->
+  <div style="margin-top:22px;background:#0a1421;border:2px solid #00d49a;border-radius:12px;padding:16px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto">
+    <b style="font-size:14px">Approved kintu lock dekhaitase?</b>
+    <p style="color:var(--muted);font-size:12px;margin:6px 0 10px">Bot theke pawa Special Link er TOKEN ongsho ta ekhane paste koro. Ba puro link tai paste koro.</p>
+    <input id="unlockTokenInput" type="text" placeholder="TOKEN ba puro Special Link paste koro" style="width:100%;padding:12px;border-radius:10px;border:1px solid #17314a;background:#050a12;color:#fff;outline:none" />
+    <button id="unlockBtn" class="btn premium" style="width:100%;margin-top:10px">Unlock Premium</button>
+    <p id="unlockMsg" style="font-size:12px;color:var(--muted);margin:8px 0 0;display:none"></p>
+    <p style="font-size:11px;color:var(--muted);margin:10px 0 0">Token koi pabo? Bot approve korar somoy je Special Link dise, oi link tai. Oi link er <b style="color:#fff">?access= er porer ongsho</b> tai TOKEN.</p>
+  </div>
 </div>
 <section class="content" id="welcome"><div class="container"><div class="app-yt-card" style="border-color:#1b5a3a">
 <div class="yt-head"><b>Assalamu Alaikum Wa Rahmatullah</b><span style="background:#0a5a3a">GHOST FAMILY</span></div>
@@ -501,6 +510,34 @@ async function checkPremium() {
     }
   }
 }
+// Unlock via pasted token - link harai gele / notun browser er jonno
+(function(){
+  var btn=document.getElementById('unlockBtn');
+  if(!btn) return;
+  btn.addEventListener('click', async function(){
+    var inp=document.getElementById('unlockTokenInput');
+    var msg=document.getElementById('unlockMsg');
+    var raw=(inp.value||'').trim();
+    if(!raw){ msg.style.display='block'; msg.textContent='Age TOKEN ba Special Link paste koro.'; return; }
+    var token=raw;
+    if(raw.includes('access=')){ try{ token=new URL(raw).searchParams.get('access')||raw.split('access=')[1].split('&')[0]; }catch(e){ token=raw.split('access=')[1].split('&')[0]; } }
+    token=token.trim();
+    msg.style.display='block'; msg.textContent='Checking...';
+    try{
+      let r=await fetch('https://giogram-backend.onrender.com/api/verify?token='+encodeURIComponent(token));
+      let j=await r.json();
+      if(j.valid){
+        localStorage.setItem('ghost_premium_token', token);
+        // URL eo token bosai dei, jate refresh e thake
+        var u=new URL(window.location.href); u.searchParams.set('access', token); window.history.replaceState({},'',u);
+        msg.textContent='Unlock hoye gese! Premium khultase...';
+        setTimeout(function(){ window.location.reload(); }, 600);
+      } else {
+        msg.textContent='Token thik na - Bot e Special Link likhe notun Special Link nao. Reason: '+(j.reason||'not found');
+      }
+    }catch(e){ msg.textContent='Net problem, abar try koro.'; }
+  });
+})();
 checkPremium();
 updateDashboard();
 updateMarketWatch();
