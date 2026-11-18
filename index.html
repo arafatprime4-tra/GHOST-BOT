@@ -148,9 +148,7 @@ body.premium-unlocked .premium-only { display: block !important; }
 body.premium-unlocked #premiumContent { display: block !important; }
 body.premium-locked .premium-only { display: none !important; }
 body.premium-locked #premiumContent { display: none !important; }
-body.premium-locked .hero,
-body.premium-locked .features-strip,
-body.premium-locked section.content:not(#contact) { display: none !important; }
+body.premium-locked #premiumContent { display: none !important; }
 #lockScreen { display: none; padding: 60px 20px; text-align: center; background: linear-gradient(145deg, #0a1421, #050a12); border: 1px solid #17314a; border-radius: 18px; margin: 30px auto; max-width: 700px; min-height: 60vh; }
 body.premium-locked #lockScreen { display: block !important; }
 #premiumBanner { display: none; padding: 12px; background: #0a3320; border: 1px solid #00ff88; color: #00ff88; text-align: center; font-weight: 800; font-size: 13px; border-radius: 10px; margin: 15px auto; max-width: 1180px; }
@@ -175,8 +173,8 @@ body{ padding-bottom:84px; }
 @media(max-width:640px){ .hero-grid{ grid-template-columns:1fr; } }
 
 /* ALADA ALADA PAGE - FIX: shudhu active page dekhabe, baki shob lukano. Fallback nai, jate shob ek page e na dekha jay */
-#premiumContent .app-page{ display:none !important; }
-#premiumContent .app-page.active{ display:block !important; }
+#premiumContent .app-page, #publicPages .app-page{ display:none !important; }
+#premiumContent .app-page.active, #publicPages .app-page.active{ display:block !important; }
 #premiumContent .app-page.active.hero{ display:block !important; }
 /* Lock thakle premiumContent lukano - system ager moto */
 </style>
@@ -210,10 +208,20 @@ body{ padding-bottom:84px; }
   </div>
   <p style="font-size:11px;color:var(--muted);margin-top:18px">Already approved? Apnar special link ta check korun — format: giogram-backend.onrender.com/?access=TOKEN</p>
 </div>
-<div id="premiumContent"><div id="currentPageLabel" style="text-align:center;background:#0a5a3a;color:#fff;font-weight:800;font-size:13px;padding:10px;border-radius:10px;margin:14px auto;max-width:1180px;letter-spacing:1px">HOME PAGE - Alada Page</div>
 
 
 
+
+
+
+</div>
+
+<!-- PROFILE - Alada page - Approved member er info -->
+
+
+<div id="currentPageLabel" style="text-align:center;background:#0a5a3a;color:#fff;font-weight:800;font-size:13px;padding:10px;border-radius:10px;margin:14px auto;max-width:1180px;letter-spacing:1px">HOME PAGE - Alada Page</div>
+<!-- PUBLIC PAGES - Shobar jonno khola, lock thakleo dekhabe - Welcome SMS ekhane, harabe na -->
+<div id="publicPages">
 <section class="hero app-page active" id="home" data-page="home" style="display:block">
   <div class="container hero-grid">
     <div>
@@ -271,23 +279,28 @@ body{ padding-bottom:84px; }
 </div>
 <p style="color:var(--muted);font-size:13px;line-height:1.7;margin-top:16px">অনুগ্রহ করে আগে ডেমো অ্যাকাউন্টে পরীক্ষা করে নিন। ট্রেডিংয়ে লাভের সম্ভাবনার পাশাপাশি ক্ষতির ঝুঁকিও আছে—তাই নিজের বিবেচনায় সিদ্ধান্ত নিন এবং সামর্থ্যের বাইরে ঝুঁকি নেবেন না।<br><br>আপনাদের অভিজ্ঞতা ও সৎ ফিডব্যাক আমাদের কাছে সত্যিই মূল্যবান। পাশে থাকার জন্য হৃদয় থেকে ধন্যবাদ।</p>
 </div></div></section>
-<!-- BOT SETUP VIDEO - App moto card, full page na - System same, shudu video add -->
 <section class="content app-page" id="video" data-page="video" style="display:none"><div class="container"><div class="app-yt-card">
 <div class="yt-head"><b> Bot Setup Video - Step by Step</b><span> YouTube</span></div>
 <div class="yt-frame"><iframe src="https://www.youtube.com/embed/ubHSg9NmH3k" title="GHOST PREMIUM Bot Setup" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
 <p style="color:var(--muted);font-size:13px;margin:12px 0 0">Telegram theke approved niye ashar por ei video dekhe bot setup koro. Token chara signal asbe na - age Telegram bot theke approved nite hobe.</p>
 <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><a class="btn primary" href="https://www.youtube.com/watch?v=ubHSg9NmH3k" target="_blank" rel="noopener"> YouTube e Dekho</a><a class="btn" href="https://t.me/ghostsupportbd" target="_blank" rel="noopener"> Admin / Support</a></div>
 </div></div></section>
-
-<div class="features-strip premium-only">
-  <div class="container strip-grid">
-    <div class="strip-item"><b>◎ REAL SSID</b><small>1 SSID = All Market Live</small></div>
-    <div class="strip-item"><b> Draggable Bot</b><small>Header dhore move</small></div>
-    <div class="strip-item"><b>◷ 1-Minute Strategy</b><small>FAST 20s hold</small></div>
-    <div class="strip-item"><b> Risk Management</b><small>1% Risk, No Martingale</small></div>
-    <div class="strip-item"><b> GHOST PREMIUM</b><small>UP Green / DOWN Red</small></div>
+<section class="content premium-only app-page" id="education" data-page="channel" style="display:none">
+  <div class="container">
+    <div class="center"><span class="eyebrow">LEARN WITH GHOST PREMIUM</span><h2 class="section-title">Trading Education — Heart Touching</h2><p class="section-intro">90% eka hare jay, 10% winner family te thakun — 1% risk e safe trading.</p></div>
+    <div class="education-grid">
+      <article class="card"><div class="icon">01</div><h3>1 SSID Logic</h3><p>1 ta login = 1 SSID = sob market. q.get_candles("EURUSD") ar q.get_candles("CADJPY") same SSID te.</p></article>
+      <article class="card"><div class="icon">02</div><h3>Draggable Bot</h3><p>Bot 1 jaigai thake na — header ⋮⋮ dhore drag kore Buy/Sell er upor theke sorano jabe. Mobile e finger diye.</p></article>
+      <article class="card"><div class="icon">03</div><h3>Smart ID Check</h3><p>#1234567 pathale bot sundor kore bole —  # chara sudhu number pathan Example: 1234567. Ridoy chuya error.</p></article>
+    </div>
   </div>
+</section>
+<section class="content app-page" id="contact" data-page="channel" style="display:none">
+  <div class="container"><div class="cta"><span class="eyebrow">JOIN GHOST PREMIUM FAMILY</span><h2 class="section-title">Trade Smart with <span class="blue">GHOST PREMIUM</span> — Draggable + Real</h2><p class="section-intro">90% eka hare, amra chai apni 10% winner er moddhe thaken. Bot free, kintu sothik pothe.</p><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank"> Telegram Bot — GHOST PREMIUM</a><a class="btn primary" href="https://t.me/premierghos" target="_blank">→ Join Premier Ghost</a></div><p style="margin-top:15px;font-size:12px;color:var(--muted)">Bot ta 1 jaigai thake na — drag kore move kora jay. 1 SSID diye sob market real price.</p></div></div>
+</section>
 </div>
+<!-- PREMIUM PAGES - Shudhu approved member er jonno, system ager moto -->
+<div id="premiumContent">
 <section class="content premium-only app-page" id="features" data-page="signals" style="display:none">
   <div class="container features-layout">
     <div>
@@ -350,16 +363,6 @@ body{ padding-bottom:84px; }
     </div>
   </div>
 </section>
-<section class="content premium-only app-page" id="education" data-page="channel" style="display:none">
-  <div class="container">
-    <div class="center"><span class="eyebrow">LEARN WITH GHOST PREMIUM</span><h2 class="section-title">Trading Education — Heart Touching</h2><p class="section-intro">90% eka hare jay, 10% winner family te thakun — 1% risk e safe trading.</p></div>
-    <div class="education-grid">
-      <article class="card"><div class="icon">01</div><h3>1 SSID Logic</h3><p>1 ta login = 1 SSID = sob market. q.get_candles("EURUSD") ar q.get_candles("CADJPY") same SSID te.</p></article>
-      <article class="card"><div class="icon">02</div><h3>Draggable Bot</h3><p>Bot 1 jaigai thake na — header ⋮⋮ dhore drag kore Buy/Sell er upor theke sorano jabe. Mobile e finger diye.</p></article>
-      <article class="card"><div class="icon">03</div><h3>Smart ID Check</h3><p>#1234567 pathale bot sundor kore bole —  # chara sudhu number pathan Example: 1234567. Ridoy chuya error.</p></article>
-    </div>
-  </div>
-</section>
 <section class="content app-page" id="pricing" data-page="profile" style="display:none;background:#070e18;border-block:1px solid var(--border)">
   <div class="container center">
     <span class="eyebrow">GHOST PREMIUM MEMBERSHIP</span>
@@ -372,9 +375,6 @@ body{ padding-bottom:84px; }
     <p style="font-size:12px;color:var(--muted);margin-top:15px">No Bot Gives 100% Win — Use 1% Risk. 1 SSID = All Market real price.</p>
   </div>
 </section>
-</div>
-
-<!-- PROFILE - Alada page - Approved member er info -->
 <section class="content app-page" id="profilePage" data-page="profile" style="display:none"><div class="container"><div class="app-yt-card">
 <div class="yt-head"><b>Profile - Premium Status</b><span style="background:#0a5a3a">MEMBER</span></div>
 <p style="color:var(--muted);font-size:13px">Approved link diye dhukle ekhane tomar Trader ID, Deposit, Status dekhabe. Normal link e lock dekhabe.</p>
@@ -385,9 +385,7 @@ body{ padding-bottom:84px; }
 </div>
 <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">Telegram Bot</a><a class="btn" href="https://t.me/premierghos" target="_blank">Join Channel</a></div>
 </div></div></section>
-<section class="content app-page" id="contact" data-page="channel" style="display:none">
-  <div class="container"><div class="cta"><span class="eyebrow">JOIN GHOST PREMIUM FAMILY</span><h2 class="section-title">Trade Smart with <span class="blue">GHOST PREMIUM</span> — Draggable + Real</h2><p class="section-intro">90% eka hare, amra chai apni 10% winner er moddhe thaken. Bot free, kintu sothik pothe.</p><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank"> Telegram Bot — GHOST PREMIUM</a><a class="btn primary" href="https://t.me/premierghos" target="_blank">→ Join Premier Ghost</a></div><p style="margin-top:15px;font-size:12px;color:var(--muted)">Bot ta 1 jaigai thake na — drag kore move kora jay. 1 SSID diye sob market real price.</p></div></div>
-</section>
+</div>
 </main>
 <footer>
   <div class="container footer-row"><div><b>GHOST PREMIUM — TRADE SMART</b><div>© <span id="year"></span> All rights reserved. — 1 SSID = All Market — Draggable Bot</div></div><div>REAL SSID Live · Draggable · Heart Touching Welcome</div></div>
@@ -522,6 +520,7 @@ updateMarketWatch();
 </script>
 
 <!-- BOTTOM MENU - Trading category er shathe mile - Home, Signals, Video, Channel, Profile - System same -->
+
 <nav class="bottom-nav" id="bottomNav">
 <button data-go="home" class="active"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg></span>Home</button>
 <button data-go="signals"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></span>Signals</button>
@@ -542,6 +541,11 @@ function showAppPage(page){
   document.querySelectorAll('#bottomNav button').forEach(function(b){
     if(b.getAttribute('data-go')===page){ b.classList.add('active'); } else { b.classList.remove('active'); }
   });
+  // Lock thakle Signals/Profile e click korle lock dekhabe, khali page dekhabe na
+  if(document.body.classList.contains('premium-locked') && (page==='signals' || page==='profile')){
+    var ls=document.getElementById('lockScreen');
+    if(ls){ ls.style.display='block'; ls.scrollIntoView({behavior:'smooth'}); }
+  }
   document.body.classList.add('app-ready');
   window.scrollTo({top:0, behavior:'smooth'});
   if(page==='channel'){ /* channel page e contact dekhabe */ }
