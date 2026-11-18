@@ -25,7 +25,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#050a12">
-<title>GHOST TRADER | Trading Dashboard - REAL SSID + DRAGGABLE</title>
+<title>GHOST PREMIUM | Trading Dashboard - REAL SSID + DRAGGABLE</title>
 <style>
 :root {
   --bg: #050a12;
@@ -158,13 +158,31 @@ body.premium-unlocked #premiumBanner { display: block !important; }
 body.premium-locked #premiumBanner { display: none !important; }
 .lock-icon { font-size: 48px; margin-bottom: 15px; }
 
+
+/* APP UPGRADE - System same, shudu design + video + bottom menu - Telegram approved flow same thakbe */
+body{ padding-bottom:84px; }
+.app-yt-card{ background:linear-gradient(145deg,#0d2034,#060d17); border:1px solid #1b4565; border-radius:18px; padding:16px; margin:28px 0; box-shadow:0 10px 40px rgba(0,0,0,.4); }
+.app-yt-card .yt-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.app-yt-card .yt-head b{ font-size:14px; }
+.app-yt-card .yt-head span{ font-size:11px; background:#ff0000; color:#fff; padding:3px 8px; border-radius:20px; font-weight:800; }
+.yt-frame{ position:relative; width:100%; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px; background:#000; }
+.yt-frame iframe{ position:absolute; top:0; left:0; width:100%; height:100%; border:0; }
+.bottom-nav{ position:fixed; bottom:0; left:0; right:0; z-index:100; background:rgba(5,10,18,.92); backdrop-filter:blur(18px); border-top:1px solid #17314a; display:flex; justify-content:space-around; padding:8px 4px calc(8px + env(safe-area-inset-bottom)); }
+.bottom-nav button{ background:none; border:0; color:#a5b6cb; font-size:11px; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; padding:4px 10px; border-radius:10px; }
+.bottom-nav button.active{ color:#00d4ff; background:rgba(0,212,255,.12); }
+.bottom-nav button .ic{ display:flex; align-items:center; justify-content:center; line-height:1; } .bottom-nav button .ic svg{ width:22px; height:22px; }
+@media(max-width:640px){ .hero-grid{ grid-template-columns:1fr; } }
+
+.css-menu-icon{ display:inline-flex; flex-direction:column; gap:4px; } .css-menu-icon span{ display:block; width:20px; height:2px; background:#fff; border-radius:2px; }
+.css-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; background:#00ff88; box-shadow:0 0 8px #00ff88; }
+.css-dot.green{ background:#00ff88; }
 </style>
 </head>
 <body class="premium-locked">
 <header>
   <div class="container nav">
-    <a class="brand" href="#home">GHOST <span>TRADER</span><small>TRADE SMART</small></a>
-    <button class="btn menu-toggle" id="menuToggle">☰</button>
+    <a class="brand" href="#home">GHOST <span>PREMIUM</span><small>TRADE SMART</small></a>
+    <button class="btn menu-toggle" id="menuToggle"><span class="css-menu-icon"><span></span><span></span><span></span></span></button>
     <nav class="navlinks" id="navlinks">
       <a href="#home">Home</a>
       <a href="#features">Features</a>
@@ -177,15 +195,15 @@ body.premium-locked #premiumBanner { display: none !important; }
   </div>
 </header>
 <main>
-<div id="premiumBanner">🔓 PREMIUM UNLOCKED — Trader ID Verified — Full Access Active ✅</div>
+<div id="premiumBanner"><span class="css-dot green"></span> PREMIUM UNLOCKED — Trader ID Verified — Full Access Active</div>
 <div id="lockScreen">
-  <div class="lock-icon">🔒</div>
+  <div class="lock-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
   <h2 style="margin:10px 0">Premium Content Locked</h2>
   <p style="color:var(--muted)">Apni approve link chara dhukesen. Ekhane sudhu normal info dekhben.<br>Premium bookmark, signal plate, dashboard dekhte hole Telegram bot e ID pathan.</p>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px">
-    <a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">🤖 Telegram Bot — Get ID</a>
-    <a class="btn primary" href="https://t.me/premierghos" target="_blank">➤ Join Channel</a>
-    <a class="btn" href="https://t.me/ghostsupportbd" target="_blank">👨‍💼 Admin</a>
+    <a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">Telegram Bot — Get ID</a>
+    <a class="btn primary" href="https://t.me/premierghos" target="_blank">Join Channel</a>
+    <a class="btn" href="https://t.me/ghostsupportbd" target="_blank">Admin</a>
   </div>
   <p style="font-size:11px;color:var(--muted);margin-top:18px">Already approved? Apnar special link ta check korun — format: giogram-backend.onrender.com/?access=TOKEN</p>
 </div>
@@ -196,17 +214,17 @@ body.premium-locked #premiumBanner { display: none !important; }
 <section class="hero" id="home">
   <div class="container hero-grid">
     <div>
-      <span class="eyebrow">✦ GHOST PREMIUM · 1 SSID = ALL MARKET · DRAGGABLE</span>
-      <h1>Welcome to<br>GHOST <span class="blue">TRADER</span></h1>
+      <span class="eyebrow">GHOST PREMIUM · 1 SSID = ALL MARKET · DRAGGABLE</span>
+      <h1>Welcome to<br>GHOST <span class="blue">PREMIUM</span></h1>
       <p><span class="real-badge">● REAL SSID LIVE</span> AI Trading Analysis | Real Quotex Price | 1-Minute Strategy | Draggable Bot</p>
       <p>1 ta SSID diye sob market er real price — EURUSD, CADJPY, AUDCHF sob same SSID te. Bot 1 jaigai atke thakbe na, drag kore move kora jabe.</p>
       <div class="hero-actions">
-        <button class="btn premium" id="copyBotBtn">📋 COPY UNIVERSAL BOOKMARKLET (PC+MOBILE)</button>
-        <a class="btn primary" href="https://t.me/premierghos" target="_blank">➤ Join Telegram</a>
+        <button class="btn premium" id="copyBotBtn">COPY UNIVERSAL BOOKMARKLET (PC+MOBILE)</button>
+        <a class="btn primary" href="https://t.me/premierghos" target="_blank">Join Telegram</a>
         <a class="btn" href="#features">Explore Features →</a>
       </div>
-      <div class="copy-success" id="copySuccess">🟢 Copied! Quotex chart e bookmark bar e paste korun — header dhore drag kora jabe!</div>
-      <p style="margin-top:12px"><span class="real-badge">👻 GHOST PREMIUM — UP Green / DOWN Red — REAL ONLY</span></p>
+      <div class="copy-success" id="copySuccess">Copied! Quotex chart e bookmark bar e paste korun — header dhore drag kora jabe!</div>
+      <p style="margin-top:12px"><span class="real-badge">GHOST PREMIUM — UP Green / DOWN Red — REAL ONLY</span></p>
     </div>
     <div class="dashboard premium-only">
       <div class="dash-head"><h3>Ghost Premium Live Panel</h3><span class="real-tag" id="liveStatus">● REAL LIVE</span></div>
@@ -232,17 +250,41 @@ body.premium-locked #premiumBanner { display: none !important; }
         <div class="stat"><small>Price / RSI</small><strong id="dashPrice">1.08500 / 55.0</strong></div>
         <div class="stat"><small>SSID Mode</small><strong id="dashSSID" style="font-size:12px">1 SSID = All Market</strong></div>
       </div>
-      <div class="disclaimer">🟢 REAL: 1 SSID diye EURUSD, CADJPY, AUDCHF sob market real price. Draggable bot — header dhore move kora jabe. UP Green / DOWN Red.</div>
+      <div class="disclaimer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="3" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> REAL: 1 SSID diye EURUSD, CADJPY, AUDCHF sob market real price. Draggable bot — header dhore move kora jabe. UP Green / DOWN Red.</div>
     </div>
   </div>
 </section>
+<!-- WELCOME MESSAGE - Bot er same message website eo - Emoji na, shob SVG / CSS -->
+<section class="content" id="welcome"><div class="container"><div class="app-yt-card" style="border-color:#1b5a3a">
+<div class="yt-head"><b>Assalamu Alaikum Wa Rahmatullah</b><span style="background:#0a5a3a">GHOST FAMILY</span></div>
+<p style="font-size:15px;line-height:1.8">আপনাদের বিশ্বাস ও ভালোবাসাই আমাদের সবচেয়ে বড় প্রাপ্তি। সেই ভালোবাসার প্রতিদান হিসেবে বটটি আপনাদের জন্য সম্পূর্ণ ফ্রিতে দেওয়া হচ্ছে। বটটি পেতে শুধু আমাদের চ্যানেলে জয়েন থাকুন—এর বাইরে কোনো গোপন শর্ত নেই।</p>
+<p style="font-size:15px;line-height:1.8"><b>আমাদের চ্যানেলে জয়েন করুন</b><br>আপনার আইডি আমরা পেয়েছি। চ্যানেলে যোগ দিয়ে আমাদের একটি মেসেজ দিন—ইনশাআল্লাহ, বটটি পাওয়ার পরবর্তী ধাপ জানিয়ে দেব। আপনাদের সামান্য সহযোগিতাই আমাদের এগিয়ে যাওয়ার অনুপ্রেরণা।</p>
+<div style="margin:18px 0 8px"><b>বট ব্যবহারের আগে জরুরি নির্দেশনা</b></div>
+<div style="display:grid;gap:10px">
+<div style="display:flex;gap:10px;align-items:center;background:rgba(0,212,154,.08);border:1px solid rgba(0,212,154,.3);padding:10px 12px;border-radius:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d49a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>শুধু REAL MARKET-এ ব্যবহার করুন</span></div>
+<div style="display:flex;gap:10px;align-items:center;background:rgba(255,82,107,.08);border:1px solid rgba(255,82,107,.3);padding:10px 12px;border-radius:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff526b" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>OTC MARKET-এ ব্যবহার করবেন না</span></div>
+<div style="display:flex;gap:10px;align-items:center;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.3);padding:10px 12px;border-radius:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>অবশ্যই মানি ম্যানেজমেন্ট মেনে চলুন</span></div>
+<div style="display:flex;gap:10px;align-items:center;background:rgba(255,82,107,.08);border:1px solid rgba(255,82,107,.3);padding:10px 12px;border-radius:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff526b" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg><span>1 STEP MTG ব্যবহার করবেন না</span></div>
+<div style="display:flex;gap:10px;align-items:center;background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);padding:10px 12px;border-radius:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>কোনো বট বা সিগন্যালই ১০০% নিশ্চিত নয়</span></div>
+</div>
+<p style="color:var(--muted);font-size:13px;line-height:1.7;margin-top:16px">অনুগ্রহ করে আগে ডেমো অ্যাকাউন্টে পরীক্ষা করে নিন। ট্রেডিংয়ে লাভের সম্ভাবনার পাশাপাশি ক্ষতির ঝুঁকিও আছে—তাই নিজের বিবেচনায় সিদ্ধান্ত নিন এবং সামর্থ্যের বাইরে ঝুঁকি নেবেন না।<br><br>আপনাদের অভিজ্ঞতা ও সৎ ফিডব্যাক আমাদের কাছে সত্যিই মূল্যবান। পাশে থাকার জন্য হৃদয় থেকে ধন্যবাদ।</p>
+</div></div></section>
+
+<!-- BOT SETUP VIDEO - App moto card, full page na - System same, shudu video add -->
+<section class="content" id="video"><div class="container"><div class="app-yt-card">
+<div class="yt-head"><b><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M8 5v14l11-7z"/></svg> Bot Setup Video - Step by Step</b><span>▶ YouTube</span></div>
+<div class="yt-frame"><iframe src="https://www.youtube.com/embed/ubHSg9NmH3k" title="GHOST PREMIUM Bot Setup" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+<p style="color:var(--muted);font-size:13px;margin:12px 0 0">Telegram theke approved niye ashar por ei video dekhe bot setup koro. Token chara signal asbe na - age Telegram bot theke approved nite hobe.</p>
+<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><a class="btn primary" href="https://www.youtube.com/watch?v=ubHSg9NmH3k" target="_blank" rel="noopener">YouTube e Dekho</a><a class="btn" href="https://t.me/ghostsupportbd" target="_blank" rel="noopener">Admin / Support</a></div>
+</div></div></section>
+
 <div class="features-strip premium-only">
   <div class="container strip-grid">
     <div class="strip-item"><b>◎ REAL SSID</b><small>1 SSID = All Market Live</small></div>
-    <div class="strip-item"><b>✦ Draggable Bot</b><small>Header dhore move</small></div>
+    <div class="strip-item"><b>Draggable Bot</b><small>Header dhore move</small></div>
     <div class="strip-item"><b>◷ 1-Minute Strategy</b><small>FAST 20s hold</small></div>
-    <div class="strip-item"><b>♢ Risk Management</b><small>1% Risk, No Martingale</small></div>
-    <div class="strip-item"><b>☏ GHOST PREMIUM</b><small>UP Green / DOWN Red</small></div>
+    <div class="strip-item"><b>Risk Management</b><small>1% Risk, No Martingale</small></div>
+    <div class="strip-item"><b>GHOST PREMIUM</b><small>UP Green / DOWN Red</small></div>
   </div>
 </div>
 <section class="content premium-only" id="features" class="content premium-only">
@@ -251,14 +293,14 @@ body.premium-locked #premiumBanner { display: none !important; }
       <span class="eyebrow">OUR FEATURES — GHOST PREMIUM</span>
       <h2 class="section-title">Everything You Need for <span class="blue">Real Trading</span></h2>
       <p class="section-intro">1 ta email/pass diye login korle 1 ta SSID pabe — oi 1 ta SSID diye sob market er real price pabe. Bot 1 jaigai atke thakbe na, drag kora jabe.</p>
-      <button class="btn premium" onclick="document.getElementById('copyBotBtn').click()">📋 Copy Draggable Bot →</button>
+      <button class="btn premium" onclick="document.getElementById('copyBotBtn').click()">Copy Draggable Bot</button>
     </div>
     <div class="cards">
       <article class="card"><div class="icon">◎</div><h3>1 SSID = All Market</h3><p>Same SSID, asset name change = real price. EURUSD, CADJPY, AUDCHF sob same SSID te 100% Quotex chart price.</p></article>
       <article class="card"><div class="icon">⌁</div><h3>Draggable Bot</h3><p>Bot 1 jaigai thakbe na — header ⋮⋮ dhore mouse / finger diye jekhane khushi move kora jabe.</p></article>
       <article class="card"><div class="icon">▤</div><h3>Real Market Analysis</h3><p>Member je market e thakbe seta analysis kore signal — EURUSD likhle EURUSD er real analysis.</p></article>
-      <article class="card"><div class="icon">♧</div><h3>Heart Touching Welcome</h3><p>/start dile ridoy chuya welcome — choto kintu emotional. 90% eka hare, 10% winner family.</p></article>
-      <article class="card"><div class="icon">⚙</div><h3>Smart ID Check</h3><p>#1234567 pathale bolbe 🔴 # chara sudhu number pathan — Example: 1234567. Sundor error message.</p></article>
+      <article class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#ff526b"><path d="M12 21s-7-4.5-9.5-9C.5 8 3 4.5 6.5 4.5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3C21 4.5 23.5 8 21.5 12 19 16.5 12 21 12 21z"/></svg></div><h3>Heart Touching Welcome</h3><p>/start dile ridoy chuya welcome — choto kintu emotional. 90% eka hare, 10% winner family.</p></article>
+      <article class="card"><div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 1 1-14 0 7 7 0 0 1 14 0z"/></svg></div><h3>Smart ID Check</h3><p>#1234567 pathale bolbe # chara sudhu number pathan — Example: 1234567. Sundor error message.</p></article>
       <article class="card"><div class="icon">▣</div><h3>Congratulations + Deposit</h3><p>Approve hole Trader ID, Total Deposit soho beautiful message + Academy, Website, App Link button.</p></article>
     </div>
   </div>
@@ -276,7 +318,7 @@ body.premium-locked #premiumBanner { display: none !important; }
         <div class="market-row"><span>USD/JPY<small>Real — Same SSID</small></span><b id="price-USDJPY">149.50</b><span class="red" id="sig-USDJPY">WAIT</span></div>
         <div class="market-row"><span>CAD/JPY<small>Real — Same SSID</small></span><b id="price-CADJPY">109.90</b><span class="green" id="sig-CADJPY">WAIT</span></div>
         <div class="market-row"><span>AUD/USD<small>Real — Same SSID</small></span><b id="price-AUDUSD">0.65500</b><span class="green" id="sig-AUDUSD">WAIT</span></div>
-        <p style="color:var(--muted);font-size:12px; margin-top:10px">🟢 1 ta email/pass = 1 SSID = sob market real price. q.get_candles("EURUSD") + q.get_candles("CADJPY") same SSID.</p>
+        <p style="color:var(--muted);font-size:12px; margin-top:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="3" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> 1 ta email/pass = 1 SSID = sob market real price. q.get_candles("EURUSD") + q.get_candles("CADJPY") same SSID.</p>
       </div>
       <div class="panel">
         <div class="dash-head"><h3>Real Signal Preview — Draggable</h3><span class="real-tag">REAL SSID</span></div>
@@ -301,7 +343,7 @@ body.premium-locked #premiumBanner { display: none !important; }
             <span class="demo-note" id="confBadge">Confidence: --</span>
           </div>
         </div>
-        <button class="btn premium" id="demoButton" style="width:100%;margin-top:15px">🔮 Get REAL Signal — Draggable Bot Same</button>
+        <button class="btn premium" id="demoButton" style="width:100%;margin-top:15px">Get REAL Signal — Draggable Bot Same</button>
         <p style="font-size:12px;color:var(--muted);margin-top:8px">Eta real analysis — Quotex chart er sathe 100% milbe jokhon QUOTEX_EMAIL/PASS set korben. Bot draggable — header dhore move.</p>
       </div>
     </div>
@@ -313,7 +355,7 @@ body.premium-locked #premiumBanner { display: none !important; }
     <div class="education-grid">
       <article class="card"><div class="icon">01</div><h3>1 SSID Logic</h3><p>1 ta login = 1 SSID = sob market. q.get_candles("EURUSD") ar q.get_candles("CADJPY") same SSID te.</p></article>
       <article class="card"><div class="icon">02</div><h3>Draggable Bot</h3><p>Bot 1 jaigai thake na — header ⋮⋮ dhore drag kore Buy/Sell er upor theke sorano jabe. Mobile e finger diye.</p></article>
-      <article class="card"><div class="icon">03</div><h3>Smart ID Check</h3><p>#1234567 pathale bot sundor kore bole — 🔴 # chara sudhu number pathan Example: 1234567. Ridoy chuya error.</p></article>
+      <article class="card"><div class="icon">03</div><h3>Smart ID Check</h3><p>#1234567 pathale bot sundor kore bole — # chara sudhu number pathan Example: 1234567. Ridoy chuya error.</p></article>
     </div>
   </div>
 </section>
@@ -323,7 +365,7 @@ body.premium-locked #premiumBanner { display: none !important; }
     <h2 class="section-title">Choose Your Plan — FREE PREMIUM</h2>
     <p class="section-intro">We Don't Sell Bot. We Give FREE To Our Referral Members!</p>
     <div class="price-grid">
-      <div class="price-card"><span class="real-tag">REAL SSID</span><h3>Free Premium</h3><div class="price">$0 — Lifetime</div><ul><li>1 SSID = All Market real price</li><li>Draggable bot — move anywhere</li><li>Real market analysis — jekono pair</li><li>Heart touching welcome + smart ID check</li><li>Congratulations with deposit info</li><li>Academy + Website + App Link</li></ul><a class="btn premium" href="https://broker-qx.pro/sign-up/?lid=2384783"target="_blank">Create QX Account — FREE</a></div>
+      <div class="price-card"><span class="real-tag">REAL SSID</span><h3>Free Premium</h3><div class="price">$0 — Lifetime</div><ul><li>1 SSID = All Market real price</li><li>Draggable bot — move anywhere</li><li>Real market analysis — jekono pair</li><li>Heart touching welcome + smart ID check</li><li>Congratulations with deposit info</li><li>Academy + Website + App Link</li></ul><a class="btn premium" href="https://qxbroker.com/en/sign-up/?lid=123456" target="_blank">Create QX Account — FREE</a></div>
       <div class="price-card" style="border-color:var(--purple)"><span class="real-tag">GHOST PREMIUM</span><h3>Approved Member</h3><div class="price">Approved Only</div><ul><li>Trader ID + Total Deposit info</li><li>Website — 1 Click Copy Bot</li><li>Academy Link — Sikhte Thakun</li><li>Signal Bot Bookmark — Draggable</li><li>App Link — Mobile</li><li>Channel + Admin Support</li></ul><a class="btn primary" href="https://t.me/Qx_ghost_bot" target="_blank">Telegram Bot — Get ID</a></div>
     </div>
     <p style="font-size:12px;color:var(--muted);margin-top:15px">No Bot Gives 100% Win — Use 1% Risk. 1 SSID = All Market real price.</p>
@@ -331,7 +373,7 @@ body.premium-locked #premiumBanner { display: none !important; }
 </section>
 </div>
 <section class="content" id="contact">
-  <div class="container"><div class="cta"><span class="eyebrow">JOIN GHOST PREMIUM FAMILY</span><h2 class="section-title">Trade Smart with <span class="blue">GHOST PREMIUM</span> — Draggable + Real</h2><p class="section-intro">90% eka hare, amra chai apni 10% winner er moddhe thaken. Bot free, kintu sothik pothe.</p><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">🤖 Telegram Bot — GHOST PREMIUM</a><a class="btn primary" href="https://t.me/premierghos" target="_blank">➤ Join Ghost Trader</a></div><p style="margin-top:15px;font-size:12px;color:var(--muted)">Bot ta 1 jaigai thake na — drag kore move kora jay. 1 SSID diye sob market real price.</p></div></div>
+  <div class="container"><div class="cta"><span class="eyebrow">JOIN GHOST PREMIUM FAMILY</span><h2 class="section-title">Trade Smart with <span class="blue">GHOST PREMIUM</span> — Draggable + Real</h2><p class="section-intro">90% eka hare, amra chai apni 10% winner er moddhe thaken. Bot free, kintu sothik pothe.</p><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank"> Telegram Bot — GHOST PREMIUM</a><a class="btn primary" href="https://t.me/premierghos" target="_blank">→ Join Premier Ghost</a></div><p style="margin-top:15px;font-size:12px;color:var(--muted)">Bot ta 1 jaigai thake na — drag kore move kora jay. 1 SSID diye sob market real price.</p></div></div>
 </section>
 </main>
 <footer>
@@ -344,7 +386,7 @@ const navlinks = document.getElementById("navlinks");
 menuToggle.addEventListener("click", () => { navlinks.classList.toggle("open"); });
 document.querySelectorAll(".navlinks a").forEach(link => { link.addEventListener("click", () => { navlinks.classList.remove("open"); }); });
 document.getElementById("year").textContent = new Date().getFullYear();
-// GHOST_CODE_BASE removed - getGhostCode() below returns full fetch+eval loader (CSP-safe, single slash)
+const GHOST_CODE_BASE = `javascript:(function(){window.GHOST_TOKEN='`;
 function getGhostCode(){
   const token = new URLSearchParams(window.location.search).get('access') || new URLSearchParams(window.location.search).get('token') || localStorage.getItem('ghost_premium_token') || '';
   // FIX: fetch+eval loader - bypasses Quotex CSP script-src which blocks <script src=external>. Single slash, no //ghost.js
@@ -362,8 +404,8 @@ copyBtn.addEventListener("click", async () => {
     const dynamicCode = getGhostCode();
     await navigator.clipboard.writeText(dynamicCode); 
     copySuccess.style.display = "block"; 
-    copyBtn.textContent = "🟢 Copied! — With Token"; 
-    setTimeout(()=>{ copySuccess.style.display="none"; copyBtn.textContent="📋 COPY UNIVERSAL BOOKMARKLET (PC+MOBILE)"; }, 2500); 
+    copyBtn.textContent = "<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="3" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> Copied! — With Token"; 
+    setTimeout(()=>{ copySuccess.style.display="none"; copyBtn.textContent="COPY UNIVERSAL BOOKMARKLET (PC+MOBILE)"; }, 2500); 
   }
   catch(e) { 
     const dynamicCode = getGhostCode();
@@ -402,7 +444,7 @@ document.getElementById("demoButton").addEventListener("click", async () => {
   signalEl.textContent = "Fetching REAL SSID...";
   infoEl.textContent = `Pair: ${pair} — Same SSID se real price fetch hocche...`;
   let data = await fetchSignal(pair,"SAFE");
-  let emoji = data.signal=="UP" ? "🟢" : data.signal=="DOWN" ? "🔴" : "⏳";
+  let emoji = data.signal=="UP" ? "UP" : data.signal=="DOWN" ? "DOWN" : "...";
   signalEl.textContent = `${emoji} ${data.pair} ${data.signal} — ${data.confidence}%`;
   signalEl.className = data.signal=="UP" ? "up" : data.signal=="DOWN" ? "down" : "";
   infoEl.innerHTML = `Pair: ${data.pair} | Price: ${data.price} | RSI: ${data.filter?.rsi} | Trend: ${data.filter?.trend}<br>Stake: ${Number.isFinite(stake) && stake>=0 ? "$"+stake.toFixed(2) : "Invalid"} | Strategies: ${(data.strategies||[]).join(", ")}<br><b>${data.ssid_mode}</b> — ${data.data_source}<br>Bot draggable — header dhore move kora jay, UP green / DOWN red.`;
@@ -437,7 +479,7 @@ async function checkPremium() {
       body.classList.remove('premium-locked');
       localStorage.setItem('ghost_premium_token', token);
       let b = document.getElementById('premiumBanner');
-      if (b) b.innerHTML = `🔓 PREMIUM UNLOCKED — ID ${j.data.trader_id} — Deposit $${j.data.amount} — Full Access 🟢`;
+      if (b) b.innerHTML = `PREMIUM UNLOCKED — ID ${j.data.trader_id} — Deposit $${j.data.amount} — Full Access <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="3" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg>`;
       console.log("Premium unlocked", j.data);
     } else {
       body.classList.add('premium-locked');
@@ -459,6 +501,44 @@ async function checkPremium() {
 checkPremium();
 updateDashboard();
 updateMarketWatch();
+</script>
+
+<!-- BOTTOM MENU - Trading category er shathe mile - Home, Signals, Video, Channel, Profile - System same -->
+<nav class="bottom-nav" id="bottomNav">
+<button data-go="home" class="active"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg></span>Home</button>
+<button data-go="trading"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></span>Signals</button>
+<button data-go="video"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><polygon points="10 9 15 12 10 15" fill="currentColor" stroke="none"/></svg></span>Video</button>
+<button data-go="channel"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>Channel</button>
+<button data-go="profile"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>Profile</button>
+</nav>
+<script>
+// Bottom nav - System same, shudu scroll + link, Telegram approved flow e hat deya hoy nai
+(function(){
+  var btns=document.querySelectorAll('#bottomNav button');
+  function setActive(el){ btns.forEach(b=>b.classList.remove('active')); if(el) el.classList.add('active'); }
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      setActive(b);
+      var go=b.getAttribute('data-go');
+      if(go==='home'){ document.getElementById('home')?.scrollIntoView({behavior:'smooth'}); }
+      else if(go==='trading'){ document.getElementById('trading')?.scrollIntoView({behavior:'smooth'}); }
+      else if(go==='video'){ document.getElementById('video')?.scrollIntoView({behavior:'smooth'}); }
+      else if(go==='channel'){ window.open('https://t.me/ghostsupportbd','_blank'); }
+      else if(go==='profile'){
+        var tok=localStorage.getItem('ghost_premium_token')||'';
+        if(tok){ document.getElementById('premiumBanner')?.scrollIntoView({behavior:'smooth'}); }
+        else{ document.getElementById('lockScreen')?.scrollIntoView({behavior:'smooth'}); }
+      }
+    });
+  });
+  window.addEventListener('scroll', function(){
+    var ids=['home','trading','video'];
+    var cur='home';
+    ids.forEach(function(id){ var el=document.getElementById(id); if(el){ var r=el.getBoundingClientRect(); if(r.top<200) cur=id; } });
+    var map={home:'home',trading:'trading',video:'video'};
+    btns.forEach(function(b){ if(b.getAttribute('data-go')===map[cur]) b.classList.add('active'); else if(['home','trading','video'].includes(b.getAttribute('data-go'))) b.classList.remove('active'); });
+  });
+})();
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
