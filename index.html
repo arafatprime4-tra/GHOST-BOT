@@ -148,6 +148,8 @@ body.premium-unlocked .premium-only { display: block !important; }
 body.premium-unlocked #premiumContent { display: block !important; }
 body.premium-locked .premium-only { display: none !important; }
 body.premium-locked #premiumContent { display: none !important; }
+.locked-only{ display:none !important; } body.premium-locked .locked-only{ display:inline-block !important; } body.premium-unlocked .locked-only{ display:none !important; }
+body.premium-locked .premium-only{ display:none !important; } body.premium-unlocked .premium-only{ display:block !important; }
 body.premium-locked #premiumContent { display: none !important; }
 #lockScreen { display: none; padding: 60px 20px; text-align: center; background: linear-gradient(145deg, #0a1421, #050a12); border: 1px solid #17314a; border-radius: 18px; margin: 30px auto; max-width: 700px; min-height: 60vh; }
 body.premium-locked #lockScreen { display: block !important; }
@@ -230,7 +232,7 @@ body{ padding-bottom:84px; }
       <p><span class="real-badge">● REAL SSID LIVE</span> AI Trading Analysis | Real Quotex Price | 1-Minute Strategy | Draggable Bot</p>
       <p>1 ta SSID diye sob market er real price — EURUSD, CADJPY, AUDCHF sob same SSID te. Bot 1 jaigai atke thakbe na, drag kore move kora jabe.</p>
       <div class="hero-actions">
-        <button class="btn premium" id="copyBotBtn"> COPY UNIVERSAL BOOKMARKLET (PC+MOBILE)</button>
+        <button class="btn premium premium-only" id="copyBotBtn"> COPY UNIVERSAL BOOKMARKLET (PC+MOBILE)</button><a class="btn locked-only" href="https://t.me/Qx_ghost_bot" target="_blank" style="background:#ff526b;color:#fff">LOCKED - Premium Link Diye Dhuko - Bookmark Copy Korte Parba Na</a>
         <a class="btn primary" href="https://t.me/premierghos" target="_blank">→ Join Telegram</a>
         <a class="btn" href="#features">Explore Features →</a>
       </div>
@@ -307,7 +309,7 @@ body{ padding-bottom:84px; }
       <span class="eyebrow">OUR FEATURES — GHOST PREMIUM</span>
       <h2 class="section-title">Everything You Need for <span class="blue">Real Trading</span></h2>
       <p class="section-intro">1 ta email/pass diye login korle 1 ta SSID pabe — oi 1 ta SSID diye sob market er real price pabe. Bot 1 jaigai atke thakbe na, drag kora jabe.</p>
-      <button class="btn premium" onclick="document.getElementById('copyBotBtn').click()"> Copy Draggable Bot →</button>
+      <button class="btn premium premium-only" onclick="if(!new URLSearchParams(window.location.search).get('access')){alert('LOCKED - Premium link diye dhuko');}else{document.getElementById('copyBotBtn').click()}"> Copy Draggable Bot →</button>
     </div>
     <div class="cards">
       <article class="card"><div class="icon">◎</div><h3>1 SSID = All Market</h3><p>Same SSID, asset name change = real price. EURUSD, CADJPY, AUDCHF sob same SSID te 100% Quotex chart price.</p></article>
@@ -405,13 +407,15 @@ function getGhostCode(){
   if(token){
     return `javascript:(function(){window.GHOST_TOKEN='${token}';fetch('https://giogram-backend.onrender.com/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{eval(c)}).catch(e=>alert('Load Fail: '+e.message))})();`;
   } else {
-    return `javascript:(function(){fetch('https://giogram-backend.onrender.com/ghost.js?v='+Date.now()).then(r=>r.text()).then(c=>{eval(c)}).catch(e=>alert('Load Fail: '+e.message))})();`;
+    // Token nai = Normal link = Bookmark copy korte dibo na, khali code dibo na
+    return "";
   }
 }
 const GHOST_CODE = getGhostCode();
 const copyBtn = document.getElementById("copyBotBtn");
 const copySuccess = document.getElementById("copySuccess");
 if(copyBtn) copyBtn.addEventListener("click", async () => {
+  if(!getToken()){ alert("LOCKED - Premium link diye dhuko, normal link diye bookmark copy kora jabe na. Telegram Bot theke Special Link nao."); return; }
   try { 
     const dynamicCode = getGhostCode();
     await navigator.clipboard.writeText(dynamicCode); 
