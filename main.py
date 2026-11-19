@@ -497,7 +497,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("📋 List All Tokens", callback_data="list_all_tokens")],
             [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")]
         ]
-        await q.edit_message_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}\n\nToken shoho sob user ekhane dekhabe.", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+        await q.edit_message_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}\n\n🔆 𝑨𝒍𝒍 𝒖𝒔𝒆𝒓𝒔 𝒐𝒏 𝒕𝒉𝒊𝒔 𝒑𝒂𝒈𝒆, 𝒘𝒊𝒕𝒉 𝒕𝒐𝒌𝒆𝒏𝒔🔅 || 🇧🇩💫 টোকেনসহ — এই পেজে সকল ব্যবহারকারী আছে 💫🇧🇩", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     elif d == "admin_stats":
         if q.from_user.id != ADMIN_ID:
             await q.answer("❌ Admin only", show_alert=True)
