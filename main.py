@@ -657,18 +657,21 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
                 [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK)]
             ]
-            msg = f"""🎉 CONGRATULATIONS PREMIUM APPROVED 🎉
+            msg = f"""🎉 CONGRATULATIONS PREMIUM ACCESS UNLOCKED 🎉
 
-Trader ID: <code>{trader_id}</code>
-Deposit: ${amount}
-Status:  🟢 ACTIVE
+🆔️Trader ID: <code>{trader_id}</code>
+💎Tier: VIP/ELITE ACCESS 
+💳Deposit: ${amount}
+🟢Status: ACTIVE & VERIFIED 
 
-🔓 YOUR SPECIAL LINK:
+🔓 YOUR SPECIAL/PREMIUM LINK:
 <code>{premium_link}</code>
 
-Normal link e sudhu Channel+Admin, ei link e sob Premium.
 
-- GHOST Team Ghost
+সাধারণ লিংকে শুধু বেসিক আপডেট আর সীমিত অ্যাক্সেস থাকে—কিন্তু এই প্রাইভেট লিংকে আপনার জন্য উন্মুক্ত হচ্ছে সব Exclusive Channel, Priority Support এবং VIP সুবিধা।
+
+
+- GHOST Team 
 """
             try:
                 with open('approved_sticker.jpg','rb') as sticker:
