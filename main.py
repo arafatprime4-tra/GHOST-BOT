@@ -657,7 +657,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("🌐 Website", url=premium_link)],
                 [InlineKeyboardButton("🔖 Guide", callback_data="bookmark_guide"), InlineKeyboardButton("💬 Channel", url=CHANNEL_LINK), InlineKeyboardButton("🏫 Academy", url=ACADEMY_LINK)]
             ]
-            msg = f"""🎉 CONGRATULATIONS PREMIUM ACCESS UNLOCKED 🎉
+            msg = f"""🎉 <b>𝐂𝐎𝐍𝐆𝐑𝐀𝐓𝐔𝐋𝐀𝐓𝐈𝐎𝐍𝐒</b> 🎉
+💎 <b>𝐏𝐑𝐄𝐌𝐈𝐔𝐌 𝐀𝐂𝐂𝐄𝐒𝐒 𝐔𝐍𝐋𝐎𝐂𝐊𝐄𝐃</b> 💎 🎉
 
 🆔️Trader ID: <code>{trader_id}</code>
 💎Tier: VIP/ELITE ACCESS 
