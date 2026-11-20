@@ -283,7 +283,7 @@ def api_admin_suspend_token():
 def health(): 
     return f"GHOST LIVE ADMIN={ADMIN_ID} TOKENS={len(approved_tokens)} OK"
 
-WELCOME = """<b>GHOST TRADER BOT</b>
+WELCOME = """<b>𝙂𝙃𝙊𝙎𝙏 𝙏𝙍𝘼𝘿𝙀𝙍 𝙋𝙍𝙀𝙈𝙄𝙐𝙈 𝘽𝙊𝙏</b>
 
 <b>🤖🆓️Our bot is free—please don’t try to sell it, and never pay for bots like this.🚫💸</b>
 
@@ -700,12 +700,12 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg = f"""🎉 <b>𝐂𝐎𝐍𝐆𝐑𝐀𝐓𝐔𝐋𝐀𝐓𝐈𝐎𝐍𝐒</b> 🎉
 💎 <b>𝐏𝐑𝐄𝐌𝐈𝐔𝐌 𝐀𝐂𝐂𝐄𝐒𝐒 𝐔𝐍𝐋𝐎𝐂𝐊𝐄𝐃</b> 💎 🎉
 
-🆔️Trader ID: <code>{trader_id}</code>
-💎Tier: VIP/ELITE ACCESS 
-💳Deposit: ${amount}
-🟢Status: ACTIVE & VERIFIED 
+🆔️ 𝗧𝗿𝗮𝗱𝗲𝗿 𝗜𝗱: <code>{trader_id}</code>
+💎 𝗧𝗶𝗲𝗿 : 𝗩𝗜𝗣 / 𝗘𝗹𝗶𝘁𝗲 𝗔𝗰𝗰𝗲𝘀𝘀
+💳 𝗗𝗲𝗽𝗼𝘀𝗶𝘁: ${amount}
+🟢 𝗦𝘁𝗮𝘁𝘂𝘀 : 𝗔𝗰𝘁𝗶𝘃𝗲 & 𝗩𝗲𝗿𝗶𝗳𝗶𝗲𝗱
 
-🔓 YOUR SPECIAL/PREMIUM LINK:
+🔓 𝗬𝗼𝘂𝗿 𝗦𝗽𝗲𝗰𝗶𝗮𝗹 / 𝗣𝗿𝗲𝗺𝗶𝘂𝗺 𝗟𝗶𝗻𝗸
 <code>{premium_link}</code>
 
 
