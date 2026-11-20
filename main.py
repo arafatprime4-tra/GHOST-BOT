@@ -310,6 +310,46 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         kb.append([InlineKeyboardButton("📊 Stats / Tokens", callback_data="admin_stats")])
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("""👻 GHOST TRADER - সাহায্য কেন্দ্র
+
+১️⃣ বট কি ফ্রি?
+✅ হ্যাঁ! প্রথম 1k জনের জন্য ১০০% ফ্রি।
+
+২️⃣ বট কিভাবে পাবো? (Guide)
+এটা একদম সহজ!
+👉 আপনার Present Trader ID টা পাঠান। আমাদের লিঙ্ক থেকে করা লাগবে না, যার লিঙ্ক থেকেই করেন না কেন, শুধু ID টা পাঠান।
+⚠️ অবশ্যই আমাদের চ্যানেলে Join থাকতে হবে, না হলে বট পাবেন না।
+
+📢 Channel: t.me/premierghos
+
+৩️⃣ সমস্যা হলে?
+👑 ADMIN/OWNER: @ghostsupportbd""")
+
+async def privacy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("""🔐 Privacy Policy: https://telegra.ph/Privacy-Policy-11-20-275
+
+We store only your encrypted API token. Fully secure & private.""")
+
+async def description_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("""👻 GHOST TRADER | Price Action Expert
+
+We read Price, not indicators.
+
+📚 Strategy:
+• Price Action
+• SMC (Liquidity + Structure)
+• No Indicators
+
+🎯 Signals: 3-4/Day Best
+যত খুশি নিতে পারো, তবে ৩-৪ টাই সেরা।
+
+📈 Live Trade at 1k Members
+22/1k Joined
+
+👑 ADMIN/OWNER: @ghostsupportbd
+⚠️ Overtrade করে লস করলে Ghost দায়ী নয়।""")
+
 async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # FIX: Admin Panel ashe na - karon ADMIN_ID vul hole is_admin=False hoy
     # Ekhon /admin dilei bujha jabe ADMIN_ID thik ache kina
@@ -713,6 +753,9 @@ def run_bot():
             app.add_handler(CommandHandler("start", start))
             app.add_handler(CommandHandler("admin", admin_command))
             app.add_handler(CommandHandler("myid", myid))
+            app.add_handler(CommandHandler("help", help_command))
+            app.add_handler(CommandHandler("privacy", privacy_command))
+            app.add_handler(CommandHandler("description", description_command))
             app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
             app.add_handler(MessageHandler(filters.PHOTO, handle_media))
             app.add_handler(MessageHandler(filters.Sticker.ALL, handle_media))
