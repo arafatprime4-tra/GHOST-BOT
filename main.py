@@ -324,7 +324,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📢 Channel: t.me/premierghos
 
 ৩️⃣ সমস্যা হলে?
-👑 ADMIN/OWNER: @ghostsupportbd""")
+👑 ADMIN/OWNER: @ghostsupportbd""", disable_web_page_preview=True)
 
 async def privacy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("""🔐 Privacy Policy: https://telegra.ph/Privacy-Policy-11-20-275
