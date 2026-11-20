@@ -24,7 +24,7 @@ except:
     digits = re.sub(r'[^0-9]', '', _admin_raw)
     ADMIN_ID = int(digits) if digits else 0
 
-AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","https://qxbroker.com/en/sign-up/?lid=123456")
+AFFILIATE_LINK = os.getenv("AFFILIATE_LINK","")
 WEBSITE_URL = os.getenv("WEBSITE_URL","https://giogram-backend.onrender.com")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK","https://t.me/premierghos")
 ACADEMY_LINK = os.getenv("ACADEMY_LINK","https://t.me/premierghos")
@@ -329,7 +329,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def privacy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("""🔐 Privacy Policy: https://telegra.ph/Privacy-Policy-11-20-275
 
-We store only your encrypted API token. Fully secure & private.""")
+We store only your encrypted API token. Fully secure & private.""", disable_web_page_preview=True)
 
 async def description_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("""👻 GHOST TRADER | Price Action Expert
