@@ -140,12 +140,9 @@ def unsuspend_premium_token(token):
 
 def delete_premium_token(token):
     if token in approved_tokens:
-        # Soft delete - keep record but mark deleted
+        # Soft delete - record rakhte hobe, nahole pore signal block kora jabe na
         approved_tokens[token]["status"] = "deleted"
         approved_tokens[token]["deleted_at"] = int(time.time())
-        save_tokens()
-        # Also actually remove after save for security, but keep log
-        del approved_tokens[token]
         save_tokens()
         return True
     return False
@@ -201,6 +198,12 @@ def api_signal():
         # V3 = newest (voice fix + cache fix), V2 = ager LYRA (grace 1 din), baki sob OLD
         if ver not in ("LYRA-V2","LYRA-V3","","ghost"):  # ghost.js ver pathay na - khali ver keo allow, nahole shob WAIT hoy
             return jsonify({"signal_id": f"OLD-{int(time.time())}","signal":"WAIT","status":"OLD_VERSION","market":request.args.get('pair','EURUSD'),"pair":request.args.get('pair','EURUSD'),"direction":"WAIT","reason":"OLD BOOKMARKLET EXPIRED - New Link Nao","risk_percent":1,"expiry_timestamp":int((time.time()+60)*1000),"remainingSeconds":60,"time_left":60,"blocked":True})
+        # BOOKMARK SUSPEND / DELETE CHECK - ghost.js token pathay (localStorage theke)
+        _tok = (request.args.get('token','') or request.args.get('access','') or request.args.get('premium','') or request.args.get('t','') or '').strip()
+        if _tok:
+            _d = approved_tokens.get(_tok)
+            if _d and _d.get("status") in ("suspended","deleted"):
+                return jsonify({"signal_id": f"BLOCKED-{int(time.time())}","signal":"WAIT","status":"SUSPENDED" if _d.get("status")=="suspended" else "DELETED","market":request.args.get('pair','EURUSD'),"pair":request.args.get('pair','EURUSD'),"direction":"WAIT","reason":"SUSPENDED - Admin er sathe contact koro" if _d.get("status")=="suspended" else "DELETED - Admin er sathe contact koro","risk_percent":1,"expiry_timestamp":int((time.time()+60)*1000),"remainingSeconds":60,"time_left":60,"blocked":True})
         mode=request.args.get('mode','SAFE')
         raw_pair=request.args.get('pair','EURUSD')
         # OTC ALLOWED - real off থাকলে OTC দিবে
@@ -388,6 +391,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"❌ {e}")
         return
     if text.upper() in PAIRS:
+        # BOT SUSPEND / DELETE CHECK - user_id diye khujbo
+        _uid = str(update.effective_user.id)
+        _blocked = False
+        _blk_reason = ""
+        for _t, _dd in approved_tokens.items():
+            if str(_dd.get("user_id")) == _uid and _dd.get("status") in ("suspended","deleted"):
+                _blocked = True
+                _blk_reason = "SUSPENDED - Admin er sathe contact koro" if _dd.get("status")=="suspended" else "DELETED - Admin er sathe contact koro"
+                break
+        if _blocked:
+            await update.message.reply_text(f"⛔ Signal blocked\n{_blk_reason}", parse_mode='HTML')
+            return
         try:
             s = signal_engine.get_signal(text.upper(), "FAST")
             emoji = "🟢" if s["signal"]=="UP" else "🔴" if s["signal"]=="DOWN" else "⏳"
