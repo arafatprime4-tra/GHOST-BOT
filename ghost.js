@@ -85,7 +85,7 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>GHOST <span>PREMIUM</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>𝐆𝐇𝐎𝐒𝐓 <span>𝗣𝗥𝗘𝗠𝗜𝗨𝗠</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
 <div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
@@ -511,6 +511,18 @@ function showSTOP(){
   updateLossUI();
 }
 function updateUI(j){
+  // SUSPEND / DELETE - sobar age, loss protection keo override korbe
+  if(j && (j.status==="SUSPENDED" || j.status==="DELETED" || j.blocked===true)){
+    lockedSignalId=""; lockedUntil=0; currentSignal=null; waitStart=0;
+    let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");
+    if(sigEl){ sigEl.className="gh-sig wait"; sigEl.style.background="rgba(255,0,0,.35)"; }
+    if(txtEl) txtEl.textContent="⛔ SUSPENDED";
+    if(arrowEl) arrowEl.textContent="⛔";
+    if(reasonEl) reasonEl.textContent=j.reason||"SUSPENDED - Admin er sathe contact koro";
+    if(confEl) confEl.textContent="0% CONF";
+    if(barEl) barEl.style.width="0%";
+    return;
+  }
   // FIX: 2 Loss = DIRECT OFF - kono signal na. updateUI teo protection check, nahole purano UP abar chole ashto (video te STOP <-> UP flicker)
   let prot0=check_loss_protection();
   if(!prot0.allowed){ showSTOP(); return; }
@@ -548,7 +560,21 @@ function fetchSignal(forcePair){
     showSTOP();
     return;
   }
-  if(lockedSignalId && now<lockedUntil && currentSignal){ updateUI(currentSignal); return; }
+  // SUSPEND er jonno - lock thakleo 10 sec por por ekbar server check, nahole suspend dekhabe na
+  if(lockedSignalId && now<lockedUntil && currentSignal){
+    if(!window.__GHOST_SUSP_CHECK || now - window.__GHOST_SUSP_CHECK > 10000){
+      window.__GHOST_SUSP_CHECK = now;
+      let asset2=forcePair||getCurrentMarket()||currentPair;
+      let url2="https://giogram-backend.onrender.com/api/signal?pair="+asset2+"&mode=SAFE&ver=LYRA-V3";
+      if(TOKEN) url2+="&token="+encodeURIComponent(TOKEN);
+      fetch(url2).then(r=>r.json()).then(j2=>{
+        if(j2 && (j2.status==="SUSPENDED" || j2.status==="DELETED" || j2.blocked===true)){
+          lockedSignalId=""; lockedUntil=0; currentSignal=null; waitStart=0; updateUI(j2); return;
+        }
+      }).catch(()=>{});
+    }
+    updateUI(currentSignal); return;
+  }
   let asset=forcePair||getCurrentMarket();
   if(!asset) asset=currentPair;
   if((document.body.innerText||"").includes("Select trade pair")) return;
@@ -556,6 +582,11 @@ function fetchSignal(forcePair){
   if(TOKEN) url+="&token="+encodeURIComponent(TOKEN);
   fetch(url).then(r=>r.json()).then(j=>{
     if(!j) return;
+    // SUSPEND / DELETE - server er reason fele dibo na, sorasori dekhabe
+    if(j.status==="SUSPENDED" || j.status==="DELETED" || j.blocked===true){
+      lockedSignalId=""; lockedUntil=0; currentSignal=null; waitStart=0;
+      updateUI(j); return;
+    }
     if(j.signal==="UP") j.signal="CALL";
     if(j.signal==="DOWN") j.signal="PUT";
     if(j.status==="EXPIRED"||j.status==="DELETED"||j.is_expired){
