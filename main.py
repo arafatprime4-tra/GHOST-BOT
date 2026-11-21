@@ -702,11 +702,11 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             premium_token = ""
             _uname = None
             _fname = None
-        try:
-            _uinfo = user_username_map.get(int(uid)) if str(uid).isdigit() else None
-            if isinstance(_uinfo, dict):
-                _uname = _uinfo.get("username")
-                _fname = _uinfo.get("first_name")
+            try:
+                _uinfo = user_username_map.get(int(uid)) if str(uid).isdigit() else None
+                if isinstance(_uinfo, dict):
+                   _uname = _uinfo.get("username")
+                   _fname = _uinfo.get("first_name")
         except:
             _uname = None
             _fname = None   
