@@ -105,7 +105,7 @@ def create_premium_token(trader_id, user_id, amount, username=None, first_name=N
     token = secrets.token_urlsafe(32)
     _uname = None
     if username:
-        _clean = str(usermane).lstrip("@).strip()
+        _clean = str(usermane).lstrip("@").strip()
                if _clean:
                     _uname = "@" + _clean                  
     approved_tokens[token] = {
