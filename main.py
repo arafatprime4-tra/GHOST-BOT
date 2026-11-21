@@ -386,11 +386,11 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🔄 𝐑𝐞𝐟𝐫𝐞𝐬𝐡", callback_data="admin_panel")],
         [InlineKeyboardButton("📋 𝐋𝐢𝐬𝐭 𝐀𝐥𝐥 𝐓𝐨𝐤𝐞𝐧𝐬", callback_data="list_all_tokens")]
     ]
-    await update.message.reply_text(f"🔧 <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    await update.message.reply_text(f"🔧 <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: <code>{ADMIN_ID}</code>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
-    match = "✅ Tumi Admin - /start e Panel asbe" if u.id == ADMIN_ID else "❌ Tumi Admin na - ADMIN_ID vul. Render e ADMIN_ID = ei ID dao"
+    match = "✅ You Are The Admin - /start Panel Will Come" if u.id == ADMIN_ID else "❌ You Are NOT Admin - ADMIN_ID Is Incorrect. Render e ADMIN_ID = ei ID dao"
     await update.message.reply_text(f"🆔 Your ID: <code>{u.id}</code>\n@{u.username or 'N/A'}\nRender ADMIN_ID: <code>{ADMIN_ID}</code>\n\n{match}", parse_mode='HTML')
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
