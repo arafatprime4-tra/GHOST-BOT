@@ -446,10 +446,10 @@ async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"❌ {e}")
         return
     tid = user_trader_map.get(user.id, "N/A")
-       try:
-            user_username_map[user.id] = {"username": user.usermane, "first_name": user.first_name}
-       except:
-           pass
+    try:
+        user_username_map[user.id] = {"username": user.usermane, "first_name": user.first_name}
+    except:
+        pass
     kb = [[InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না", callback_data=f"dpnM_{user.id}_{tid}")]]
     await update.message.reply_text(f"📸 Received ID {tid}\n💰 ডিপোজিট করেছেন?", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     try:
