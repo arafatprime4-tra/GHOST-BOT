@@ -34,6 +34,7 @@ PAIRS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY"
 
 pending_custom_msg = {}
 user_trader_map = {}
+user_username_map={}
 pending_deposit_claims = {}
 
 TOKEN_FILE = "approved_tokens.json"
@@ -100,12 +101,18 @@ def get_tokens_backup_json():
         return json.dumps(approved_tokens, indent=2)
     except:
         return "{}"
-
-def create_premium_token(trader_id, user_id, amount):
+def create_premium_token(trader_id, user_id, amount, username=None, first_name=None):
     token = secrets.token_urlsafe(32)
+    _uname = None
+    if username:
+        _clean = str(usermane).lstrip("@).strip()
+               if _clean:
+                    _uname = "@" + _clean                  
     approved_tokens[token] = {
         "trader_id": str(trader_id),
         "user_id": str(user_id),
+        "username": _uname,
+        "first_name": str(first_name) if first_name elas None,
         "amount": str(amount),
         "created": int(time.time()),
         "created_human": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + 6*3600)),
@@ -405,6 +412,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ ID 8 digit")
         return
     user_trader_map[user.id] = tid
+                try:
+                     user_username_map[user.id] = {"username": user.usermane, "first_name": user.first_name}
+                except:
+                    pass                                           
     kb = [
         [InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("❌ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
         [InlineKeyboardButton("📸 Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
@@ -435,6 +446,10 @@ async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"❌ {e}")
         return
     tid = user_trader_map.get(user.id, "N/A")
+       try:
+            user_username_map[user.id] = {"username": user.usermane, "first_name": user.first_name}
+       except:
+           pass
     kb = [[InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না", callback_data=f"dpnM_{user.id}_{tid}")]]
     await update.message.reply_text(f"📸 Received ID {tid}\n💰 ডিপোজিট করেছেন?", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     try:
@@ -685,11 +700,21 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             trader_id=parts[2]
             amount=parts[3]
             premium_token = ""
+        _uname = None
+        _fname = None
+        try:
+            _uinfo = user_username_map.get(int(uid)) if str(uid).isdigit() else None
+            if isinstance(_uinfo, dict):
+                _uname = _uinfo.get("username")
+                _fname = _uinfo.get("first_name")
+        except:
+            _uname = None
+            _fname = None   
             try:
-                premium_token = create_premium_token(trader_id, uid, amount)
+                premium_token = create_premium_token(trader_id, uid, amount, username=_uname, first_name=_fname)
             except Exception as e:
                 premium_token = f"{trader_id}_{uid}_{amount}_{secrets.token_urlsafe(8)}"
-                approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "amount": str(amount), "created": int(time.time())}
+                approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "username": _uname, "firstname": _fname, "amount": str(amount), "created": int(time.time())}
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
             kb=[
