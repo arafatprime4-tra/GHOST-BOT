@@ -413,7 +413,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     user_trader_map[user.id] = tid
                 try:
-                     user_username_map[user.id] = {"username": user.usermane, "first_name": user.first_name}
+                    user_username_map[user.id] = {"username": user.usermane, "first_name": user.first_name}
                 except:
                     pass                                           
     kb = [
