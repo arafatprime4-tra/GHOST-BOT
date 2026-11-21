@@ -710,7 +710,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except:
                _uname = None
                _fname = None   
-        try:
+            try:
                 premium_token = create_premium_token(trader_id, uid, amount, username=_uname, first_name=_fname)
             except Exception as e:
                 premium_token = f"{trader_id}_{uid}_{amount}_{secrets.token_urlsafe(8)}"
