@@ -707,9 +707,9 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if isinstance(_uinfo, dict):
                    _uname = _uinfo.get("username")
                    _fname = _uinfo.get("first_name")
-        except:
-            _uname = None
-            _fname = None   
+            except:
+               _uname = None
+               _fname = None   
         try:
                 premium_token = create_premium_token(trader_id, uid, amount, username=_uname, first_name=_fname)
             except Exception as e:
