@@ -378,7 +378,7 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # FIX: Admin Panel ashe na - karon ADMIN_ID vul hole is_admin=False hoy
     # Ekhon /admin dilei bujha jabe ADMIN_ID thik ache kina
     if update.effective_user.id != ADMIN_ID:
-        await update.message.reply_text(f"❌ Admin only\n\nTomar ID: <code>{update.effective_user.id}</code>\nRender e ADMIN_ID: <code>{ADMIN_ID}</code>\n\n2 ta na mille Panel asbe na.\nRender → Environment → ADMIN_ID = Tomar ID diye dao, tarpor Clear build cache & Deploy.", parse_mode='HTML')
+        await update.message.reply_text(f"❌ Admin only\n\nTomar ID: <code>{update.effective_user.id}</code>\nADMIN_ID: <code>{ADMIN_ID}</code>\n\n2 ta na mille Panel asbe na.", parse_mode='HTML')
         return
     kb=[
         [InlineKeyboardButton("👥 𝐌𝐚𝐧𝐚𝐠𝐞 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐔𝐬𝐞𝐫𝐬", callback_data="manage_premium")],
@@ -390,7 +390,7 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
-    match = "✅ You Are The Admin - /start Panel Will Come" if u.id == ADMIN_ID else "❌ You Are NOT Admin - ADMIN_ID Is Incorrect. Render e ADMIN_ID = ei ID dao"
+    match = "✅ You Are The Admin - /start Panel Will Come" if u.id == ADMIN_ID else "❌ You Are NOT Admin - ADMIN_ID Is Incorrect."
     await update.message.reply_text(f"🆔 Your ID: <code>{u.id}</code>\n@{u.username or 'N/A'}\nRender ADMIN_ID: <code>{ADMIN_ID}</code>\n\n{match}", parse_mode='HTML')
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
