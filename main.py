@@ -709,7 +709,14 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                    _fname = _uinfo.get("first_name")
             except:
                _uname = None
-               _fname = None   
+               _fname = None
+            if not _uname and not _fname:
+                try:
+                    _chat = await context.bot.get_chat(int(uid))
+                    _uname = _chat.username
+                    _fname = _chat.first_name
+                except:
+                    pass
             try:
                 premium_token = create_premium_token(trader_id, uid, amount, username=_uname, first_name=_fname)
             except Exception as e:
