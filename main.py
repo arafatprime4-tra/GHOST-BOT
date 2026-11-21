@@ -112,7 +112,7 @@ def create_premium_token(trader_id, user_id, amount, username=None, first_name=N
         "trader_id": str(trader_id),
         "user_id": str(user_id),
         "username": _uname,
-        "first_name": str(first_name) if first_name elas None,
+        "first_name": str(first_name) if first_name else None,
         "amount": str(amount),
         "created": int(time.time()),
         "created_human": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + 6*3600)),
