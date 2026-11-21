@@ -77,6 +77,20 @@ if not approved_tokens:
                 _src = "ENV var"
     except Exception as e:
         print(f"Load ENV tokens fail: {e}")
+# OLD TOKEN AUTO-FIX - purono fallback token e status / suspended_at / created_human / first_name missing thakle bharay dao
+for _tk, _dd in list(approved_tokens.items()):
+    if isinstance(_dd, dict):
+        if "firstname" in _dd and "first_name" not in _dd:
+            _dd["first_name"] = _dd.pop("firstname")
+        if "status" not in _dd or not _dd.get("status"):
+            _dd["status"] = "active"
+        if "suspended_at" not in _dd:
+            _dd["suspended_at"] = None
+        if "created_human" not in _dd and _dd.get("created"):
+            try:
+                _dd["created_human"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(int(_dd["created"]) + 6*3600))
+            except:
+                pass
 print(f"STABLE: Tokens loaded: {len(approved_tokens)} from {_src or 'empty - fresh start'}")
 
 def save_tokens():
@@ -105,7 +119,7 @@ def create_premium_token(trader_id, user_id, amount, username=None, first_name=N
     token = secrets.token_urlsafe(32)
     _uname = None
     if username:
-        _clean = str(usermane).lstrip("@").strip()
+        _clean = str(username).lstrip("@").strip()
         if _clean:
             _uname = "@" + _clean                  
     approved_tokens[token] = {
@@ -428,7 +442,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     user_trader_map[user.id] = tid
     try:
-        user_username_map[user.id] = {"username": user.usermane, "first_name": user.first_name}
+        user_username_map[user.id] = {"username": user.username, "first_name": user.first_name}
     except:
         pass                                           
     kb = [
@@ -462,7 +476,7 @@ async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     tid = user_trader_map.get(user.id, "N/A")
     try:
-        user_username_map[user.id] = {"username": user.usermane, "first_name": user.first_name}
+        user_username_map[user.id] = {"username": user.username, "first_name": user.first_name}
     except:
         pass
     kb = [[InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না", callback_data=f"dpnM_{user.id}_{tid}")]]
@@ -736,7 +750,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 premium_token = create_premium_token(trader_id, uid, amount, username=_uname, first_name=_fname)
             except Exception as e:
                 premium_token = f"{trader_id}_{uid}_{amount}_{secrets.token_urlsafe(8)}"
-                approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "username": _uname, "firstname": _fname, "amount": str(amount), "created": int(time.time())}
+                approved_tokens[premium_token] = {"trader_id": str(trader_id), "user_id": str(uid), "username": _uname, "first_name": _fname, "amount": str(amount), "created": int(time.time()), "created_human": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + 6*3600)), "status": "active", "suspended_at": None}
                 save_tokens()
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
             kb=[
