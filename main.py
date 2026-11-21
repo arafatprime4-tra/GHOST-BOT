@@ -700,8 +700,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             trader_id=parts[2]
             amount=parts[3]
             premium_token = ""
-        _uname = None
-        _fname = None
+            _uname = None
+            _fname = None
         try:
             _uinfo = user_username_map.get(int(uid)) if str(uid).isdigit() else None
             if isinstance(_uinfo, dict):
