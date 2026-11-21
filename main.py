@@ -381,12 +381,12 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Admin only\n\nTomar ID: <code>{update.effective_user.id}</code>\nRender e ADMIN_ID: <code>{ADMIN_ID}</code>\n\n2 ta na mille Panel asbe na.\nRender → Environment → ADMIN_ID = Tomar ID diye dao, tarpor Clear build cache & Deploy.", parse_mode='HTML')
         return
     kb=[
-        [InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")],
-        [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
-        [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")],
-        [InlineKeyboardButton("📋 List All Tokens", callback_data="list_all_tokens")]
+        [InlineKeyboardButton("👥 𝐌𝐚𝐧𝐚𝐠𝐞 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐔𝐬𝐞𝐫𝐬", callback_data="manage_premium")],
+        [InlineKeyboardButton("📊 𝐒𝐭𝐚𝐭𝐮𝐬", callback_data="admin_stats")],
+        [InlineKeyboardButton("🔄 𝐑𝐞𝐟𝐫𝐞𝐬𝐡", callback_data="admin_panel")],
+        [InlineKeyboardButton("📋 𝐋𝐢𝐬𝐭 𝐀𝐥𝐥 𝐓𝐨𝐤𝐞𝐧𝐬", callback_data="list_all_tokens")]
     ]
-    await update.message.reply_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    await update.message.reply_text(f"🔧 <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
@@ -576,12 +576,12 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.answer("❌ Admin only", show_alert=True)
             return
         kb=[
-            [InlineKeyboardButton("👥 Manage Premium Users", callback_data="manage_premium")],
-            [InlineKeyboardButton("📊 Stats / Tokens", callback_data="admin_stats")],
-            [InlineKeyboardButton("📋 List All Tokens", callback_data="list_all_tokens")],
-            [InlineKeyboardButton("🔄 Refresh", callback_data="admin_panel")]
+            [InlineKeyboardButton("👥 𝑀𝑎𝑛𝑎𝑔𝑒 𝑃𝑟𝑒𝑚𝑖𝑢𝑚 𝑈𝑠𝑒𝑟𝑠", callback_data="manage_premium")],
+            [InlineKeyboardButton("📊 𝑆𝑡𝑎𝑡𝑢𝑠 / 𝑇𝑜𝑘𝑒𝑛𝑠", callback_data="admin_stats")],
+            [InlineKeyboardButton("📋 ​𝐿𝑖𝑠𝑡 𝐴𝑙𝑙 𝑇𝑜𝑘𝑒𝑛𝑠", callback_data="list_all_tokens")],
+            [InlineKeyboardButton("🔄 𝑅𝑒𝑓𝑟𝑒𝑠ℎ", callback_data="admin_panel")]
         ]
-        await q.edit_message_text(f"🔧 <b>ADMIN PANEL</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: {ADMIN_ID}\n\n🔆 𝑨𝒍𝒍 𝒖𝒔𝒆𝒓𝒔 𝒐𝒏 𝒕𝒉𝒊𝒔 𝒑𝒂𝒈𝒆, 𝒘𝒊𝒕𝒉 𝒕𝒐𝒌𝒆𝒏𝒔🔅 || 🇧🇩💫 টোকেনসহ — এই পেজে সকল ব্যবহারকারী আছে 💫🇧🇩", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+        await q.edit_message_text(f"🔧 <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: <code>{ADMIN_ID}</code>\n\n🔆 𝑨𝒍𝒍 𝒖𝒔𝒆𝒓𝒔 𝒐𝒏 𝒕𝒉𝒊𝒔 𝒑𝒂𝒈𝒆, 𝒘𝒊𝒕𝒉 𝒕𝒐𝒌𝒆𝒏𝒔🔅 || 🇧🇩💫 টোকেনসহ — এই পেজে সকল ব্যবহারকারী আছে 💫🇧🇩", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     elif d == "admin_stats":
         if q.from_user.id != ADMIN_ID:
             await q.answer("❌ Admin only", show_alert=True)
