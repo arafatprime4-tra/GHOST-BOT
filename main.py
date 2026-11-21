@@ -106,8 +106,8 @@ def create_premium_token(trader_id, user_id, amount, username=None, first_name=N
     _uname = None
     if username:
         _clean = str(usermane).lstrip("@").strip()
-               if _clean:
-                    _uname = "@" + _clean                  
+        if _clean:
+            _uname = "@" + _clean                  
     approved_tokens[token] = {
         "trader_id": str(trader_id),
         "user_id": str(user_id),
