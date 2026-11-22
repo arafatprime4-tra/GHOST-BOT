@@ -382,82 +382,121 @@ header {
   border-top: 1px solid rgba(174,233,255,.30) !important;
 }
 .bottom-nav button.active { color: #AEE9FF !important; background: rgba(174,233,255,.15) !important; }
-/* ===== 5 POINT - GLASS BACKGROUND + GOLDEN TEXT + VIDEO MOTION - V17 ===== */
-#welcome .app-yt-card > div > div > div {
+/* ===== 5 POINT - ADVANCED PRABHA - GLASS + GOLDEN + VIDEO MOTION - V18 ===== */
+/* Container - golden dust + progress beam behind cards */
+#welcome .app-yt-card div[style*="grid"] {
+  position: relative !important;
+}
+#welcome .app-yt-card div[style*="grid"]::before {
+  content: "" !important; position: absolute !important; inset: -10px -6px !important;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(255,215,100,.70) 0 2px, transparent 3px),
+    radial-gradient(circle at 85% 20%, rgba(255,255,255,.70) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 30% 55%, rgba(255,215,100,.60) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 70% 75%, rgba(255,215,100,.70) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 90%, rgba(255,255,255,.60) 0 1.5px, transparent 2.5px) !important;
+  background-size: 100% 100% !important;
+  animation: ghost-dust-float 4.5s ease-in-out infinite !important;
+  pointer-events: none !important; z-index: 0 !important;
+}
+@keyframes ghost-dust-float {
+  0%, 100% { transform: translateY(0); opacity: .70; }
+  50% { transform: translateY(-6px); opacity: 1; }
+}
+#welcome .app-yt-card div[style*="grid"]::after {
+  content: "" !important; position: absolute !important; left: 0; right: 0; top: -2px !important; height: 2px !important;
+  background: linear-gradient(90deg, transparent, #FFD166, #FFF8D6, #FFD166, transparent) !important;
+  background-size: 200% 100% !important;
+  animation: ghost-beam-move 5.5s linear infinite !important;
+  pointer-events: none !important; z-index: 1 !important;
+}
+@keyframes ghost-beam-move {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+#welcome .app-yt-card div[style*="grid"] > div {
   position: relative !important; overflow: hidden !important;
   display: flex !important; align-items: center !important; gap: 12px !important;
   padding: 15px 14px !important; border-radius: 16px !important; cursor: pointer !important;
-  /* GLASS BACKGROUND */
-  background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.04) 40%, rgba(255,215,100,.08)) !important;
+  /* GLASS ADVANCED - top glossy + depth */
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.04) 40%, rgba(255,215,100,.10)) !important;
   backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
   border: 1px solid rgba(255,255,255,.35) !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.35) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.10) !important;
   transition: all .25s ease !important;
+  z-index: 1 !important;
 }
-/* GOLDEN TEXT - VIDEO ER MOTO SHINE */
-#welcome .app-yt-card > div > div > div span {
-  background: linear-gradient(90deg, #FFE9A8, #FFD166, #FFB300, #FFD166, #FFE9A8) !important;
+/* GOLDEN TEXT ADVANCED - brighter + glow */
+#welcome .app-yt-card div[style*="grid"] > div span {
+  background: linear-gradient(90deg, #FFF8D6, #FFD166, #FFAA00, #FFD166, #FFF8D6) !important;
   background-size: 250% 100% !important;
   -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important;
-  animation: ghost-gold-shine 2.8s ease-in-out infinite !important;
+  animation: ghost-gold-shine-adv 2.6s ease-in-out infinite !important;
   font-weight: 700 !important; font-size: 14.5px !important;
-  text-shadow: none !important;
+  filter: drop-shadow(0 0 6px rgba(255,215,100,.35)) !important;
 }
-@keyframes ghost-gold-shine {
+@keyframes ghost-gold-shine-adv {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-/* ICON - PHOTO ER MOTO COLOR THAKBE - ICON ER BACKGROUND GLASS */
-#welcome .app-yt-card > div > div > div svg {
+/* ICON - glass circle + pulse with own color when active */
+#welcome .app-yt-card div[style*="grid"] > div svg {
   min-width: 30px !important; width: 30px !important; height: 30px !important;
   padding: 5px !important; background: rgba(255,255,255,.12) !important;
   border: 1px solid rgba(255,255,255,.30) !important; border-radius: 50% !important; flex-shrink: 0 !important;
   backdrop-filter: blur(8px) !important;
+  transition: all .25s ease !important;
 }
-/* VIDEO MOTION - GOLDEN LIGHT BOYE JABE */
-@keyframes ghost-gold-sweep {
+#welcome .app-yt-card div[style*="grid"] > div.ghost-clean-active svg { transform: scale(1.15) !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(1).ghost-clean-active svg { box-shadow: 0 0 12px rgba(0,212,154,.80) !important; border-color: rgba(0,212,154,.70) !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(2).ghost-clean-active svg { box-shadow: 0 0 12px rgba(255,82,107,.80) !important; border-color: rgba(255,82,107,.70) !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(3).ghost-clean-active svg { box-shadow: 0 0 12px rgba(0,212,255,.80) !important; border-color: rgba(0,212,255,.70) !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(4).ghost-clean-active svg { box-shadow: 0 0 12px rgba(255,82,107,.80) !important; border-color: rgba(255,82,107,.70) !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(5).ghost-clean-active svg { box-shadow: 0 0 12px rgba(255,193,7,.80) !important; border-color: rgba(255,193,7,.70) !important; }
+/* VIDEO MOTION - GOLDEN LIGHT SWEEP - brighter + wider */
+@keyframes ghost-gold-sweep-adv {
   0% { transform: translateX(-180%) skewX(-20deg); opacity: 0; }
   20% { opacity: 1; }
   60% { transform: translateX(320%) skewX(-20deg); opacity: 1; }
   65%, 100% { transform: translateX(320%) skewX(-20deg); opacity: 0; }
 }
-#welcome .app-yt-card > div > div > div::after {
-  content: "" !important; position: absolute !important; top: 0; bottom: 0; width: 40% !important;
-  background: linear-gradient(90deg, transparent, rgba(255,215,100,.35), rgba(255,255,255,.55), rgba(255,215,100,.35), transparent) !important;
-  animation: ghost-gold-sweep 5.5s ease-in-out infinite !important;
-  display: block !important; pointer-events: none !important;
+#welcome .app-yt-card div[style*="grid"] > div::after {
+  content: "" !important; position: absolute !important; top: 0; bottom: 0; width: 50% !important;
+  background: linear-gradient(90deg, transparent, rgba(255,215,100,.40), rgba(255,255,255,.65), rgba(255,215,100,.40), transparent) !important;
+  animation: ghost-gold-sweep-adv 5.5s ease-in-out infinite !important;
+  display: block !important; pointer-events: none !important; z-index: 1 !important;
 }
-#welcome .app-yt-card > div > div > div:nth-child(1)::after { animation-delay: 0s !important; }
-#welcome .app-yt-card > div > div > div:nth-child(2)::after { animation-delay: 1.10s !important; }
-#welcome .app-yt-card > div > div > div:nth-child(3)::after { animation-delay: 2.20s !important; }
-#welcome .app-yt-card > div > div > div:nth-child(4)::after { animation-delay: 3.30s !important; }
-#welcome .app-yt-card > div > div > div:nth-child(5)::after { animation-delay: 4.40s !important; }
-/* VIDEO MOTION - GOL DIYE GHIRA - GOLDEN */
-#welcome .app-yt-card > div > div > div::before {
-  content: "" !important; position: absolute !important; inset: -3px !important;
-  border: 2px solid rgba(255,215,100,.90) !important; border-radius: 18px !important;
-  box-shadow: 0 0 14px rgba(255,215,100,.50) !important;
-  opacity: 0 !important; pointer-events: none !important; z-index: 2 !important;
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(1)::after { animation-delay: 0s !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(2)::after { animation-delay: 1.10s !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(3)::after { animation-delay: 2.20s !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(4)::after { animation-delay: 3.30s !important; }
+#welcome .app-yt-card div[style*="grid"] > div:nth-child(5)::after { animation-delay: 4.40s !important; }
+/* ADVANCED - ROTATING GOLDEN BORDER + GOLDEN RIPPLE */
+#welcome .app-yt-card div[style*="grid"] > div::before {
+  content: "" !important; position: absolute !important; inset: -2px !important;
+  border-radius: 18px !important; padding: 2px !important;
+  background: conic-gradient(from 0deg, transparent 0%, #FFD166 15%, transparent 30%, transparent 50%, #FFD166 65%, transparent 80%) !important;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
+  -webkit-mask-composite: xor !important; mask-composite: exclude !important;
+  animation: ghost-border-rotate 3.5s linear infinite !important;
+  opacity: .55 !important; pointer-events: none !important; z-index: 2 !important;
 }
-#welcome .app-yt-card > div > div > div.ghost-clean-active::before {
-  animation: ghost-gold-draw 1.10s ease-in-out forwards !important;
+@keyframes ghost-border-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-@keyframes ghost-gold-draw {
-  0% { opacity: 0; transform: scale(.95); }
-  20% { opacity: 1; transform: scale(1.01); }
-  40% { opacity: 1; transform: scale(1); }
-  60% { opacity: 0; transform: scale(1.01); }
-  100% { opacity: 0; transform: scale(1); }
+#welcome .app-yt-card div[style*="grid"] > div.ghost-clean-active {
+  border-color: rgba(255,215,100,.90) !important;
+  background: linear-gradient(135deg, rgba(255,215,100,.20), rgba(255,255,255,.10)) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.32), 0 0 18px rgba(255,215,100,.50), inset 0 1px 0 rgba(255,255,255,.55) !important;
+  transform: translateY(-2px) scale(1.01) !important;
 }
-#welcome .app-yt-card > div > div > div.ghost-clean-active {
-  border-color: rgba(255,215,100,.85) !important;
-  background: linear-gradient(135deg, rgba(255,215,100,.18), rgba(255,255,255,.08)) !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,.30), 0 0 16px rgba(255,215,100,.45), inset 0 1px 0 rgba(255,255,255,.45) !important;
-  transform: translateY(-1px) !important;
+#welcome .app-yt-card div[style*="grid"] > div.ghost-clean-active::before {
+  opacity: 1 !important; animation: ghost-border-rotate 1.2s linear infinite !important;
 }
-#welcome .app-yt-card > div > div > div.ghost-clean-active span {
-  background: linear-gradient(90deg, #FFF3C4, #FFD166, #FFB300, #FFD166, #FFF3C4) !important;
+#welcome .app-yt-card div[style*="grid"] > div.ghost-clean-active span {
+  background: linear-gradient(90deg, #FFF8D6, #FFD166, #FFAA00, #FFD166, #FFF8D6) !important;
   background-size: 250% 100% !important;
   -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important;
 }
@@ -489,11 +528,81 @@ header {
   .navlinks { background: rgba(11,36,71,.97) !important; border-bottom: 1px solid rgba(174,233,255,.40) !important; }
   .navlinks.open { display: flex !important; }
 }
+
+/* ===== BUTTONS - 4 COLOR STRONG - V23 - INSIDE STYLE ===== */
+.btn:not(.menu-toggle):not([data-go]){
+  position:relative !important; overflow:hidden !important; isolation:isolate !important;
+  font-weight:800 !important; letter-spacing:.3px !important; border-width:2px !important; border-radius:14px !important; padding:13px 18px !important;
+  backdrop-filter: blur(14px) saturate(150%) !important; -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+}
+@keyframes btnBorderSpinStrong{ to{ transform:rotate(360deg); } }
+@keyframes btnSweepStrong{
+  0%{ left:-80%; opacity:0; } 15%{ opacity:1; } 55%{ left:130%; opacity:1; } 100%{ left:130%; opacity:0; }
+}
+.btn:not(.menu-toggle):not([data-go])::before{
+  content:"" !important; position:absolute !important; inset:-2px !important; border-radius:inherit !important; padding:2.5px !important;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important; -webkit-mask-composite: xor !important; mask-composite: exclude !important;
+  animation: btnBorderSpinStrong 3s linear infinite !important; pointer-events:none !important; z-index:1 !important;
+}
+.btn:not(.menu-toggle):not([data-go])::after{
+  content:"" !important; position:absolute !important; top:0 !important; left:-80% !important; width:70% !important; height:100% !important;
+  filter: blur(1px) !important; animation: btnSweepStrong 2s ease-in-out infinite !important; pointer-events:none !important; z-index:2 !important;
+}
+/* BLUE - Join / Channel */
+.btn.primary{
+  background: linear-gradient(135deg, rgba(0,229,255,.32), rgba(0,120,255,.22), rgba(0,229,255,.28)) !important; background-color: rgba(0,229,255,.12) !important;
+  border-color:#00E5FF !important; color:#fff !important;
+  box-shadow: 0 0 0 2px rgba(0,229,255,.35) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 38px rgba(0,229,255,.55) !important;
+  animation: btnBluePulseStrong 2.6s ease-in-out infinite !important;
+}
+@keyframes btnBluePulseStrong{ 0%,100%{ box-shadow:0 0 0 2px rgba(0,229,255,.35) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 20px rgba(0,229,255,.35); } 50%{ box-shadow:0 0 0 2px rgba(0,229,255,.50) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 38px rgba(0,229,255,.60); } }
+.btn.primary, .btn.primary span, .btn.primary b{ color:#fff !important; text-shadow:0 0 18px rgba(0,229,255,.90), 0 1px 0 rgba(0,0,0,.40) !important; }
+.btn.primary::before{ background: conic-gradient(from 0deg, transparent 0%, #00E5FF 15%, #fff 20%, transparent 32%, transparent 50%, #0099FF 65%, #00E5FF 72%, transparent 82%) !important; }
+.btn.primary::after{ background: linear-gradient(100deg, transparent, rgba(255,255,255,.60), rgba(0,229,255,.60), rgba(255,255,255,.60), transparent) !important; }
+/* GOLDEN - Premium / Bot / Signal / Copy */
+.btn.premium, .btn.premium-only{
+  background: linear-gradient(135deg, rgba(255,209,102,.38), rgba(255,160,0,.24), rgba(255,209,102,.32)) !important; background-color: rgba(255,209,102,.12) !important;
+  border-color:#FFD166 !important; color:#FFF8E1 !important;
+  box-shadow: 0 0 0 2px rgba(255,209,102,.35) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 38px rgba(255,209,102,.55) !important;
+  animation: btnGoldPulseStrong 3s ease-in-out infinite !important;
+}
+@keyframes btnGoldPulseStrong{ 0%,100%{ box-shadow:0 0 0 2px rgba(255,209,102,.35) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 20px rgba(255,209,102,.35); } 50%{ box-shadow:0 0 0 2px rgba(255,209,102,.50) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 38px rgba(255,209,102,.60); } }
+.btn.premium, .btn.premium span, .btn.premium b, .btn.premium-only, .btn.premium-only span, .btn.premium-only b{ color:#FFF8E1 !important; text-shadow:0 0 18px rgba(255,209,102,.90), 0 1px 0 rgba(0,0,0,.45) !important; }
+.btn.premium::before, .btn.premium-only::before{ background: conic-gradient(from 0deg, transparent 0%, #FFD166 15%, #fff 20%, transparent 32%, transparent 50%, #FFAA00 65%, #FFD166 72%, transparent 82%) !important; }
+.btn.premium::after, .btn.premium-only::after{ background: linear-gradient(100deg, transparent, rgba(255,255,255,.60), rgba(255,209,102,.65), rgba(255,255,255,.60), transparent) !important; }
+/* GREEN - Admin / Explore / Plain */
+.btn:not(.primary):not(.premium):not(.premium-only):not(.locked-only):not(.menu-toggle):not([data-go]){
+  background: linear-gradient(135deg, rgba(0,255,150,.30), rgba(0,180,100,.20), rgba(0,255,150,.26)) !important; background-color: rgba(0,255,150,.10) !important;
+  border-color:#00FF88 !important; color:#fff !important;
+  box-shadow: 0 0 0 2px rgba(0,255,150,.35) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 36px rgba(0,255,150,.50) !important;
+  animation: btnGreenPulseStrong 2.8s ease-in-out infinite !important;
+}
+@keyframes btnGreenPulseStrong{ 0%,100%{ box-shadow:0 0 0 2px rgba(0,255,150,.35) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 20px rgba(0,255,150,.35); } 50%{ box-shadow:0 0 0 2px rgba(0,255,150,.50) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 36px rgba(0,255,150,.55); } }
+.btn:not(.primary):not(.premium):not(.premium-only):not(.locked-only):not(.menu-toggle):not([data-go]),
+.btn:not(.primary):not(.premium):not(.premium-only):not(.locked-only):not(.menu-toggle):not([data-go]) span,
+.btn:not(.primary):not(.premium):not(.premium-only):not(.locked-only):not(.menu-toggle):not([data-go]) b{ color:#fff !important; text-shadow:0 0 18px rgba(0,255,150,.90), 0 1px 0 rgba(0,0,0,.45) !important; }
+.btn:not(.primary):not(.premium):not(.premium-only):not(.locked-only):not(.menu-toggle):not([data-go])::before{
+  background: conic-gradient(from 0deg, transparent 0%, #00FF88 15%, #fff 20%, transparent 32%, transparent 50%, #00D49A 65%, #00FF88 72%, transparent 82%) !important;
+}
+.btn:not(.primary):not(.premium):not(.premium-only):not(.locked-only):not(.menu-toggle):not([data-go])::after{
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.60), rgba(0,255,150,.60), rgba(255,255,255,.60), transparent) !important;
+}
+/* RED - Locked */
+.btn.locked-only{
+  background: linear-gradient(135deg, rgba(255,45,85,.36), rgba(200,0,40,.24), rgba(255,45,85,.30)) !important; background-color: rgba(255,45,85,.12) !important;
+  border-color:#FF2D55 !important; color:#fff !important;
+  box-shadow: 0 0 0 2px rgba(255,45,85,.40) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 40px rgba(255,45,85,.60) !important;
+  animation: btnRedPulseStrong 2.6s ease-in-out infinite !important;
+}
+@keyframes btnRedPulseStrong{ 0%,100%{ box-shadow:0 0 0 2px rgba(255,45,85,.40) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 20px rgba(255,45,85,.40); } 50%{ box-shadow:0 0 0 2px rgba(255,45,85,.55) inset, 0 14px 34px rgba(0,0,0,.45), 0 0 40px rgba(255,45,85,.65); } }
+.btn.locked-only, .btn.locked-only span, .btn.locked-only b{ color:#fff !important; text-shadow:0 0 18px rgba(255,45,85,.95), 0 1px 0 rgba(0,0,0,.50) !important; }
+.btn.locked-only::before{ background: conic-gradient(from 0deg, transparent 0%, #FF2D55 15%, #fff 20%, transparent 32%, transparent 50%, #FF526B 65%, #FF2D55 72%, transparent 82%) !important; }
+.btn.locked-only::after{ background: linear-gradient(100deg, transparent, rgba(255,255,255,.60), rgba(255,45,85,.60), rgba(255,255,255,.60), transparent) !important; }
 </style>
 <script id="ghost-clean-v16-js">
 (function(){
   function startClean(){
-    var pts = document.querySelectorAll('#welcome .app-yt-card > div > div > div');
+    var pts = document.querySelectorAll('#welcome .app-yt-card div[style*="grid"] > div');
     if(!pts || pts.length < 5) return;
     pts = Array.prototype.slice.call(pts).slice(0,5);
     var i = 0;
