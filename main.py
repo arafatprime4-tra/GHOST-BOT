@@ -378,7 +378,7 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # FIX: Admin Panel ashe na - karon ADMIN_ID vul hole is_admin=False hoy
     # Ekhon /admin dilei bujha jabe ADMIN_ID thik ache kina
     if update.effective_user.id != ADMIN_ID:
-        await update.message.reply_text(f"❌ Admin only\n\nTomar ID: <code>{update.effective_user.id}</code>\nADMIN_ID: <code>{ADMIN_ID}</code>\n\n2 ta na mille Panel asbe na.", parse_mode='HTML')
+        await update.message.reply_text(f"🚫 Admin only\n\nTomar ID: <code>{update.effective_user.id}</code>\nADMIN_ID: <code>{ADMIN_ID}</code>\n\n2 ta na mille Panel asbe na.", parse_mode='HTML')
         return
     kb=[
         [InlineKeyboardButton("👥 𝐌𝐚𝐧𝐚𝐠𝐞 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐔𝐬𝐞𝐫𝐬", callback_data="manage_premium")],
@@ -390,7 +390,7 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
-    match = "✅ You Are The Admin - /start Panel Will Come" if u.id == ADMIN_ID else "❌ You Are NOT Admin - ADMIN_ID Is Incorrect."
+    match = "✅ You Are The Admin - /start Panel Will Come" if u.id == ADMIN_ID else "🚫 You Are NOT Admin - ADMIN_ID Is Incorrect."
     await update.message.reply_text(f"🆔 Your ID: <code>{u.id}</code>\n@{u.username or 'N/A'}\nRender ADMIN_ID: <code>{ADMIN_ID}</code>\n\n{match}", parse_mode='HTML')
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -402,7 +402,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=int(target_uid), text=f"📩 <b>Admin:</b>\n\n{text}\n\n- GHOST Team Ghost", parse_mode='HTML')
             await update.message.reply_text(f" Sent to {target_uid}")
         except Exception as e:
-            await update.message.reply_text(f"❌ {e}")
+            await update.message.reply_text(f"🚫 {e}")
         return
     if text.upper() in PAIRS:
         # BOT SUSPEND / DELETE CHECK - user_id diye khujbo
@@ -423,7 +423,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg = f"📊 <b>{text.upper()}</b> {emoji} {s['signal']} {s.get('confidence',0)}% Price {s.get('price')} RSI {s['filter'].get('rsi')}"
             await update.message.reply_text(msg, parse_mode='HTML')
         except Exception as e:
-            await update.message.reply_text(f"❌ {e}")
+            await update.message.reply_text(f"🚫 {e}")
         return
     if "#" in text:
         num_only = re.sub(r'[^0-9]', '', text)
@@ -438,7 +438,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     tid = text
     if len(tid) !=8:
-        await update.message.reply_text("❌ ID 8 digit")
+        await update.message.reply_text("🚫 ID 8 digit")
         return
     user_trader_map[user.id] = tid
     try:
@@ -446,7 +446,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         pass                                           
     kb = [
-        [InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("❌ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
+        [InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("🚫 না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
         [InlineKeyboardButton("📸 Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
     ]
     await update.message.reply_text(f" ID <code>{tid}</code> Received!\n💰 <b>ডিপোজিট করেছেন?</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
@@ -454,7 +454,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if ADMIN_ID != 0:
             kb_admin = [
                 [InlineKeyboardButton(" Direct Approve", callback_data=f"ap_{user.id}_{tid}"), InlineKeyboardButton("✍️ Custom Msg", callback_data=f"cm_{user.id}")],
-                [InlineKeyboardButton("❌ Reject", callback_data=f"rj_{user.id}")]
+                [InlineKeyboardButton("🚫 Reject", callback_data=f"rj_{user.id}")]
             ]
             await context.bot.send_message(chat_id=ADMIN_ID, text=f"📩 <b>New ID</b>\nTrader ID: <code>{tid}</code>\nUser: <code>{user.id}</code> @{user.username or 'N/A'}", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
     except Exception as e:
@@ -472,14 +472,14 @@ async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await context.bot.send_message(chat_id=int(target_uid), text=f"📩 {cap}")
             await update.message.reply_text(f" Media sent to {target_uid}")
         except Exception as e:
-            await update.message.reply_text(f"❌ {e}")
+            await update.message.reply_text(f"🚫 {e}")
         return
     tid = user_trader_map.get(user.id, "N/A")
     try:
         user_username_map[user.id] = {"username": user.username, "first_name": user.first_name}
     except:
         pass
-    kb = [[InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("❌ না", callback_data=f"dpnM_{user.id}_{tid}")]]
+    kb = [[InlineKeyboardButton(" ✅ হ্যাঁ, করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("🚫 না", callback_data=f"dpnM_{user.id}_{tid}")]]
     await update.message.reply_text(f"📸 Received ID {tid}\n💰 ডিপোজিট করেছেন?", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     try:
         if ADMIN_ID != 0:
@@ -518,7 +518,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.edit_message_text(f"Fail {e}")
     elif d.startswith("dpn_"):
         trader_id = d.split("_")[2] if len(d.split("_"))>2 else "N/A"
-        await q.edit_message_text(f"❌ Deposit করেন নাই ID {trader_id} Link: {AFFILIATE_LINK}")
+        await q.edit_message_text(f"🚫 Deposit করেন নাই ID {trader_id} Link: {AFFILIATE_LINK}")
     elif d.startswith("dpyM_"):
         raw = d.replace("dpyM_","")
         sp = raw.split("_")
@@ -532,13 +532,13 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.edit_message_text(f"Fail {e}")
     elif d.startswith("dpnM_"):
         trader_id = d.replace("dpnM_","").split("_")[1] if "_" in d.replace("dpnM_","") else "N/A"
-        await q.edit_message_text(f"❌ Deposit না ID {trader_id}")
+        await q.edit_message_text(f"🚫 Deposit না ID {trader_id}")
     elif d.startswith("cm_") and not d.startswith("cmdep_") and not d.startswith("cmnolink_") and not d.startswith("cmscreen_") and not d.startswith("cmwrite_"):
         uid = d.split("_")[1]
         if user.id != ADMIN_ID:
             return
         kb_custom = [
-            [InlineKeyboardButton("❌ Deposit nai", callback_data=f"cmdep_{uid}"), InlineKeyboardButton("🚫 Link theke na", callback_data=f"cmnolink_{uid}")],
+            [InlineKeyboardButton("🚫 Deposit nai", callback_data=f"cmdep_{uid}"), InlineKeyboardButton("🚫 Link theke na", callback_data=f"cmnolink_{uid}")],
             [InlineKeyboardButton("📸 Screenshot chai", callback_data=f"cmscreen_{uid}"), InlineKeyboardButton("✍️ Nije likhbo", callback_data=f"cmwrite_{uid}")],
             [InlineKeyboardButton("⬅️ Back", callback_data=f"ap_{uid}_N/A")]
         ]
@@ -554,7 +554,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
             await q.edit_message_text(f" Sent to {uid}")
         except Exception as e:
-            await q.edit_message_text(f"❌ {e}")
+            await q.edit_message_text(f"🚫 {e}")
     elif d.startswith("cmnolink_"):
         uid = d.split("_")[1]
         msg = f"🚫 Link theke na\nNew account khulun: {AFFILIATE_LINK}"
@@ -562,7 +562,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
             await q.edit_message_text(f" Sent to {uid}")
         except Exception as e:
-            await q.edit_message_text(f"❌ {e}")
+            await q.edit_message_text(f"🚫 {e}")
     elif d.startswith("cmscreen_"):
         uid = d.split("_")[1]
         msg = "📸 Screenshot din Deposit History"
@@ -570,10 +570,10 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
             await q.edit_message_text(f" Sent to {uid}")
         except Exception as e:
-            await q.edit_message_text(f"❌ {e}")
+            await q.edit_message_text(f"🚫 {e}")
     elif d == "admin_panel":
         if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
+            await q.answer("🚫 Admin only", show_alert=True)
             return
         kb=[
             [InlineKeyboardButton("👥 𝑀𝑎𝑛𝑎𝑔𝑒 𝑃𝑟𝑒𝑚𝑖𝑢𝑚 𝑈𝑠𝑒𝑟𝑠", callback_data="manage_premium")],
@@ -584,7 +584,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.edit_message_text(f"🔧 <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: <code>{ADMIN_ID}</code>\n\n🔆 𝑨𝒍𝒍 𝒖𝒔𝒆𝒓𝒔 𝒐𝒏 𝒕𝒉𝒊𝒔 𝒑𝒂𝒈𝒆, 𝒘𝒊𝒕𝒉 𝒕𝒐𝒌𝒆𝒏𝒔🔅 || 🇧🇩💫 টোকেনসহ — এই পেজে সকল ব্যবহারকারী আছে 💫🇧🇩", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     elif d == "admin_stats":
         if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
+            await q.answer("🚫 Admin only", show_alert=True)
             return
         users = get_all_premium_users()
         active = len([u for u in users if u.get("status")=="active"])
@@ -592,7 +592,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.edit_message_text(f"📊 <b>STATS</b>\n\nTotal Tokens: {len(approved_tokens)}\nActive: {active}\nSuspended: {susp}\nAdmin: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="admin_panel")]]), parse_mode='HTML')
     elif d == "list_all_tokens":
         if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
+            await q.answer("🚫 Admin only", show_alert=True)
             return
         users = get_all_premium_users()
         if not users:
@@ -604,7 +604,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.edit_message_text(txt, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="admin_panel")]]), parse_mode='HTML')
     elif d == "manage_premium":
         if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
+            await q.answer("🚫 Admin only", show_alert=True)
             return
         users = get_all_premium_users()
         if not users:
@@ -621,7 +621,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text += f"{idx+1}. ID:{trader} | User:{user_id} | ${amount} | {status} | {token_short}...\n"
             # Add delete/suspend buttons per user
             kb.append([
-                InlineKeyboardButton(f"❌ Delete {trader}", callback_data=f"delprem_{u['token'][:16]}"),
+                InlineKeyboardButton(f"🚫 Delete {trader}", callback_data=f"delprem_{u['token'][:16]}"),
                 InlineKeyboardButton(f"⏸️ Suspend {trader}" if status=="active" else f"▶️ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
             ])
         kb.append([InlineKeyboardButton("🔄 Refresh", callback_data="manage_premium"), InlineKeyboardButton("🗑️ Delete All", callback_data="del_all_premium")])
@@ -630,7 +630,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif d.startswith("delprem_"):
         if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
+            await q.answer("🚫 Admin only", show_alert=True)
             return
         token_part = d.split("_")[1]
         # Find full token
@@ -645,16 +645,16 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             delete_premium_token(full_token)
             # Notify user if possible
             try:
-                await context.bot.send_message(chat_id=int(user_id), text=f"❌ Your premium access (Trader ID {trader}) has been revoked by admin.\n\nContact admin via bot to request again.")
+                await context.bot.send_message(chat_id=int(user_id), text=f"🚫 Your premium access (Trader ID {trader}) has been revoked by admin.\n\nContact admin via bot to request again.")
             except:
                 pass
             await q.edit_message_text(f" Deleted premium for Trader {trader} (User {user_id})\nToken {token_part}... removed\nUser can request again via bot.")
         else:
-            await q.edit_message_text(f"❌ Token not found: {token_part}")
+            await q.edit_message_text(f"🚫 Token not found: {token_part}")
 
     elif d.startswith("susprem_"):
         if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
+            await q.answer("🚫 Admin only", show_alert=True)
             return
         token_part = d.split("_")[1]
         full_token = None
@@ -682,15 +682,15 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     pass
                 await q.edit_message_text(f"▶️ Unsuspended Trader {trader} (User {user_id})\nAccess restored.")
         else:
-            await q.edit_message_text(f"❌ Token not found: {token_part}")
+            await q.edit_message_text(f"🚫 Token not found: {token_part}")
 
     elif d == "del_all_premium":
         if q.from_user.id != ADMIN_ID:
-            await q.answer("❌ Admin only", show_alert=True)
+            await q.answer("🚫 Admin only", show_alert=True)
             return
         kb = [
             [InlineKeyboardButton(" Yes Delete ALL", callback_data="confirm_del_all")],
-            [InlineKeyboardButton("❌ Cancel", callback_data="manage_premium")]
+            [InlineKeyboardButton("🚫 Cancel", callback_data="manage_premium")]
         ]
         await q.edit_message_text(f"⚠️ Delete ALL {len(approved_tokens)} premium users?\nThis cannot be undone!\nUsers will need to request again.", reply_markup=InlineKeyboardMarkup(kb))
 
@@ -781,7 +781,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except:
                 pass
             await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-            await q.edit_message_text(f" Approved {trader_id} ${amount} -> {uid}\n{premium_link}")
+            await q.edit_message_text(f" Approved <code>{trader_id}</code> ${amount} -> {uid}\n{premium_link}")
         except Exception as e:
             logging.error(f"dep fail {traceback.format_exc()}")
             await q.edit_message_text(f"❌ Error {e}")
