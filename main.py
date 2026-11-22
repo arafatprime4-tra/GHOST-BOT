@@ -386,7 +386,7 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🔄 𝐑𝐞𝐟𝐫𝐞𝐬𝐡", callback_data="admin_panel")],
         [InlineKeyboardButton("📋 𝐋𝐢𝐬𝐭 𝐀𝐥𝐥 𝐓𝐨𝐤𝐞𝐧𝐬", callback_data="list_all_tokens")]
     ]
-    await update.message.reply_text(f"🔧 <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: <code>{ADMIN_ID}</code>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    await update.message.reply_text(f"🔧 <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nUser's/Tokens: {len(approved_tokens)}\nAdmin ID: <code>{ADMIN_ID}</code>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
