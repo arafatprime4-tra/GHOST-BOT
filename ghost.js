@@ -71,8 +71,8 @@ css.innerHTML=`
 .gh-loss-btn:active{transform:scale(.96)}
 .gh-protect{margin:0 6px 2px;padding:2px 5px;border-radius:6px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.4);color:#ffb3c2;font-size:6px;font-weight:700;text-align:center;display:none}
 .gh-protect.on{display:block;animation:ghBlink 1s infinite}
-.gh-close{margin:0 6px 3px;height:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:6px;font-weight:700;cursor:pointer}
-.gh-close:hover{background:rgba(255,45,85,.15);color:#fff}
+.gh-𝗖𝗹𝗼𝘀𝗲{margin:0 6px 3px;height:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#FF0000;font-size:6px;font-weight:700;cursor:pointer}
+.gh-𝗖𝗹𝗼𝘀𝗲:hover{background:rgba(255,45,85,.15);color:#fff}
 .gh-corner{position:absolute;width:7px;height:7px;border:1.5px solid rgba(0,240,255,.6)}
 .gh-corner.tl{top:6px;left:6px;border-right:none;border-bottom:none}
 .gh-corner.tr{top:6px;right:6px;border-left:none;border-bottom:none}
@@ -85,13 +85,13 @@ if(!box){ box=document.createElement("div"); box.id="ghost-bot"; }
 // Reuse first box - remove korbo na, taile LOADING box haray jabe na
 box.innerHTML=`
 <div class="gh-corner tl"></div><div class="gh-corner tr"></div><div class="gh-corner bl"></div><div class="gh-corner br"></div>
-<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>𝐆𝐇𝐎𝐒𝐓 <span>𝗣𝗥𝗘𝗠𝗜𝗨𝗠</span></b><span class="gh-live">● LIVE</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
-<div class="gh-pair" id="gh-pair">GBP/USD<small>GHOST AI</small></div>
+<div class="gh-h" id="gh-h"><div class="gh-h-left"><div class="gh-dot"></div><b>𝐆𝐇𝐎𝐒𝐓 <span>𝐏𝐑𝐄𝐌𝐈𝐔𝐌</span></b><span class="gh-live">● ʟɪᴠᴇ</span></div><div class="gh-toggle" id="gh-toggle">PA ON</div></div>
+<div class="gh-pair" id="gh-pair">GBP/USD<small>𝙂𝙃𝙊𝙎𝙏 𝘼𝙄</small></div>
 <div class="gh-sig wait" id="gh-sig"><div class="gh-scan"></div><div class="gh-shine"></div><div class="gh-arrow" id="gh-arrow">◉</div><b id="gh-txt">WAIT</b><small id="gh-reason">GHOST AI Analyzing...</small></div>
 <div class="gh-bar"><div class="gh-bar-fill" id="gh-bar"></div></div>
 <div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK • <span id="gh-pa" style="color:#00f0ff;font-size:5.5px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
 <div class="gh-protect" id="gh-protect">🛑 2 LOSS - 30 MIN OFF - NO SIGNAL</div>
-<div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">🟢 WIN</button><button class="gh-loss-btn loss" id="gh-loss-btn">🔴 LOSS</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
+<div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">🟢 𝐖𝐈𝐍</button><button class="gh-loss-btn loss" id="gh-loss-btn">🔴 𝐋𝐎𝐒𝐒</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
 <div class="gh-close" id="gh-close">✕ Close</div>
 `;
 if(!box.isConnected){ (document.body || document.documentElement).appendChild(box); }
@@ -132,7 +132,7 @@ function updateLossUI(){
   let prot = document.getElementById('gh-protect');
   let chk = check_loss_protection();
   if(prot){
-    if(!chk.allowed){ if(prot.classList) prot.classList.add('on'); prot.textContent = '🛑 2 LOSS - '+chk.remaining+' MIN OFF - NO SIGNAL'; }
+    if(!chk.allowed){ if(prot.classList) prot.classList.add('on'); prot.textContent = '🛑 2 LOSS - '+chk.remaining+'30 MIN OFF - NO SIGNAL'; }
     else if(prot.classList) prot.classList.remove('on');
   }
 }
@@ -516,7 +516,7 @@ function updateUI(j){
     lockedSignalId=""; lockedUntil=0; currentSignal=null; waitStart=0;
     let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");
     if(sigEl){ sigEl.className="gh-sig wait"; sigEl.style.background="rgba(255,0,0,.35)"; }
-    if(txtEl) txtEl.textContent="⛔ SUSPENDED";
+    if(txtEl) txtEl.textContent="⛔︎︎ sᴜsᴘᴇɴᴅᴇᴅ";
     if(arrowEl) arrowEl.textContent="⛔";
     if(reasonEl) reasonEl.textContent=j.reason||"SUSPENDED - Admin er sathe contact koro";
     if(confEl) confEl.textContent="0% CONF";
@@ -528,7 +528,7 @@ function updateUI(j){
   if(!prot0.allowed){ showSTOP(); return; }
   let pairEl=document.getElementById("gh-pair");
   // VIDEO 1 FIX: Ghosting - pair same thakle innerHTML recreate koro na, nahole UP er upor DOWN ghost dekha jay
-  if(pairEl){ let mTxt=(j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2').replace('OTC',' OTC'); let newHTML=mTxt+'<small>GHOST AI</small>'; if(pairEl.innerHTML!==newHTML) pairEl.innerHTML=newHTML; }
+  if(pairEl){ let mTxt=(j.market||currentPair).replace(/([A-Z]{3})([A-Z]{3})/,'$1/$2').replace('OTC',' OTC'); let newHTML=mTxt+'<small>𝙂𝙃𝙊𝙎𝙏 𝘼𝙄</small>'; if(pairEl.innerHTML!==newHTML) pairEl.innerHTML=newHTML; }
   let sigEl=document.getElementById("gh-sig");let txtEl=document.getElementById("gh-txt");let reasonEl=document.getElementById("gh-reason");let paEl=document.getElementById("gh-pa");
   let arrowEl=document.getElementById("gh-arrow");let barEl=document.getElementById("gh-bar");let confEl=document.getElementById("gh-conf");
   let dir=j.signal||j.direction;
