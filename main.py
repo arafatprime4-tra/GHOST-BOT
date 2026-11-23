@@ -391,7 +391,7 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
     match = "✅ You Are The Admin - /start Panel Will Come" if u.id == ADMIN_ID else "🚫 You Are NOT Admin - ADMIN_ID Is Incorrect."
-    await update.message.reply_text(f"🆔 Your ID: <code>{u.id}</code>\n@{u.username or 'N/A'}\nRender ADMIN_ID: <code>{ADMIN_ID}</code>\n\n{match}", parse_mode='HTML')
+    await update.message.reply_text(f"🆔 Your ID: <code>{u.id}</code>\n@{u.username or 'N/A'}\nADMIN_ID: <code>{ADMIN_ID}</code>\n\n{match}", parse_mode='HTML')
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
@@ -540,7 +540,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         kb_custom = [
             [InlineKeyboardButton("⊘ Deposit nai", callback_data=f"cmdep_{uid}"), InlineKeyboardButton("⊘ Link theke na", callback_data=f"cmnolink_{uid}")],
             [InlineKeyboardButton("📸 Screenshot chai", callback_data=f"cmscreen_{uid}"), InlineKeyboardButton("✎ Nije likhbo", callback_data=f"cmwrite_{uid}")],
-            [InlineKeyboardButton("← Back", callback_data=f"ap_{uid}_N/A")]
+            [InlineKeyboardButton("⇐ Back", callback_data=f"ap_{uid}_N/A")]
         ]
         await q.edit_message_text(f"✎ Custom Select Member {uid}", reply_markup=InlineKeyboardMarkup(kb_custom), parse_mode='HTML')
     elif d.startswith("cmwrite_"):
@@ -589,19 +589,19 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         users = get_all_premium_users()
         active = len([u for u in users if u.get("status")=="active"])
         susp = len([u for u in users if u.get("status")=="suspended"])
-        await q.edit_message_text(f"▥ <b>STATS</b>\n\nTotal Tokens: {len(approved_tokens)}\nActive: {active}\nSuspended: {susp}\nAdmin: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("← Back", callback_data="admin_panel")]]), parse_mode='HTML')
+        await q.edit_message_text(f"▥ <b>STATS</b>\n\nTotal Tokens: {len(approved_tokens)}\nActive: {active}\nSuspended: {susp}\nAdmin: {ADMIN_ID}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⇐ Back", callback_data="admin_panel")]]), parse_mode='HTML')
     elif d == "list_all_tokens":
         if q.from_user.id != ADMIN_ID:
             await q.answer("🚫 Admin only", show_alert=True)
             return
         users = get_all_premium_users()
         if not users:
-            await q.edit_message_text("♧ No premium users yet - Token nai, tai khali dekhay.\n\nBackup theke restore korte /api/restore-tokens use koro.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("← Back", callback_data="admin_panel")]]))
+            await q.edit_message_text("♧ No premium users yet - Token nai, tai khali dekhay.\n\nBackup theke restore korte /api/restore-tokens use koro.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⇐ Back", callback_data="admin_panel")]]))
             return
         txt = f"☷ <b>All Tokens ({len(users)})</b>\n\n"
         for idx,u in enumerate(users[:15]):
             txt += f"{idx+1}. Trader:{u.get('trader_id','-')} | User:{u.get('user_id','-')} | ${u.get('amount','-')} | {u.get('status','-')} | {u['token'][:8]}...\n"
-        await q.edit_message_text(txt, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("← Back", callback_data="admin_panel")]]), parse_mode='HTML')
+        await q.edit_message_text(txt, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⇐ Back", callback_data="admin_panel")]]), parse_mode='HTML')
     elif d == "manage_premium":
         if q.from_user.id != ADMIN_ID:
             await q.answer("🚫 Admin only", show_alert=True)
@@ -625,7 +625,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 InlineKeyboardButton(f"Ⅱ Suspend {trader}" if status=="active" else f"▷ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
             ])
         kb.append([InlineKeyboardButton("↻ Refresh", callback_data="manage_premium"), InlineKeyboardButton("▤ Delete All", callback_data="del_all_premium")])
-        kb.append([InlineKeyboardButton("← Back", callback_data="back_admin")])
+        kb.append([InlineKeyboardButton("⇐ Back", callback_data="back_admin")])
         await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
     elif d.startswith("delprem_"):
