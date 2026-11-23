@@ -71,8 +71,8 @@ css.innerHTML=`
 .gh-loss-btn:active{transform:scale(.96)}
 .gh-protect{margin:0 6px 2px;padding:2px 5px;border-radius:6px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.4);color:#ffb3c2;font-size:6px;font-weight:700;text-align:center;display:none}
 .gh-protect.on{display:block;animation:ghBlink 1s infinite}
-.gh-𝗖𝗹𝗼𝘀𝗲{margin:0 6px 3px;height:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#FF0000;font-size:6px;font-weight:700;cursor:pointer}
-.gh-𝗖𝗹𝗼𝘀𝗲:hover{background:rgba(255,45,85,.15);color:#fff}
+.gh-close{margin:0 6px 3px;height:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#FF0000;font-size:6px;font-weight:700;cursor:pointer}
+.gh-close:hover{background:rgba(255,45,85,.15);color:#FF0000}
 .gh-corner{position:absolute;width:7px;height:7px;border:1.5px solid rgba(0,240,255,.6)}
 .gh-corner.tl{top:6px;left:6px;border-right:none;border-bottom:none}
 .gh-corner.tr{top:6px;right:6px;border-left:none;border-bottom:none}
@@ -92,7 +92,7 @@ box.innerHTML=`
 <div class="gh-meta" id="gh-meta">SAFE 1M • <b><span id="gh-sec">--s</span></b> • 1% RISK • <span id="gh-pa" style="color:#00f0ff;font-size:5.5px">PA: READY</span> • <span class="gh-conf" id="gh-conf">--%</span> • <span id="gh-loss-info" style="color:#ff5a7a">Loss: 0/2</span></div>
 <div class="gh-protect" id="gh-protect">🛑 2 LOSS - 30 MIN OFF - NO SIGNAL</div>
 <div class="gh-loss-row"><button class="gh-loss-btn win" id="gh-win-btn">🟢 𝐖𝐈𝐍</button><button class="gh-loss-btn loss" id="gh-loss-btn">🔴 𝐋𝐎𝐒𝐒</button></div><div id="gh-reset" style="text-align:center;font-size:6px;color:#888;cursor:pointer;padding:2px">↺ Reset Loss Count</div>
-<div class="gh-close" id="gh-close">✕ Close</div>
+<div class="gh-close" id="gh-close">ⓘ︎ ᴄʟᴏsᴇ</div>
 `;
 if(!box.isConnected){ (document.body || document.documentElement).appendChild(box); }
 
