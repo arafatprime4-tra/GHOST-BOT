@@ -324,14 +324,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     is_admin = (user_id == ADMIN_ID)
     kb=[
-        [InlineKeyboardButton("⊕ Account Create Link", url=AFFILIATE_LINK)],
-        [InlineKeyboardButton("◎ Website", url=WEBSITE_URL), InlineKeyboardButton("?? Get ID?", callback_data="how_id")],
-        [InlineKeyboardButton("◉ Channel", url=CHANNEL_LINK), InlineKeyboardButton("⊙ Admin", url="https://t.me/ghostsupportbd")]
+        [InlineKeyboardButton("⚭︎ Account Create Link", url=AFFILIATE_LINK)],
+        [InlineKeyboardButton("⌬ Website", url=WEBSITE_URL), InlineKeyboardButton("?? Get ID?", callback_data="how_id")],
+        [InlineKeyboardButton("◉ Channel", url=CHANNEL_LINK), InlineKeyboardButton("♔︎ Admin", url="https://t.me/ghostsupportbd")]
     ]
     if is_admin:
         kb.append([InlineKeyboardButton("⚙︎ Admin Panel", callback_data="admin_panel")])
-        kb.append([InlineKeyboardButton("♧ Manage Premium Users", callback_data="manage_premium")])
-        kb.append([InlineKeyboardButton("▥ Stats / Tokens", callback_data="admin_stats")])
+        kb.append([InlineKeyboardButton("𓀁𓀁 Manage Premium Users", callback_data="manage_premium")])
+        kb.append([InlineKeyboardButton("⏍ Stats / Tokens", callback_data="admin_stats")])
     await update.message.reply_text(WELCOME, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -351,7 +351,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 👑 ADMIN/OWNER: @ghostsupportbd""", disable_web_page_preview=True)
 
 async def privacy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("""🔐 Privacy Policy: https://telegra.ph/Privacy-Policy-11-20-275
+    await update.message.reply_text(""" ⚿︎⚿︎ Privacy Policy: https://telegra.ph/Privacy-Policy-11-20-275
 
 We store only your encrypted API token. Fully secure & private.""", disable_web_page_preview=True)
 
@@ -381,17 +381,17 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"🚫 Admin only\n\nTomar ID: <code>{update.effective_user.id}</code>\nADMIN_ID: <code>{ADMIN_ID}</code>\n\n2 ta na mille Panel asbe na.", parse_mode='HTML')
         return
     kb=[
-        [InlineKeyboardButton("♧ 𝐌𝐚𝐧𝐚𝐠𝐞 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐔𝐬𝐞𝐫𝐬", callback_data="manage_premium")],
-        [InlineKeyboardButton("▥ 𝐒𝐭𝐚𝐭𝐮𝐬", callback_data="admin_stats")],
+        [InlineKeyboardButton("𓀁𓀁 𝐌𝐚𝐧𝐚𝐠𝐞 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐔𝐬𝐞𝐫𝐬", callback_data="manage_premium")],
+        [InlineKeyboardButton("⏍ 𝐒𝐭𝐚𝐭𝐮𝐬", callback_data="admin_stats")],
         [InlineKeyboardButton("↻ 𝐑𝐞𝐟𝐫𝐞𝐬𝐡", callback_data="admin_panel")],
-        [InlineKeyboardButton("☷ 𝐋𝐢𝐬𝐭 𝐀𝐥𝐥 𝐓𝐨𝐤𝐞𝐧𝐬", callback_data="list_all_tokens")]
+        [InlineKeyboardButton("⎙ 𝐋𝐢𝐬𝐭 𝐀𝐥𝐥 𝐓𝐨𝐤𝐞𝐧𝐬", callback_data="list_all_tokens")]
     ]
     await update.message.reply_text(f"⚙︎ <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nUser's/Tokens: {len(approved_tokens)}\nAdmin ID: <code>{ADMIN_ID}</code>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
 async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = update.effective_user
-    match = "✅ You Are The Admin - /start Panel Will Come" if u.id == ADMIN_ID else "🚫 You Are NOT Admin - ADMIN_ID Is Incorrect."
-    await update.message.reply_text(f"🆔 Your ID: <code>{u.id}</code>\n@{u.username or 'N/A'}\nADMIN_ID: <code>{ADMIN_ID}</code>\n\n{match}", parse_mode='HTML')
+    match = "☑︎ You Are The Admin - /start Panel Will Come" if u.id == ADMIN_ID else "🚫 You Are NOT Admin - ADMIN_ID Is Incorrect."
+    await update.message.reply_text(f"ⒾⒹ Your ID: <code>{u.id}</code>\n@{u.username or 'N/A'}\nADMIN_ID: <code>{ADMIN_ID}</code>\n\n{match}", parse_mode='HTML')
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
@@ -447,7 +447,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pass                                           
     kb = [
         [InlineKeyboardButton(" ✓ হ্যাঁ, করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("⊘ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
-        [InlineKeyboardButton("📸 Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
+        [InlineKeyboardButton("⦿ Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
     ]
     await update.message.reply_text(f" ID <code>{tid}</code> Received!\n＄＄ <b>ডিপোজিট করেছেন?</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     try:
@@ -480,7 +480,7 @@ async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         pass
     kb = [[InlineKeyboardButton(" ✓ হ্যাঁ, করেছি", callback_data=f"dpyM_{user.id}_{tid}"), InlineKeyboardButton("⊘ না", callback_data=f"dpnM_{user.id}_{tid}")]]
-    await update.message.reply_text(f"📸 Received ID {tid}\n＄ ডিপোজিট করেছেন?", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    await update.message.reply_text(f"⦿ Received ID {tid}\n＄ ডিপোজিট করেছেন?", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     try:
         if ADMIN_ID != 0:
             cap = f"📸 Proof User {user.id} @{user.username or 'N/A'} Trader {tid}"
@@ -505,7 +505,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.message.reply_text("📸 Profile > Trader ID copy, # ছাড়া")
     elif d.startswith("proof_"):
         tid = d.split("_")[2] if len(d.split("_"))>2 else "N/A"
-        await q.message.reply_text(f"📸 Screenshot দিন ID {tid}")
+        await q.message.reply_text(f"⦿ Screenshot দিন ID {tid}")
     elif d.startswith("dpy_"):
         parts = d.split("_")
         uid = parts[1]
@@ -539,7 +539,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         kb_custom = [
             [InlineKeyboardButton("⊘ Deposit nai", callback_data=f"cmdep_{uid}"), InlineKeyboardButton("⊘ Link theke na", callback_data=f"cmnolink_{uid}")],
-            [InlineKeyboardButton("📸 Screenshot chai", callback_data=f"cmscreen_{uid}"), InlineKeyboardButton("✎ Nije likhbo", callback_data=f"cmwrite_{uid}")],
+            [InlineKeyboardButton("⦿ Screenshot chai", callback_data=f"cmscreen_{uid}"), InlineKeyboardButton("✎ Nije likhbo", callback_data=f"cmwrite_{uid}")],
             [InlineKeyboardButton("⇐ Back", callback_data=f"ap_{uid}_N/A")]
         ]
         await q.edit_message_text(f"✎ Custom Select Member {uid}", reply_markup=InlineKeyboardMarkup(kb_custom), parse_mode='HTML')
@@ -576,9 +576,9 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.answer("🚫 Admin only", show_alert=True)
             return
         kb=[
-            [InlineKeyboardButton("♧ 𝑀𝑎𝑛𝑎𝑔𝑒 𝑃𝑟𝑒𝑚𝑖𝑢𝑚 𝑈𝑠𝑒𝑟𝑠", callback_data="manage_premium")],
-            [InlineKeyboardButton("▥ 𝑆𝑡𝑎𝑡𝑢𝑠 / 𝑇𝑜𝑘𝑒𝑛𝑠", callback_data="admin_stats")],
-            [InlineKeyboardButton("☷ ​𝐿𝑖𝑠𝑡 𝐴𝑙𝑙 𝑇𝑜𝑘𝑒𝑛𝑠", callback_data="list_all_tokens")],
+            [InlineKeyboardButton("𓀁𓀁 𝑀𝑎𝑛𝑎𝑔𝑒 𝑃𝑟𝑒𝑚𝑖𝑢𝑚 𝑈𝑠𝑒𝑟𝑠", callback_data="manage_premium")],
+            [InlineKeyboardButton("⏍ 𝑆𝑡𝑎𝑡𝑢𝑠 / 𝑇𝑜𝑘𝑒𝑛𝑠", callback_data="admin_stats")],
+            [InlineKeyboardButton("⎙ ​𝐿𝑖𝑠𝑡 𝐴𝑙𝑙 𝑇𝑜𝑘𝑒𝑛𝑠", callback_data="list_all_tokens")],
             [InlineKeyboardButton("↻ 𝑅𝑒𝑓𝑟𝑒𝑠ℎ", callback_data="admin_panel")]
         ]
         await q.edit_message_text(f"⚙︎ <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: <code>{ADMIN_ID}</code>\n\n🔆 𝑨𝒍𝒍 𝒖𝒔𝒆𝒓𝒔 𝒐𝒏 𝒕𝒉𝒊𝒔 𝒑𝒂𝒈𝒆, 𝒘𝒊𝒕𝒉 𝒕𝒐𝒌𝒆𝒏𝒔🔅 || 🇧🇩💫 টোকেনসহ — এই পেজে সকল ব্যবহারকারী আছে 💫🇧🇩", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
@@ -596,7 +596,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         users = get_all_premium_users()
         if not users:
-            await q.edit_message_text("♧ No premium users yet - Token nai, tai khali dekhay.\n\nBackup theke restore korte /api/restore-tokens use koro.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⇐ Back", callback_data="admin_panel")]]))
+            await q.edit_message_text("𓀁 No premium users yet - Token nai, tai khali dekhay.\n\nBackup theke restore korte /api/restore-tokens use koro.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⇐ Back", callback_data="admin_panel")]]))
             return
         txt = f"☷ <b>All Tokens ({len(users)})</b>\n\n"
         for idx,u in enumerate(users[:15]):
@@ -608,7 +608,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         users = get_all_premium_users()
         if not users:
-            await q.edit_message_text("♧ No premium users yet")
+            await q.edit_message_text("𓀁 No premium users yet")
             return
         text = f"♧ <b>Premium Users ({len(users)})</b>\n\n"
         kb = []
@@ -622,9 +622,9 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Add delete/suspend buttons per user
             kb.append([
                 InlineKeyboardButton(f"⊘ Delete {trader}", callback_data=f"delprem_{u['token'][:16]}"),
-                InlineKeyboardButton(f"Ⅱ Suspend {trader}" if status=="active" else f"▷ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
-            ])
-        kb.append([InlineKeyboardButton("↻ Refresh", callback_data="manage_premium"), InlineKeyboardButton("▤ Delete All", callback_data="del_all_premium")])
+                InlineKeyboardButton(f"‖‖ Suspend {trader}" if status=="active" else f"▷ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
+            ]
+        kb.append([InlineKeyboardButton("↻ Refresh", callback_data="manage_premium"), InlineKeyboardButton("🗑︎ Delete All", callback_data="del_all_premium")])
         kb.append([InlineKeyboardButton("⇐ Back", callback_data="back_admin")])
         await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
 
@@ -692,7 +692,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("✓ Yes Delete ALL", callback_data="confirm_del_all")],
             [InlineKeyboardButton("⊘ Cancel", callback_data="manage_premium")]
         ]
-        await q.edit_message_text(f"➤ Delete ALL {len(approved_tokens)} premium users?\nThis cannot be undone!\nUsers will need to request again.", reply_markup=InlineKeyboardMarkup(kb))
+        await q.edit_message_text(f"⊗⊘ Delete ALL {len(approved_tokens)} premium users?\nThis cannot be undone!\nUsers will need to request again.", reply_markup=InlineKeyboardMarkup(kb))
 
     elif d == "confirm_del_all":
         if q.from_user.id != ADMIN_ID:
@@ -700,12 +700,12 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         count = len(approved_tokens)
         approved_tokens.clear()
         save_tokens()
-        await q.edit_message_text(f"▤ Deleted ALL {count} premium users\nThey can request again via bot.")
+        await q.edit_message_text(f"⊗⊘ Deleted ALL {count} premium users\nThey can request again via bot.")
 
     elif d == "back_admin":
         kb = [
-            [InlineKeyboardButton("♧ Manage Premium", callback_data="manage_premium")],
-            [InlineKeyboardButton("▥ Stats", callback_data="stats")]
+            [InlineKeyboardButton("𓀁𓀁 Manage Premium", callback_data="manage_premium")],
+            [InlineKeyboardButton("⏍ Stats", callback_data="stats")]
         ]
         await q.edit_message_text("⚙︎ Admin Panel", reply_markup=InlineKeyboardMarkup(kb))
 
@@ -719,7 +719,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("💵 $80", callback_data=f"dep_{uid}_{trader_id}_80"), InlineKeyboardButton("💵 $90", callback_data=f"dep_{uid}_{trader_id}_90"), InlineKeyboardButton("💵 $100", callback_data=f"dep_{uid}_{trader_id}_100"), InlineKeyboardButton("💵 $150", callback_data=f"dep_{uid}_{trader_id}_150")],
             [InlineKeyboardButton("💵 $200", callback_data=f"dep_{uid}_{trader_id}_200"), InlineKeyboardButton("💵 $250", callback_data=f"dep_{uid}_{trader_id}_250"), InlineKeyboardButton("💵 $300", callback_data=f"dep_{uid}_{trader_id}_300"), InlineKeyboardButton("💵 $500", callback_data=f"dep_{uid}_{trader_id}_500")],
             [InlineKeyboardButton("💵 $1000", callback_data=f"dep_{uid}_{trader_id}_1000"), InlineKeyboardButton("💵 $5", callback_data=f"dep_{uid}_{trader_id}_5"), InlineKeyboardButton("💵 $15", callback_data=f"dep_{uid}_{trader_id}_15"), InlineKeyboardButton("💵 $25", callback_data=f"dep_{uid}_{trader_id}_25")],
-            [InlineKeyboardButton("✎ Custom Msg", callback_data=f"cm_{uid}"), InlineKeyboardButton("× Reject", callback_data=f"rj_{uid}"), InlineKeyboardButton("♧ Manage Premium", callback_data="manage_premium")]
+            [InlineKeyboardButton("✎ Custom Msg", callback_data=f"cm_{uid}"), InlineKeyboardButton("× Reject", callback_data=f"rj_{uid}"), InlineKeyboardButton("𓀁𓀁 Manage Premium", callback_data="manage_premium")]
         ]
         await q.edit_message_text(f"＄＄ Deposit Select {trader_id} User {uid}", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     elif d.startswith("dep_"):
@@ -755,8 +755,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             premium_link = f"{WEBSITE_URL}/?access={premium_token}"
             kb=[
                 [InlineKeyboardButton("🔓 PREMIUM ACCESS", url=premium_link)],
-                [InlineKeyboardButton("◉ Website", url=premium_link)],
-                [InlineKeyboardButton("▮ Guide", callback_data="bookmark_guide"), InlineKeyboardButton("➤ Channel", url=CHANNEL_LINK), InlineKeyboardButton("✧ Academy", url=ACADEMY_LINK)]
+                [InlineKeyboardButton("⌬⌬ Website", url=premium_link)],
+                [InlineKeyboardButton("☰︎ Guide", callback_data="bookmark_guide"), InlineKeyboardButton("ⓘ︎ Channel", url=CHANNEL_LINK), InlineKeyboardButton("⛪︎⛪︎ Academy", url=ACADEMY_LINK)]
             ]
             msg = f"""🎉 <b>𝐂𝐎𝐍𝐆𝐑𝐀𝐓𝐔𝐋𝐀𝐓𝐈𝐎𝐍𝐒</b> 🎉
 💎 <b>𝐏𝐑𝐄𝐌𝐈𝐔𝐌 𝐀𝐂𝐂𝐄𝐒𝐒 𝐔𝐍𝐋𝐎𝐂𝐊𝐄𝐃</b> 💎 🎉
@@ -788,7 +788,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif d.startswith("rj_"):
         uid=d.split("_")[1]
         try:
-            await context.bot.send_message(chat_id=int(uid), text="❌ Rejected - new account from link")
+            await context.bot.send_message(chat_id=int(uid), text="<b>❌ Rejected - Create New Account From The link</b>")
             await q.edit_message_text("❌ Rejected")
         except Exception as e:
             await q.edit_message_text(f"Fail {e}")
