@@ -33,6 +33,7 @@ APP_LINK = os.getenv("APP_LINK","https://giogram-backend.onrender.com")
 PAIRS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJPY","EURGBP","EURAUD","EURCAD","GBPJPY","GBPAUD","GBPCAD","AUDJPY","AUDCAD","CADJPY","CHFJPY","GBPCHF","EURCHF","AUDCHF","CADCHF","NZDJPY","EURNZD","GBPNZD","AUDNZD","NZDCAD","USDBRL","EURBRL","GBPBRL","USDMXN","USDINR","USDTRY","USDPKR","USDZAR","USDCOP","USDCLP","USDPEN","USDEGP","USDNGN","USDKES","USDPHP","USDTHB","USDVND","USDMYR","USDIDR","USDCNH","EURMXN"]
 
 pending_custom_msg = {}
+pending_search_user = {}
 user_trader_map = {}
 user_username_map={}
 pending_deposit_claims = {}
@@ -396,6 +397,43 @@ async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
     user = update.effective_user
+    if user.id == ADMIN_ID and ADMIN_ID in pending_search_user:
+        pending_search_user.pop(ADMIN_ID, None)
+        q = text.strip()
+        q_low = q.lower().lstrip("@")
+        users = get_all_premium_users()
+        matched = []
+        for u in users:
+            trader = str(u.get("trader_id", ""))
+            uid = str(u.get("user_id", ""))
+            uname = str(u.get("username") or "")
+            fname = str(u.get("first_name") or "")
+            if q == trader or q == uid:
+                matched.append(u)
+            elif q_low and (q_low == uname.lower().lstrip("@") or q_low in uname.lower().lstrip("@") or q_low in fname.lower()):
+                matched.append(u)
+        if not matched:
+            kb_nf = [[InlineKeyboardButton("⇐ Back", callback_data="manage_premium")], [InlineKeyboardButton("⌕ Search Again", callback_data="search_premium")]]
+            await update.message.reply_text(f"⌕ Not found: {q}\n\nTrader ID / User ID / Name / Username দিয়ে আবার চেষ্টা করো।", reply_markup=InlineKeyboardMarkup(kb_nf))
+            return
+        txt_search = f"⌕ Search Result ({len(matched)})\n\n"
+        kb_search_res = []
+        for idx, u in enumerate(matched[:5]):
+            trader = u.get("trader_id", "N/A")
+            user_id = u.get("user_id", "N/A")
+            amount = u.get("amount", "0")
+            status = u.get("status", "active")
+            uname = u.get("username") or "-"
+            fname = u.get("first_name") or "-"
+            token_short = u["token"][:8]
+            txt_search += f"{idx+1}. ID:{trader} | User:{user_id} | Name:{fname} | @{uname} | ${amount} | {status} | {token_short}...\n"
+            kb_search_res.append([
+                InlineKeyboardButton(f"⊘ Delete {trader}", callback_data=f"delprem_{u['token'][:16]}"),
+                InlineKeyboardButton(f"‖‖ Suspend {trader}" if status == "active" else f"▷ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
+            ])
+        kb_search_res.append([InlineKeyboardButton("⇐ Back", callback_data="manage_premium"), InlineKeyboardButton("⌕ Search User", callback_data="search_premium")])
+        await update.message.reply_text(txt_search, reply_markup=InlineKeyboardMarkup(kb_search_res), parse_mode='HTML')
+        return
     if user.id == ADMIN_ID and ADMIN_ID in pending_custom_msg:
         target_uid = pending_custom_msg.pop(ADMIN_ID)
         try:
@@ -606,6 +644,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if q.from_user.id != ADMIN_ID:
             await q.answer("🚫 Admin only", show_alert=True)
             return
+        pending_search_user.pop(ADMIN_ID, None)
         users = get_all_premium_users()
         if not users:
             await q.edit_message_text("𓀁 No premium users yet")
@@ -624,9 +663,19 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 InlineKeyboardButton(f"⊘ Delete {trader}", callback_data=f"delprem_{u['token'][:16]}"),
                 InlineKeyboardButton(f"‖‖ Suspend {trader}" if status=="active" else f"▷ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
             ])
+        if len(users) > 15:
+            text += f"\n... +{len(users)-15} more - Search diye khujo\n"
         kb.append([InlineKeyboardButton("↻ Refresh", callback_data="manage_premium"), InlineKeyboardButton("🗑︎ Delete All", callback_data="del_all_premium")])
-        kb.append([InlineKeyboardButton("⇐ Back", callback_data="back_admin")])
+        kb.append([InlineKeyboardButton("⇐ Back", callback_data="back_admin"), InlineKeyboardButton("⌕ Search User", callback_data="search_premium")])
         await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+
+    elif d == "search_premium":
+        if q.from_user.id != ADMIN_ID:
+            await q.answer("🚫 Admin only", show_alert=True)
+            return
+        pending_search_user[ADMIN_ID] = True
+        kb_search = [[InlineKeyboardButton("⇐ Back", callback_data="manage_premium")]]
+        await q.edit_message_text("⌕ Search User\n\nTrader ID / User ID / Name / Username পাঠান:", reply_markup=InlineKeyboardMarkup(kb_search))
 
     elif d.startswith("delprem_"):
         if q.from_user.id != ADMIN_ID:
