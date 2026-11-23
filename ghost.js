@@ -26,7 +26,7 @@ try{
 let css=document.createElement("style");
 css.innerHTML=`
 /* ===== GHOST FUTURISTIC HUD - v2 FIXED LOSS ===== */
-#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.60);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.70);backdrop-filter:blur(32px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);font-family:'Segoe UI',Inter,sans-serif;color:#fff;overflow:hidden;user-select:none}
+#ghost-bot{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2147483647;width:208px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.40);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.50);backdrop-filter:blur(32px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);font-family:'Segoe UI',Inter,sans-serif;color:#fff;overflow:hidden;user-select:none}
 #ghost-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#00f0ff,#7b2fff,#00ff88,transparent);animation:ghBorderFlow 2.4s linear infinite;background-size:200% 100%}
 @keyframes ghBorderFlow{0%{background-position:0% 0}100%{background-position:200% 0}}
 @keyframes ghPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
