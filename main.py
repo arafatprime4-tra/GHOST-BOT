@@ -623,7 +623,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             kb.append([
                 InlineKeyboardButton(f"⊘ Delete {trader}", callback_data=f"delprem_{u['token'][:16]}"),
                 InlineKeyboardButton(f"‖‖ Suspend {trader}" if status=="active" else f"▷ Unsuspend {trader}", callback_data=f"susprem_{u['token'][:16]}")
-            ]
+            ])
         kb.append([InlineKeyboardButton("↻ Refresh", callback_data="manage_premium"), InlineKeyboardButton("🗑︎ Delete All", callback_data="del_all_premium")])
         kb.append([InlineKeyboardButton("⇐ Back", callback_data="back_admin")])
         await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
