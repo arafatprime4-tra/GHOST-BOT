@@ -40,8 +40,8 @@
     "amount": "0",
     "created": 1795485188,
     "created_human": "2026-11-24 07:53:08",
-    "status": "active",
-    "suspended_at": null
+    "status": "suspended",
+    "suspended_at": 1795531185
   },
   "vNNnuvqij-mKRFv5aWvzvUogOfs799mYSirW7TYXP4c": {
     "trader_id": "95901983",
