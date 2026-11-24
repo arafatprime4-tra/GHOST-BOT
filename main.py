@@ -575,7 +575,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         trader_id = parts[2] if len(parts)>2 else "N/A"
         try:
             kb_admin = [[InlineKeyboardButton("＄＄ Deposit Select", callback_data=f"ap_{uid}_{trader_id}"), InlineKeyboardButton("✎ Custom Msg", callback_data=f"cm_{uid}")], [InlineKeyboardButton("× Reject", callback_data=f"rj_{uid}")]]
-            await context.bot.send_message(chat_id=ADMIN_ID, text=f" User Claims Deposit\nUser {uid} Trader {trader_id}", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+            await context.bot.send_message(chat_id=ADMIN_ID, text=f"💲 User Claims Deposit\nUser {uid} Trader {trader_id}", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
             await q.edit_message_text(f" Claim sent Admin ID {trader_id}")
         except Exception as e:
             await q.edit_message_text(f"Fail {e}")
@@ -623,7 +623,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         msg = f"🚫 Link theke na\nNew account khulun: {AFFILIATE_LINK}"
         try:
             await context.bot.send_message(chat_id=int(uid), text=msg, parse_mode='HTML')
-            await q.edit_message_text(f" Sent to {uid}")
+            await q.edit_message_text(f"📤 Sent to {uid}")
         except Exception as e:
             await q.edit_message_text(f"🚫 {e}")
     elif d.startswith("cmscreen_"):
@@ -674,7 +674,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not users:
             await q.edit_message_text("𓀁 No premium users yet")
             return
-        text = f"♧ <b>Premium Users ({len(users)})</b>\n\n"
+        text = f"𓀁 <b>Premium Users ({len(users)})</b>\n\n"
         kb = []
         for idx, u in enumerate(users[:15]):  # Show first 15
             trader = u.get("trader_id","N/A")
@@ -855,7 +855,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except:
                 pass
             await context.bot.send_message(chat_id=int(uid), text=msg, reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
-            await q.edit_message_text(f" Approved <code>{trader_id}</code> ${amount} -> {uid}\n{premium_link}")
+            await q.edit_message_text(f"✔ Approved {trader_id} ${amount} -> {uid}\n{premium_link}")
         except Exception as e:
             logging.error(f"dep fail {traceback.format_exc()}")
             await q.edit_message_text(f"❌ Error {e}")
