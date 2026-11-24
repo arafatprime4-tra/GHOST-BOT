@@ -1,5 +1,5 @@
 
-import os, threading, logging, re, traceback, json, secrets, time
+import os, threading, logging, re, traceback, json, secrets, time, base64, urllib.request
 from flask import Flask, send_from_directory, jsonify, request
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
@@ -94,6 +94,30 @@ for _tk, _dd in list(approved_tokens.items()):
                 pass
 print(f"STABLE: Tokens loaded: {len(approved_tokens)} from {_src or 'empty - fresh start'}")
 
+def _push_tokens_to_github(data):
+    try:
+        token = os.getenv("GITHUB_TOKEN","").strip()
+        repo = os.getenv("GITHUB_REPO","").strip()
+        branch = os.getenv("GITHUB_BRANCH","main").strip() or "main"
+        if not token or not repo:
+            return
+        url = f"https://api.github.com/repos/{repo}/contents/{BACKUP_FILE}?ref={branch}"
+        headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=10) as r:
+                sha = json.loads(r.read().decode()).get("sha")
+        except Exception:
+            sha = None
+        body = {"message": "Auto save tokens - suspend/unsuspend", "content": base64.b64encode(data.encode()).decode(), "branch": branch}
+        if sha:
+            body["sha"] = sha
+        req2 = urllib.request.Request(url, data=json.dumps(body).encode(), method="PUT", headers={**headers, "Content-Type": "application/json"})
+        with urllib.request.urlopen(req2, timeout=15) as r:
+            print(f"GitHub auto-save OK: {r.status}")
+    except Exception as e:
+        print(f"GitHub auto-save fail: {e}")
+
 def save_tokens():
     # STABLE FIX: 3 jaygay save - main + backup + autosave, jekono ekta thaklei restore hobe
     try:
@@ -107,6 +131,7 @@ def save_tokens():
         # ENV backup er jonno log - user chaile ei JSON ta Render ENV e paste korte parbe
         if len(approved_tokens) > 0:
             print(f"STABLE: Tokens saved: {len(approved_tokens)} to 3 files. Backup JSON ready for ENV.")
+            threading.Thread(target=_push_tokens_to_github, args=(data,), daemon=True).start()
     except Exception as e:
         logging.error(f"Token save fail {e}")
 
