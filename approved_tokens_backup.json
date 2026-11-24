@@ -1,1 +1,46 @@
-{}
+{
+  "75r4MLykfCu8VdWV7-S-EEc8huSrC81VzwNAs34qEdo": {
+    "trader_id": "95022975",
+    "user_id": "8386159415",
+    "username": "@mms_lover2782",
+    "first_name": "NOREX",
+    "amount": "0",
+    "created": 1795108349,
+    "created_human": "2026-11-19 23:12:29",
+    "status": "suspended",
+    "suspended_at": 1795493432
+  },
+  "85682889_7582535836_0_rYBayOZfqhA": {
+    "trader_id": "85682889",
+    "user_id": "7582535836",
+    "username": "m_arafat01",
+    "first_name": "PRIME GHOST",
+    "amount": "0",
+    "created": 1795245549,
+    "created_human": "2026-11-21 13:19:09",
+    "status": "active",
+    "suspended_at": null
+  },
+  "tDkPBI05icFZg_YzhhDpr5fyKYYYy0dVj2MJ7m-yiwE": {
+    "trader_id": "97588315",
+    "user_id": "8848427534",
+    "username": "@Ghostj41",
+    "first_name": "M",
+    "amount": "10",
+    "created": 1795322579,
+    "created_human": "2026-11-22 10:42:59",
+    "status": "active",
+    "suspended_at": null
+  },
+  "zOjs0rt1UZKb1mxUtUtWVAh3OrodQxAOOp5Ad9dw-Ec": {
+    "trader_id": "91304359",
+    "user_id": "7408548098",
+    "username": "@tra9der",
+    "first_name": "ORION",
+    "amount": "0",
+    "created": 1795485188,
+    "created_human": "2026-11-24 07:53:08",
+    "status": "active",
+    "suspended_at": null
+  }
+}
