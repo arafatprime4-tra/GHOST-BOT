@@ -7,8 +7,8 @@
     "amount": "0",
     "created": 1795108349,
     "created_human": "2026-11-19 23:12:29",
-    "status": "suspended",
-    "suspended_at": 1795493432
+    "status": "active",
+    "suspended_at": null
   },
   "85682889_7582535836_0_rYBayOZfqhA": {
     "trader_id": "85682889",
