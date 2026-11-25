@@ -639,10 +639,10 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await q.answer("🚫 Admin only", show_alert=True)
             return
         kb=[
-            [InlineKeyboardButton("𓀁𓀁 𝑀𝑎𝑛𝑎𝑔𝑒 𝑃𝑟𝑒𝑚𝑖𝑢𝑚 𝑈𝑠𝑒𝑟𝑠", callback_data="manage_premium")],
-            [InlineKeyboardButton("⏍ 𝑆𝑡𝑎𝑡𝑢𝑠 / 𝑇𝑜𝑘𝑒𝑛𝑠", callback_data="admin_stats")],
-            [InlineKeyboardButton("⎙ ​𝐿𝑖𝑠𝑡 𝐴𝑙𝑙 𝑇𝑜𝑘𝑒𝑛𝑠", callback_data="list_all_tokens")],
-            [InlineKeyboardButton("↻ 𝑅𝑒𝑓𝑟𝑒𝑠ℎ", callback_data="admin_panel")]
+            [InlineKeyboardButton("𓀁𓀁 <b>𝑀𝑎𝑛𝑎𝑔𝑒 𝑃𝑟𝑒𝑚𝑖𝑢𝑚 𝑈𝑠𝑒𝑟𝑠</b>", callback_data="manage_premium")],
+            [InlineKeyboardButton("⏍ <b>𝑆𝑡𝑎𝑡𝑢𝑠 / 𝑇𝑜𝑘𝑒𝑛𝑠</b>", callback_data="admin_stats")],
+            [InlineKeyboardButton("⎙ ​<b>𝐿𝑖𝑠𝑡 𝐴𝑙𝑙 𝑇𝑜𝑘𝑒𝑛𝑠</b>", callback_data="list_all_tokens")],
+            [InlineKeyboardButton("↻ <b>𝑅𝑒𝑓𝑟𝑒𝑠ℎ</b>", callback_data="admin_panel")]
         ]
         await q.edit_message_text(f"⚙︎ <b>𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥</b>\n\nTokens: {len(approved_tokens)}\nAdmin ID: <code>{ADMIN_ID}</code>\n\n<b>🔹 𝘼𝙡𝙡 𝙪𝙨𝙚𝙧𝙨 𝙤𝙣 𝙩𝙝𝙞𝙨 𝙥𝙖𝙜𝙚, 𝙬𝙞𝙩𝙝 𝙩𝙤𝙠𝙚𝙣𝙨 🔸 || 🇧🇩💫 টোকেনসহ — এই পেজে সকল ব্যবহারকারী আছে 💫🇧🇩</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
     elif d == "admin_stats":
