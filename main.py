@@ -513,6 +513,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("⦿ Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
     ]
     await update.message.reply_text(f" ID <code>{tid}</code> Received!\n＄＄ <b>ডিপোজিট করেছেন?</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode='HTML')
+    kb2 = [
+        [InlineKeyboardButton("⍟ Admin কে ID পাঠান", url="https://t.me/ghostsupportbd")],
+        [InlineKeyboardButton("✓ হ্যাঁ, পাঠাইছি", callback_data=f"sentid_{user.id}_{tid}")]
+    ]
+    await update.message.reply_text(f"<b>⚠ ভাই, একবার Admin কে ID টা পাঠিয়ে রাখুন।\nপরে সমস্যা হলে এই ID দিয়েই ঠিক করে দিবো।</b>", reply_markup=InlineKeyboardMarkup(kb2), parse_mode='HTML')
     try:
         if ADMIN_ID != 0:
             kb_admin = [
@@ -566,6 +571,8 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"CB {d} from {user.id}")
     if d == "how_id":
         await q.message.reply_text("📸 Profile > Trader ID copy, # ছাড়া")
+    elif d.startswith("sentid_"):
+        await q.edit_message_text(f"❤️ ভাই, চিন্তা করবেন না।\nID পেয়ে গেছি, ৫ মিনিট ওয়েট করেন, Admin চেক করে Approve করে দিচ্ছে। আপনি আমাদের পরিবারের একজন। 🤲")
     elif d.startswith("proof_"):
         tid = d.split("_")[2] if len(d.split("_"))>2 else "N/A"
         await q.message.reply_text(f"⦿ Screenshot দিন ID {tid}")
