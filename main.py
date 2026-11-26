@@ -572,7 +572,20 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if d == "how_id":
         await q.message.reply_text("📸 Profile > Trader ID copy, # ছাড়া")
     elif d.startswith("sentid_"):
-        await q.edit_message_text(f"❤️ ভাই, চিন্তা করবেন না।\nID পেয়ে গেছি, ৫ মিনিট ওয়েট করেন, Admin চেক করে Approve করে দিচ্ছে। আপনি আমাদের পরিবারের একজন। 🤲")
+        parts = d.split("_")
+        uid = parts[1]
+        tid = parts[2] if len(parts)>2 else "N/A"
+        await q.edit_message_text(f"ঠিক আছে ভাই, Admin কে জিজ্ঞেস করতেছি, একটু ওয়েট করেন।")
+        kb_admin = [[InlineKeyboardButton("✓ হ্যাঁ, পাইছি", callback_data=f"gotid_{uid}_{tid}"), InlineKeyboardButton("⊘ না, পাই নাই", callback_data=f"nogotid_{uid}_{tid}")]]
+        await context.bot.send_message(chat_id=ADMIN_ID, text=f"User বলছে ID পাঠাইছে।\nUser {uid} Trader {tid}\nআপনি কি পাইছেন?", reply_markup=InlineKeyboardMarkup(kb_admin), parse_mode='HTML')
+    elif d.startswith("gotid_"):
+        uid = d.split("_")[1]
+        await context.bot.send_message(chat_id=int(uid), text=f"❤️ ভাই, চিন্তা করবেন না।\nID পেয়ে গেছি, ৫ মিনিট ওয়েট করেন, Admin চেক করে Approve করে দিচ্ছে। আপনি আমাদের পরিবারের একজন। 🤲")
+        await q.edit_message_text(f"✅ Confirm করা হইছে, User কে জানানো হইছে।")
+    elif d.startswith("nogotid_"):
+        uid = d.split("_")[1]
+        await context.bot.send_message(chat_id=int(uid), text=f"ভাই, Admin বলছে ID পায় নাই, আবার একটু পাঠিয়ে দেন।")
+        await q.edit_message_text(f"❌ User কে আবার পাঠাতে বলা হইছে।")
     elif d.startswith("proof_"):
         tid = d.split("_")[2] if len(d.split("_"))>2 else "N/A"
         await q.message.reply_text(f"⦿ Screenshot দিন ID {tid}")
