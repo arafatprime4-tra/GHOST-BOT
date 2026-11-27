@@ -64,5 +64,16 @@
     "created_human": "2026-11-25 15:58:23",
     "status": "active",
     "suspended_at": null
+  },
+  "sBTQJQUIsOky4dFULSp99Z3ptFpncZKtpKZVPpacloc": {
+    "trader_id": "96795592",
+    "user_id": "8855910723",
+    "username": null,
+    "first_name": "Sadi",
+    "amount": "0",
+    "created": 1795792590,
+    "created_human": "2026-11-27 21:16:30",
+    "status": "active",
+    "suspended_at": null
   }
 }
