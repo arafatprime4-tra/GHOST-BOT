@@ -499,20 +499,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text("Ghost ID পাঠান: 1234567\nEURUSD লিখে signal\n/start", parse_mode='HTML')
         return
-        tid = text
+    tid = text
     if len(tid) !=8:
         await update.message.reply_text("🚫 ID 8 digit")
         return
-    # Already Approved / Suspended Check
+    # Already Approved / Suspended Check - SAFE
     old = None
-    for tok, info in approved_tokens.items():
-        if str(info.get("user_id")) == str(user.id):
-            old = info
-            break
+    try:
+        for tok, info in list(approved_tokens.items()):
+            if isinstance(info, dict):
+                if str(info.get("user_id")) == str(user.id):
+                    old = info
+                    break
+            elif str(tok) == str(user.id):
+                old = {"trader_id": str(info), "status": "active"}
+                break
+    except Exception as e:
+        logging.error(f"OLD CHECK ERR {e}")
+        old = None
     if old is not None:
-        old_tid = old.get("trader_id")
+        old_tid = old.get("trader_id") if isinstance(old, dict) else "N/A"
         kb_old = [[InlineKeyboardButton("⍟ Admin কে ID পাঠান", url="https://t.me/ghostsupportbd")]]
-        if old.get("status") == "suspended":
+        if isinstance(old, dict) and old.get("status") == "suspended":
             await update.message.reply_text(f"ভাই, আপনি Suspend আছেন।\nনতুন ID দিলে খুলবে না।\nআপনার Approve করা ID: <code>{old_tid}</code>\nID টা নিয়ে Admin কে SMS দেন", reply_markup=InlineKeyboardMarkup(kb_old), parse_mode='HTML')
         else:
             await update.message.reply_text(f"ভাই, আপনি Already Approve আছেন ✅\nআপনার Approve করা ID: <code>{old_tid}</code>\nID টা Admin কে পাঠান", reply_markup=InlineKeyboardMarkup(kb_old), parse_mode='HTML')
