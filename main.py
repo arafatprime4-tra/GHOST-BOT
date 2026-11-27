@@ -499,15 +499,29 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text("Ghost ID পাঠান: 1234567\nEURUSD লিখে signal\n/start", parse_mode='HTML')
         return
-    tid = text
+        tid = text
     if len(tid) !=8:
         await update.message.reply_text("🚫 ID 8 digit")
+        return
+    # Already Approved / Suspended Check
+    old = None
+    for tok, info in approved_tokens.items():
+        if str(info.get("user_id")) == str(user.id):
+            old = info
+            break
+    if old is not None:
+        old_tid = old.get("trader_id")
+        kb_old = [[InlineKeyboardButton("⍟ Admin কে ID পাঠান", url="https://t.me/ghostsupportbd")]]
+        if old.get("status") == "suspended":
+            await update.message.reply_text(f"ভাই, আপনি Suspend আছেন।\nনতুন ID দিলে খুলবে না।\nআপনার Approve করা ID: <code>{old_tid}</code>\nID টা নিয়ে Admin কে SMS দেন", reply_markup=InlineKeyboardMarkup(kb_old), parse_mode='HTML')
+        else:
+            await update.message.reply_text(f"ভাই, আপনি Already Approve আছেন ✅\nআপনার Approve করা ID: <code>{old_tid}</code>\nID টা Admin কে পাঠান", reply_markup=InlineKeyboardMarkup(kb_old), parse_mode='HTML')
         return
     user_trader_map[user.id] = tid
     try:
         user_username_map[user.id] = {"username": user.username, "first_name": user.first_name}
     except:
-        pass                                           
+        pass
     kb = [
         [InlineKeyboardButton(" ✓ হ্যাঁ, করেছি", callback_data=f"dpy_{user.id}_{tid}"), InlineKeyboardButton("⊘ না, করিনি", callback_data=f"dpn_{user.id}_{tid}")],
         [InlineKeyboardButton("⦿ Screenshot আছে", callback_data=f"proof_{user.id}_{tid}")]
